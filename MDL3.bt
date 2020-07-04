@@ -1,0 +1,1239 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+/*
+    Offsets are marked with color FG: 0x0000FF
+    Flags are marked with color FG : 0xAAAA00
+    Map counts are marked with color FG : 0x00FF00
+*/
+
+BigEndian();
+local int curPos;
+
+// Utils Structs
+typedef struct
+{
+    float A;
+    float B;
+    float C;
+    float D;
+} UnkV4;
+
+typedef struct
+{
+    float unkF1;
+    float unkF2;
+    float unkF3;
+    float unkF4;
+
+    uint unkCount;
+    uint dataOffset <format=hex, fgcolor=0x0000FF>;
+    
+    if (unkCount > 0)
+    {
+        curPos = FTell();
+        FSeek(dataOffset);
+        float data[3 * unkCount]; // Vector 3's
+        FSeek(curPos);
+    }
+
+    uint dataOffset2 <format=hex, fgcolor=0x0000FF>;
+    uint data2Len;
+    curPos = FTell();
+    FSeek(dataOffset2);
+    byte data2[data2Len];
+    // The rest of data should be padding
+    FSeek(curPos);
+
+    byte unkData[16];
+} UnkMap1Entry <optimize=false>;
+
+// List 1
+/*
+typedef struct
+{
+    uint unk <format=hex>;
+    uint _empty_;
+    float unkF;
+    float unkF2;
+
+    uint unkCount;
+    uint dataOffset <format=hex, fgcolor=0x0000FF>;
+    
+    if (unkCount > 0)
+    {
+        curPos = FTell();
+        FSeek(dataOffset);
+        float dat[3 * unkCount]; // Vector 3's
+        FSeek(curPos);
+    }
+
+    uint dataOffset2 <format=hex, fgcolor=0x0000FF>;
+    uint unk;
+    byte unkData[16];
+} UnkMap1Entry <optimize=false>;
+*/
+
+typedef struct (int arraySize)
+{
+    UnkMap1Entry entries[arraySize];
+} UnkMap1 <optimize=false>;
+
+// List 2
+typedef struct
+{
+    uint StrOffset <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(StrOffset);
+    string Name;
+    FSeek(curPos);
+    short unk;
+    short Index;
+} MDL3GTBEEntry <optimize=false>;
+
+
+typedef struct (int arraySize)
+{
+    MDL3GTBEEntry entries[arraySize];
+} MDL3GTBEMap <optimize=false>;
+
+// Mesh Data
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    uint unk;
+    uint unk2;
+} Vertex;
+
+typedef struct
+{
+    ushort Flags <format=hex>;
+    ushort MeshIndex;
+    ushort UnkIndex;
+    ushort null1;
+    uint VerticesCount <fgcolor=0x00FF00>;
+    uint VextexOffset <format=hex, fgcolor=0x0000FF>;
+    if (VerticesCount > 0)
+    {
+        curPos = FTell();
+        FSeek(VextexOffset);
+        Vertex Vertices[VerticesCount];
+        FSeek(curPos);
+    }
+
+    uint null3; // 8?
+    uint FacesCount <fgcolor=0x00FF00>;
+
+    uint FaceIndexOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (FacesCount > 0)
+    {
+        curPos = FTell();
+        FSeek(FaceIndexOffset);
+        ushort Faces[FacesCount];
+        FSeek(curPos);
+    }
+
+    uint null5;
+    uint null6;
+    byte Flag3;
+    byte Flag4;
+    ushort unkCount1;
+    uint unkFloatsOffset <format=hex>;
+    
+    if (unkFloatsOffset != 0)
+    {
+        curPos = FTell();
+        FSeek(unkFloatsOffset);
+        float unkFloats[24];
+        FSeek(curPos);
+    }
+
+    uint unkOffset2 <format=hex>;
+    if (unkOffset2 != 0)
+    {
+       curPos = FTell();
+       FSeek(unkOffset2);
+       uint unkData[16];
+       FSeek(curPos);
+    }
+
+} MDL3Mesh <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    MDL3Mesh meshes[arraySize];
+} MDL3MeshMap <optimize=false>;
+
+// Information about the Meshes
+typedef struct
+{
+    uint StrOffset <format=hex, fgcolor=0x0000FF>;
+    uint Index;
+    curPos = FTell();
+    FSeek(StrOffset);
+    string gtbeParams;
+    FSeek(curPos);
+} MDL3MeshInfo <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    MDL3MeshInfo meshInfos[arraySize];
+} MDL3MeshInfoMap <optimize=false>;
+
+typedef struct
+{
+    uint Str1Offset <format=hex, fgcolor=0x0000FF>;
+    uint unkFlags <format=hex, fgcolor=0xAAAA00>;
+
+    local int curPos = FTell();
+    FSeek(Str1Offset);
+    string Str1;
+    FSeek(curPos);
+
+    uint Str2Offset <format=hex, fgcolor=0x0000FF>;
+    uint unkFlags2 <format=hex, fgcolor=0xAAAA00>;
+    curPos = FTell();
+    if (Str2Offset != 0) {
+        FSeek(Str2Offset);
+        string Str2;
+        FSeek(curPos);
+    }
+
+    uint Str3Offset <format=hex, fgcolor=0x0000FF>;
+    uint unkFlags3 <format=hex, fgcolor=0xAAAA00>;
+    curPos = FTell();
+    if (Str3Offset != 0) {
+        FSeek(Str3Offset);
+        string Str3;
+        FSeek(curPos);
+    }
+
+    uint Str4Offset <format=hex, fgcolor=0x0000FF>;
+    uint unkFlags4 <format=hex, fgcolor=0xAAAA00>;
+    curPos = FTell();
+    if (Str4Offset != 0) {
+        FSeek(Str4Offset);
+        string Str4;
+        FSeek(curPos);
+    }
+
+} FVFUnk <optimize=false>;
+
+typedef struct
+{    
+    uint unkFlags <format=hex, fgcolor=0xAAAA00>;
+    byte _empty_data_[0xC];
+} FVFUnk2 <optimize=false>;
+
+typedef struct
+{
+    byte unkData[0x10];
+} FVFUnk3 <optimize=false>;
+
+// Flexible Vertexes
+typedef struct 
+{
+    uint StrOffset <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(StrOffset);
+    string StrName;
+    FSeek(curPos);
+
+    uint UnkIndex;
+
+    uint unkOffset <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(unkOffset);
+    FVFUnk fvfUnk;
+    FSeek(curPos);
+
+    uint _empty_;
+    uint _empty2_;
+
+    uint unkOffset2 <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(unkOffset2);
+    FVFUnk2 fvfUnk2;
+    FSeek(curPos);
+    
+    ushort UnkFlags <format=hex, fgcolor=0xAAAA00>;
+    byte empty_or_reserved[0x5A];
+
+    uint unkOffset3 <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(unkOffset3);
+    FVFUnk3 fvfUnk3;
+    FSeek(curPos);
+
+} FVF <optimize=false>;
+
+
+
+typedef struct (int arraySize)
+{
+    FVF fvf[arraySize];
+} FVFMap <optimize=false>;
+
+
+// TXS3
+typedef struct
+{
+    int ImageOffset <format=hex, fgcolor=0x0000FF>;
+    int ImageSize;
+    byte _empty_;
+    byte ImageType;
+    byte MipmapCount;
+    byte Unk;
+    ushort Width;
+    ushort Height;
+
+    local int cPos = FTell();
+    cPos = FTell();
+    FSeek(ImageOffset);
+    byte ImageData[ImageSize];
+    FSeek(cPos);
+    byte _empty_or_reserved_[16];    
+} TXS3Entry <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    TXS3Entry entry[arraySize];
+    
+} TXS3TextureMap<optimize=false>;
+
+typedef struct
+{
+    char Magic[4];
+    uint SizeIfNotBundled;
+    uint BasePos <format=hex, fgcolor=0x0000FF>;
+    uint _real_size_empty_;
+    uint _empty_;
+    uint ImageCount <fgcolor=0x00FF00>;
+    uint _empty2_;
+    uint ListEntryOffsetBegin <format=hex, fgcolor=0x0000FF>;
+    
+    curPos = FTell();
+    FSeek(ListEntryOffsetBegin);
+    TXS3TextureMap Textures(ImageCount);
+    FSeek(curPos);
+
+    uint firstTXS3TextureDataOffset <format=hex, fgcolor=0x0000FF>;
+    byte _data_empty_or_reserved[28];
+
+} TXS3 <optimize=false>;
+
+typedef struct 
+{
+    uint entryOffset <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(entryOffset);
+    string entryName;
+    FSeek(curPos);
+
+    ushort unk1;
+    ushort unk2;
+    ushort unk3;
+    ushort unk4;
+} SHDSEntry1 <optimize=false>;
+
+typedef struct 
+{
+  ushort DataCount <fgcolor=0x00FF00>;
+  ushort unk;
+  ushort unk2;
+  ushort unkFlags;
+  uint unkFlags2 <format=hex>;
+  ushort unk3;
+  short FF;
+  uint unk4;
+  byte unkData[12];
+  UnkV4 data[DataCount];
+} SHDSEntry2Data <optimize=false>;
+
+typedef struct 
+{
+  uint StrOffset <format=hex>;
+  curPos = FTell();
+  FSeek(StrOffset);
+  string Name;
+  FSeek(curPos);
+
+  uint unk1 <format=hex>;
+  uint unk2;
+  uint unk3;
+} SHDSEntry2DataName <optimize=false>;
+
+typedef struct 
+{
+    uint entryOffset <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(entryOffset);
+    SHDSEntry2Data dat;
+    FSeek(curPos);
+
+    uint unkFlags <format=hex>;
+    uint unkCount <fgcolor=0x00FF00>;
+    uint unkFlags3 <format=hex>;
+    uint _empty_;
+    uint unkOffset1 <format=hex, fgcolor=0x0000FF>;
+    
+    local int cPos = FTell();
+    FSeek(unkOffset1);
+    SHDSEntry2DataName e[unkCount];
+    FSeek(cPos);
+
+    uint unkOffset2 <format=hex>;
+    cPos = FTell();
+    FSeek(unkOffset2);
+    SHDSEntry2DataName e2;
+    FSeek(cPos);
+
+    uint unk6;
+    ushort unkFlags4 <format=hex>;
+    short minus1;
+    uint unk9;
+} SHDSEntry2 <optimize=false>;
+
+typedef struct 
+{
+    uint entryOffset <format=hex, fgcolor=0x0000FF>;
+    byte data[68];
+} SHDSEntry3;
+
+typedef struct (int arraySize)
+{
+    SHDSEntry1 entries[arraySize];
+} SHDSEntryMap1;
+
+typedef struct (int arraySize)
+{
+    SHDSEntry2 entries[arraySize];
+} SHDSEntryMap2;
+
+typedef struct (int arraySize)
+{
+    SHDSEntry3 entries[arraySize];
+} SHDSEntryMap3;
+
+typedef struct 
+{
+    uint entryOffset;
+
+} SHDSEntry4;
+
+typedef struct
+{
+     ushort unk1;
+     ushort unk2;
+     uint listOffset <format=hex, fgcolor=0x0000FF>;
+     uint listOffset2;
+} SHDSEntryMap4;
+
+typedef struct
+{
+     uint offset;
+} SHDSEntry5;
+
+typedef struct (int arraySize)
+{
+     SHDSEntry5 entries[arraySize];
+} SHDSEntryMap5;
+
+typedef struct 
+{
+    uint entryOffset;
+    uint entryOffset2;
+    uint unkFlags <format=hex, fgcolor=0xAAAA00>;
+    byte _empty[20];
+    
+
+} SHDSEntry6;
+
+typedef struct (int arraySize)
+{
+     SHDSEntry6 entries[arraySize];
+} SHDSEntryMap6;
+
+typedef struct
+{
+    char Magic[4];
+    uint empty;
+    uint baseHeaderPos <format=hex, fgcolor=0x0000FF>;
+    uint _real_size_empty_;
+    uint _empty_;
+    ushort _empty_2_;
+    
+    ushort list1EntryCount <fgcolor=0x00FF00>;
+    ushort list2EntryCount <fgcolor=0x00FF00>;
+    ushort list3EntryCount <fgcolor=0x00FF00>;
+
+    uint list1EntryOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    local int cPos = FTell();
+    if (list1EntryCount > 0)
+    {
+        FSeek(list1EntryOffset);
+        SHDSEntryMap1 entries1(list1EntryCount);
+    }
+    
+    FSeek(cPos);
+    uint list2EntryOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (list2EntryCount > 0)
+    {
+        FSeek(list2EntryOffset);
+        SHDSEntryMap2 entries2(list2EntryCount);
+    }
+    
+    FSeek(cPos + 4);
+    uint _empty_3_;
+    uint firstTXS3TextureOffset <format=hex, fgcolor=0x0000FF>; // Again?
+
+    uint list3EntryOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (list2EntryCount > 0)
+    {
+        FSeek(list3EntryOffset);
+        SHDSEntryMap3 entries3(list3EntryCount);
+    }
+    FSeek(cPos + 16);
+    
+    ushort unk;
+    ushort list4EntryCount <fgcolor=0x00FF00>;
+    ushort list5EntryCount <fgcolor=0x00FF00>;
+    ushort unk4;
+
+    uint unkOffset1 <format=hex, fgcolor=0x0000FF>;
+    cPos = FTell();
+    if (unkOffset1 != 0)
+    {
+        FSeek(unkOffset1);
+        SHDSEntryMap4 entries4;
+    }
+    
+    FSeek(cPos);
+    uint unkOffset2 <format=hex, fgcolor=0x0000FF>;
+    cPos = FTell();
+    if (list4EntryCount > 0)
+    {
+        FSeek(unkOffset2);
+        SHDSEntryMap5 entries5(list4EntryCount);
+    }
+
+    FSeek(cPos);
+    uint unkOffset3 <format=hex, fgcolor=0x0000FF>; // unk3Count
+
+    cPos = FTell();
+    if (list5EntryCount > 0)
+    {
+        FSeek(unkOffset3);
+        SHDSEntryMap6 entries6(list5EntryCount);
+    }
+    
+    FSeek(cPos);
+} SHDSHeader <optimize=false>;
+
+typedef struct
+{
+   byte data[64];
+
+   uint boneNameOffset <format=hex, fgcolor=0x0000FF>;
+   curPos = FTell();
+   FSeek(boneNameOffset);
+   string boneName;
+   FSeek(curPos);
+
+   byte bMirror, bParent, bUnk, bId;
+
+} MDL3Bone <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    MDL3Bone Bones[arraySize];
+} MDL3BoneMap <optimize=false>;
+
+
+typedef struct (int offset)
+{
+    curPos = FTell();
+    FSeek(offset);
+    uint strOffset <format=hex, fgcolor=0x0000FF>;
+    FSeek(strOffset);
+    string name;
+    FSeek(offset + 4);
+    ushort unkFlags <format=hex, fgcolor=0xAAAA00>;
+    ushort unkCount <fgcolor=0x00FF00>;
+    float unkFloats[unkCount];
+    FSeek(curPos);
+} MDL3MeshLightMapData <optimize=false>;
+
+typedef struct
+{
+    uint entryOffset <format=hex, fgcolor=0x0000FF>;
+    MDL3MeshLightMapData data(entryOffset);
+} MDL3MeshLightMapEntry <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    MDL3MeshLightMapEntry entries[arraySize];
+} MDL3MeshLightMap;
+
+typedef struct
+{
+    uint entryOffset <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(entryOffset);
+    string unkStr;
+    FSeek(curPos);
+
+    ushort unk; // Maybe flags? Always saw 1
+    ushort Index;
+} UnkStrMap4Entry <optimize=false>;
+
+typedef struct
+{
+    uint entryOffset <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(entryOffset);
+    string unkStr;
+    FSeek(curPos);
+
+    ushort zero; // Maybe flags? Always saw 1
+    ushort Flags_OrUnk;
+} MDL3SamplerEntry <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    UnkStrMap4Entry entries[arraySize];
+} UnkStrMap4;
+
+typedef struct (int arraySize)
+{
+    MDL3SamplerEntry entries[arraySize];
+} MDL3SamplerMap;
+
+typedef struct
+{
+    uint noidea;
+
+} unkStrEntry3 <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    unkStrEntry3 entries[arraySize];
+} unkStrMap3;
+
+
+
+typedef struct
+{
+    uint entryOffset <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(entryOffset);
+    float data[32];
+    FSeek(curPos);
+} unkStrEntry4 <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    unkStrEntry4 entries[arraySize];
+} unkStrMap5;
+
+typedef struct
+{
+    uint unk; // RGB?
+    byte _empty_[12];
+    short unk1; // Width?
+    short unk2; // Height?
+    byte _empty_2_[12];
+} UnkStr15List1Entry <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    UnkStr15List1Entry entries[arraySize];
+} UnkMap15List1 <optimize=false>;
+
+typedef struct
+{
+    uint entryOffset <format=hex, fgcolor=0x0000FF>;
+    local int cPos = FTell();
+    FSeek(entryOffset);
+    byte data[0x20];
+    FSeek(cPos);
+} UnkMap15List2Entry <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    UnkMap15List2Entry entries[arraySize];
+} UnkMap15List2 <optimize=false>;
+
+typedef struct
+{
+    ushort unk;
+    ushort unk2;
+    ushort unk3;
+    ushort _empty_;
+    /*
+    ushort unk4;
+    ushort unk5;
+
+    ushort unk6;
+    ushort _empty_2_;
+    ushort unk7;
+    ushort unk8;
+    ushort unk9;
+    ushort unk10;
+    ushort unk11;
+    ushort unk12;
+    
+    ushort unk13;
+    ushort unk14;
+    ushort unk15;
+    ushort unk16;
+    if (unk16 == 8 || unk16 == 12)
+        float floatData[7];
+    else if (unk16 == 4)
+    {
+        uint what1;
+        uint what2;
+        float floatData[9];
+    }
+    */
+} UnkMap15List3EntryData <optimize=false>;
+
+typedef struct
+{
+    ushort unk;
+    ushort unk2;
+    uint unk3;
+    uint unkOffset <format=hex, fgcolor=0x0000FF>;
+    local int cPos = FTell();
+    FSeek(unkOffset);
+    UnkMap15List3EntryData unkData;
+    FSeek(cPos);
+
+    uint empty;
+    ushort unk4;
+    ushort unk5;
+    byte _empty_[12];
+} UnkMap15List3Entry <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    UnkMap15List3Entry entries[arraySize];
+} UnkMap15List3 <optimize=false>;
+
+typedef struct
+{
+    uint unk;
+    uint offset  <format=hex, fgcolor=0x0000FF>;
+    local int cPos = FTell();
+    FSeek(offset);
+    byte unkData[16];
+    FSeek(cPos);
+
+} UnkMap15List4Entry <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    UnkMap15List4Entry entries[arraySize];
+} UnkMap15List4 <optimize=false>;
+
+typedef struct
+{
+    uint unk;
+    uint offset  <format=hex, fgcolor=0x0000FF>;
+    local int cPos = FTell();
+    FSeek(offset);
+    byte unkData[12];
+    FSeek(cPos);
+
+} UnkMap15List5Entry <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    UnkMap15List4Entry entries[arraySize];
+} UnkMap15List5 <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    ushort list1EntryCount;
+    ushort list2EntryCount;
+    ushort list3EntryCount;
+    ushort list4EntryCount;
+    ushort list5EntryCount;
+    ushort list6EntryCount;
+    ushort list7FloatCount;
+    ushort unk;
+    uint list1Offset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    curPos = FTell();
+    FSeek(list1Offset);
+    UnkMap15List1 list1(list1EntryCount);
+    FSeek(curPos);
+
+    uint list2Offset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    curPos = FTell();
+    FSeek(list2Offset);
+    UnkMap15List2 list2(list2EntryCount);
+    FSeek(curPos);
+
+    uint offset3 <format=hex, fgcolor=0x0000FF, hidden=true>;
+    curPos = FTell();
+    FSeek(offset3);
+    UnkMap15List3 list3(list3EntryCount);
+    FSeek(curPos);
+
+    uint offset4 <format=hex, fgcolor=0x0000FF, hidden=true>;
+    curPos = FTell();
+    FSeek(offset4);
+    UnkMap15List4 list4(list4EntryCount);
+    FSeek(curPos);
+
+    uint offset5 <format=hex, fgcolor=0x0000FF, hidden=true>;
+    curPos = FTell();
+    FSeek(offset5);
+    UnkMap15List5 list5(list5EntryCount);
+    FSeek(curPos);
+
+    uint offset6 <format=hex, fgcolor=0x0000FF>;
+    uint offset7 <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (list7FloatCount != 0)
+    {
+        curPos = FTell();
+        FSeek(offset7);
+        float unkFloatArr7[list7FloatCount];
+        FSeek(curPos);
+    }
+
+    short unk8;
+    short unk9;
+    short unk10;
+} UnkMap15 <optimize=false>;
+
+typedef struct
+{
+    uint dataOffset <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(dataOffset);
+    ushort data[34];
+    FSeek(curPos);
+
+    byte d[60];
+} UnkStrEntry21 <optimize=false>;
+
+
+typedef struct (int arraySize)
+{
+    UnkStrEntry21 entries[arraySize];
+} UnkMap21;
+
+typedef struct
+{
+    ushort unk1;
+    ushort unk2;
+    ushort index;
+    ushort _empty_;
+    ushort unk3;
+    short unk4;
+    short unk5;
+    short unk6;
+} MDL3ReflectionDataMap1EntryData;
+typedef struct
+{
+    uint strNameOffset <format=hex, fgcolor=0x0000FF>;
+    local int cPos = FTell();
+    FSeek(strNameOffset);
+    string name;
+    FSeek(cPos);
+
+    ushort maybeIndex;
+    ushort unkCount;
+    uint offset <format=hex, fgcolor=0x0000FF>;
+
+    if (unkCount != 0)
+    {
+        cPos = FTell();
+        FSeek(offset);
+        MDL3ReflectionDataMap1EntryData unkData[unkCount];
+        FSeek(cPos);
+    }
+
+    float unkFloat;
+} MDL3ReflectionDataMap1Entry <optimize=false>;
+
+typedef struct (int arraySize)
+{
+    MDL3ReflectionDataMap1Entry entries[arraySize];
+} MDL3ReflectionDataMap1;
+
+
+typedef struct
+{
+    ushort map1Count;
+    ushort map2Count;
+
+    uint offset1  <format=hex, fgcolor=0x0000FF>;
+    if (map1Count != 0)
+    {
+        curPos = FTell();
+        FSeek(offset1);
+        MDL3ReflectionDataMap1 map1(map1Count);
+        FSeek(curPos);
+    }
+
+    uint offset2  <format=hex, fgcolor=0x0000FF>;
+    if (map2Count != 0)
+    {
+        
+    }
+
+} MDL3ReflectionData <optimize=false>;
+
+typedef struct
+{
+    uint StrOffset <format=hex, fgcolor=0x0000FF>;
+    if (StrOffset != 0)
+    {
+        curPos = FTell();
+        FSeek(StrOffset);
+        string StrName;
+        FSeek(curPos);
+    }
+
+    byte unkData[48];
+} UnkStrEntry38 <optimize=false>;
+
+
+typedef struct (int arraySize)
+{
+    UnkStrEntry38 entries[arraySize];
+} UnkMap38;
+
+typedef struct
+{
+    uint StrOffset <format=hex, fgcolor=0x0000FF>;
+    if (StrOffset != 0)
+    {
+        curPos = FTell();
+        FSeek(StrOffset);
+        string StrName;
+        FSeek(curPos);
+    }
+
+    byte unkData[36];
+} UnkStrEntry39 <optimize=false>;
+
+
+typedef struct (int arraySize)
+{
+    UnkStrEntry39 entries[arraySize];
+} UnkMap39;
+
+typedef struct
+{
+    byte unkData[160];
+} UnkStrEntry40 <optimize=false>;
+
+
+typedef struct (int arraySize)
+{
+    UnkStrEntry40 entries[arraySize];
+} UnkMap40;
+
+typedef struct
+{
+    uint flags <fgcolor=0xAAAA00, format=hex>; // Always 0x201A00?
+    uint _empty_;   
+    uint unkFlags2 <format=hex, fgcolor=0xAAAA00>;
+    uint t;
+
+    byte unkData[48];
+    uint FileNameOffset <format=hex, fgcolor=0x0000FF>;
+    curPos = FTell();
+    FSeek(FileNameOffset);
+    string StrName;
+    FSeek(curPos);
+} MDL3StringTableEntry <optimize=false>;
+
+
+typedef struct (int arraySize)
+{
+    MDL3StringTableEntry entries[arraySize];
+} MDL3StringTable;
+
+/////////////////////
+// The Actual File //
+/////////////////////
+struct MDL3
+{
+    char Magic[4];
+    uint FileSize;
+    FSeek(16); //byte Zeros[8];
+    ushort unkEntryCountMap1 <fgcolor=0x00FF00>;
+    ushort gtbeEntryCount <fgcolor=0x00FF00>;
+    ushort meshEntryCount <fgcolor=0x00FF00>;
+    ushort meshInfoEntryCount <fgcolor=0x00FF00>;
+    ushort fvfEntryCount <fgcolor=0x00FF00>;
+    ushort boneEntryCount <fgcolor=0x00FF00>;
+    ushort unkCount3 <fgcolor=0x00FF00>;
+    ushort unkCount4 <fgcolor=0x00FF00>;
+    ushort unkCount5 <fgcolor=0x00FF00>;
+    ushort unkCount6 <fgcolor=0x00FF00>;
+
+    FSeek(0x28);
+    ushort unkCount7 <fgcolor=0x00FF00>;
+    ushort lightEntryCount <fgcolor=0x00FF00>;
+    
+    FSeek(0x30);
+    uint unkMapOffset1 <format=hex, fgcolor=0x0000FF, hidden=true>;
+	if (unkEntryCountMap1 != 0)
+    {
+        FSeek(unkMapOffset1);
+        UnkMap1 unkMap1(unkEntryCountMap1) <bgcolor=0x123456>;
+    }
+	
+    FSeek(0x34);
+    uint gtbeMapOffset  <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (gtbeEntryCount != 0)
+    {
+        FSeek(gtbeMapOffset);
+        MDL3GTBEMap gtbe(gtbeEntryCount) <bgcolor=0x654321>;
+    }
+
+    FSeek(0x38);
+    uint meshMapOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (meshEntryCount != 0)
+    {
+        FSeek(meshMapOffset);
+        MDL3MeshMap meshes(meshEntryCount) <bgcolor=0x00AA00>;
+    }
+    
+    FSeek(0x3C);
+    uint meshInfoMapOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (meshInfoEntryCount != 0)
+    {
+        FSeek(meshInfoMapOffset);
+        MDL3MeshInfoMap meshInfos(meshInfoEntryCount) <bgcolor=0x00FF00>;
+    }
+    
+    FSeek(64);
+    uint fvfMapOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (fvfEntryCount != 0)
+    {
+        FSeek(fvfMapOffset);
+        FVFMap fvfs(fvfEntryCount) <bgcolor=0xAA00AA>;
+    }
+
+    FSeek(72);
+    uint txsHeaderOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    FSeek(txsHeaderOffset);
+    TXS3 textureMap <bgcolor=0x00FFFF>;
+    
+    FSeek(76);
+    uint shdsHeaderOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (shdsHeaderOffset != 0)
+    {
+        FSeek(shdsHeaderOffset);
+        SHDSHeader shdsHeader <bgcolor=0xDDAA00>;
+    }
+
+    FSeek(80);
+    uint boneMapOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (boneEntryCount != 0)
+    {
+        FSeek(boneMapOffset);
+        MDL3BoneMap BoneMap(boneEntryCount) <format=hex, bgcolor=0xe0e0e0>;    
+    }
+    
+    FSeek(84);
+    uint lightMapOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (lightEntryCount != 0)
+    {
+        FSeek(lightMapOffset);
+        MDL3MeshLightMap lightMap(lightEntryCount) <format=hex, bgcolor=0x002200>;
+    }
+
+    FSeek(88);
+    uint unk4MapOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (unkCount4 != 0)
+    {
+        FSeek(unk4MapOffset);
+        UnkStrMap4 unkMap4(unkCount4) <format=hex, bgcolor=0x005500>;
+    }
+    
+    FSeek(92);
+    if (unkCount6 != 0) // Offset is not necessarily present if count is 0
+    {
+        uint unk5MapOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+        FSeek(unk5MapOffset);
+        // Same type of struct, for some reason the list continues to another offset
+        UnkStrMap4 unkMap5(unkCount6) <format=hex, bgcolor=0x007000>;
+    }
+    
+    FSeek(96);
+    SetBackColor(0x0000FF);
+    
+    uint unk_data_6_len <format=hex>;
+    uint unkOffset6  <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (unk_data_6_len != 0)
+    {
+        FSeek(unkOffset6);
+        byte unk_data_6[unk_data_6_len];
+    }
+    
+    FSeek(0x68);
+    uint unkOffset7 <format=hex, fgcolor=0x0000FF>; // Leads to a field of 0's?
+    if (unkOffset7 != 0)
+    {
+        FSeek(unkOffset7);
+        //byte _empty_data_offset_5[812] <bgcolor=0xBBBBBB>; Variable amount, no idea where count is located
+    }
+    
+    FSeek(0x6C);
+
+    uint firstTXS3TexDataOffset <format=hex, fgcolor=0x0000FF>;
+
+    uint unkOffset8 <hidden=true>;
+    if (unkOffset8 != 0)
+        Printf("unkOffset8 was not empty");
+    uint unkOffset9 <hidden=true>;
+    if (unkOffset9 != 0)
+        Printf("unkOffset9 was not empty");
+
+    uint unkOffset10 <format=hex, fgcolor=0x0000FF>;
+    uint unkOffset11 <format=hex, fgcolor=0x0000FF>;
+
+    uint unkOffset12 <hidden=true>;
+    if (unkOffset12 != 0)
+        Printf("unkOffset12 was not empty");
+    uint unkOffset13 <hidden=true>;
+    if (unkOffset13 != 0)
+        Printf("_empty_offset_4_ was not empty");
+    uint unkOffset14 <format=hex, fgcolor=0x0000FF>;
+
+    ushort what; // sometimes -1
+    ushort samplerMapEntryCount <fgcolor=0x00FF00>;
+    uint samplerMapOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (samplerMapEntryCount != 0)
+    {
+        FSeek(samplerMapOffset);
+        MDL3SamplerMap samplerData(samplerMapEntryCount) <format=hex, bgcolor=0x663322>;
+    }
+
+    FSeek(0x94);
+    uint unkOffset15 <format=hex, fgcolor=0x0000FF>;
+    if (unkOffset15 != 0)
+    {
+        FSeek(unkOffset15);
+        UnkMap15 unk15(0) <format=hex, bgcolor=0x871634>;
+    }
+    
+    FSeek(0x98);
+    ushort unk_count_1 <fgcolor=0x00FF00>;
+    ushort unk_count_2 <fgcolor=0x00FF00>;
+    
+    uint unkOffset16  <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (unk_count_1 != 0)
+    {
+        FSeek(unkOffset16);
+        unkStrMap3 unk3(unk_count_1) <format=hex, bgcolor=0x000000>; // Figure out later
+    }
+
+    FSeek(0xA0);
+    uint unkOffset17  <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (unk_count_2 != 0)
+    {
+        FSeek(unkOffset17);
+        UnkStrMap4 unk4(unk_count_2) <format=hex, bgcolor=0x000000>;
+    }
+    
+    FSeek(0xA4);
+    uint unkOffset18  <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (unkCount7 != 0)
+    {
+        FSeek(unkOffset18);
+        unkStrMap5 unk5(unkCount7) <format=hex, bgcolor=0x000000>;
+    }
+
+    FSeek(0xA8);
+    uint unkOffset19 <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (unkOffset19 != 0)
+        Printf("unkOffset19 was not empty");
+    uint unkOffset20 <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (unkOffset20 != 0)
+        Printf("unkOffset20 was not empty");
+    
+    uint unkOffset21 <format=hex, fgcolor=0x0000FF>;
+    FSeek(unkOffset21);
+    UnkMap21 unkMap21(4);
+    FSeek(0xB4);
+
+    uint unkOffset22 <format=hex, fgcolor=0x0000FF>;
+    uint unkOffset23 <format=hex, fgcolor=0x0000FF>;
+    if (unkOffset23 != 0)
+    {
+        FSeek(unkOffset23);
+        MDL3ReflectionData map23;
+    }
+    
+    FSeek(0xBC);
+    uint unkOffset24 <format=hex, fgcolor=0x0000FF>;
+    uint unkOffset25 <format=hex, fgcolor=0x0000FF>;
+    uint unkOffset26 <format=hex, fgcolor=0x0000FF>;
+    uint unkOffset27 <format=hex, fgcolor=0x0000FF>;
+    uint unk28 <format=hex, fgcolor=0x0000FF>;
+
+    // Presumably PMSH Header offset
+    uint pmshHeaderOffset;
+
+    uint unk30;
+    uint unk31;
+    uint unk32;
+
+    // Presumably ZLib Header Offset
+    uint zlibHeaderOffset;
+
+    ushort unkCount34;
+    ushort unkCount35;
+    ushort unkCount36;
+    ushort unkCount37;
+
+    uint unkOffset38 <format=hex, fgcolor=0x0000FF, hidden=true>;
+    if (unkCount34 > 0)
+    {
+        FSeek(unkOffset38);
+        UnkMap38 map38(unkCount34) <bgcolor=0x026971>;
+    }
+
+    FSeek(0xF0);
+    uint unkOffset39 <format=hex, fgcolor=0x0000FF>; // Found 0x02 in c001.sky...
+    if (unkCount35 > 0 && unkOffset39 > 10)
+    {
+        FSeek(unkOffset39);
+        UnkMap39 map39(unkCount35) <bgcolor=0x572742>;
+    }
+
+    FSeek(0xF4);
+    uint unkOffset40 <format=hex, fgcolor=0x0000FF>;
+    FSeek(unkOffset40);
+    UnkMap40 map40(0) <bgcolor=0x572742>; // not unkcount36
+
+    FSeek(0xF8);
+    uint MDL3StringTableOffset <format=hex, fgcolor=0x0000FF>;
+    if (unkCount37 > 0)
+    {
+        FSeek(MDL3StringTableOffset);
+        MDL3StringTable map41(unkCount37) <bgcolor=0x871421>; // not unkcount36
+    }
+
+} mdl3 <bgcolor=0x0000FF>;
+
