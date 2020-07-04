@@ -1,0 +1,29 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: TXS3 Gran Turismo File Header Specifics
+//   Authors: Nenkai#9075
+//   Version: 1.0
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct TXS2 {
+    char Magic[4];
+    uint FileSize;
+    uint Unk;
+    uint RealSize;
+    byte UnkData[120];
+    uint ImageSize;
+    byte Two;
+    ubyte Type;
+    byte MipmapCount;
+    byte Unk2;
+    short Width;
+    short Height;
+    byte UnkData2[108];
+    byte ImageData[ImageSize];
+} txs2;
