@@ -8,7 +8,7 @@ The provided files (templates) were created through 010 Editor, but should be fa
 Simply loading your target file in 010 Editor, and run the template against your file and start reversing.
 
 # General File Structure
-Gran Turismo 5+ (and possibly lower) makes heavy of trees & offsets within file formats, leading to maps of certain content types. This is a messy structure to generally reverse.
+Gran Turismo 5+ (and possibly lower) makes heavy use of trees & offsets within file formats, leading to maps of certain content types. This is a messy structure to generally reverse.
 
 ## File Formats 
 * `MDL3` -> Model files, used for cars, wheels, sky. Contains model images, reflection & light data, original file names, mesh groups, textures.
