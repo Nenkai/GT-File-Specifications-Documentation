@@ -6,8 +6,11 @@ Any help is welcome.
 
 The provided files were created through 010 Editor, but should be fairly readable. (Aside from the names assigned to unknown variables and struct fields).
 
+# General File Structure
+Gran Turismo 5+ (and possibly lower) makes heavy of trees & offsets within file formats, leading to maps of certain content types. This is a messy structure to generally reverse.
+
 ## File Formats 
 * `MDL3` -> Model files, used for cars, wheels, sky. Contains model images, reflection & light data, original file names, mesh groups, textures.
   Usually extension less files (but can be found in car, wheel, .sky files in the crs folder).
   
-* `TXS3` -> Texture files, originally DDS Images. Either found in .img files, or bundled inside files such as `MDL3`.
+* `TXS3` -> Texture files, originally DDS Images. Either found in .img files, or bundled inside files such as `MDL3`. Multiple can be present in a `MDL3`.
