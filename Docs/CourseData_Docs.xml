@@ -1,0 +1,497 @@
+-------- GT5 Documentation for course data ----------
+------------- textdata/gt5/<folder> -----------------
+
+<xml>
+  <GameParameter version="<INTEGER>"> -- 100 on pre-release, 106 on BCES disc release
+    <championship value="INTEGER" /> -- 0 or 1
+	
+	-- Found on certain licenses, unknown
+	<editor_info>
+      <psp_mode value="1" />
+    </editor_info>
+	
+	-- Found on certain files
+	<arcade value="0" />
+	
+	<events>
+	 -- Array of "event", each one is a race appearing in the category
+      <event>
+	    
+		-- Found in Licenses
+		<achieve_condition>
+          <num value="0" />
+          <type value="GOAL_V" />
+        </achieve_condition>
+		
+		-- ?
+		 <begin_date>2010/04/02 12:00:00</begin_date>
+		 <end_date>2010/04/02 12:00:00</end_date>
+		 
+        <entry_set>
+		
+		  -- Fixed entry, non generated, used for events where you can only drive a specific car for instance
+		  <entry>
+		    <car color="0" label="_147_ti_20_ts_06" />
+            <delay value="INTEGER" /> -- ?
+            <driver_name value="Player" /> -- Sets the player's name
+            <initial_position value="INTEGER" /> -- ? 0-2000?
+            <initial_velocity value="INTEGER" /> -- ? 50
+            <player_no value="INTEGER" /> -- Number
+            <proxy_driver_model value="-1" />
+            <race_class_id value="0" />
+            <start_type value="NONE" />
+			
+		     -- singlerace_suzuka_pitstart.xml
+			 <car_parameter version="101">xe73/0D7///tkDsKwkAURW80H5xI/JCABhFBkAgiYm2hjbWliJ3auxDR2gW4Ahv3E3UBgo2F8YaYkELNAswdHmfezHvzuQBWjI+S4nMvvqMcvbewBkaMoLxwJzOAfCBVQPhdeXJPCkB3SR2wF2QWqN3ICtAoklXgwl7YwPlB5vye6B5AY3oN8ySx3gDKrVhu8SmnH/Uyo+N/jlFMOj+3EzOtp0zldnaRcZ8n34DeVquV5jZK87okFapGc8xFUwyw4UDfmUzUSEKYjjBVy9Jph8O6ZeD3UlHitn9R6n/q/5/6Lxlda4hWmL4A</car_parameter>
+			 <driver_parameter>xe73/4D///+dyyESACAIRNHd8WoWG1cw2Ew2GzeHoZAZfnrly93/PLSTudIKgiNkrP4O</driver_parameter>
+
+
+			-- Found for Loeb, Grand Tour, Vettel
+			<driver_parameter>
+              <body_code value="0" />
+              <body_color_code value="0" />
+              <braking_skill value="0" />
+              <cornering_skill value="0" />
+              <display_driving_line value="0" />
+              <display_name value="Sebastien Loeb" />
+              <head_code value="0" />
+              <head_color_code value="0" />
+              <physics_pro value="1" />
+              <port value="0" />
+              <region value="FR" />
+              <special_ai_type value="NORMAL" />
+              <type value="PLAYER/AI" />
+            </driver_parameter>
+          </entry>
+		  
+		  -- Generated Entry
+          <entry_generate>
+            <ai_skill value="INTEGER" /> --  0-100
+              <ai_skill_breaking value="INTEGER" /> --  0-100
+              <ai_skill_cornering value="INTEGER" /> --  0-100
+              <cars>
+	  		  -- Array of "car"
+                <car label="gt5_sun_vitz_rs_turbo_02" /> -- example
+              </cars>
+              <delays>
+	  		  -- Array of "delay"
+                <delay value="0" /> -- Starting delay, found 2 for vettel events, 3 for loeb, 6 in single_race_suzuka.xml
+              </delays>
+              <enemy_list_type value="SAME/ONLY_PREMIUM/ONLY_STANDARD" />
+              <enemy_lv value="INTEGER" /> -- Usually always 0?
+              <entry_num value="INTEGER" /> -- Amount of cars, usually 0-16
+              <generate_type value="SHUFFLE/ONE_MAKE/SPEC_DB/0/DEMO/GAMBLE" /> -- DEMO and GAMBLE unused?
+              <player_pos value="INTEGER" /> -- 0-7, probably more depending on amount of cars
+              <race_code value="0xffffffffffffffff" /> -- ?
+              <ai_breaking value="INTEGER" /> -- -1 or 0? -1 was found in rally files
+              <ai_cornering value="0" />  -- -1 or 0? -1 was found in rally files
+              <enemy_bspec_lv value="0" />  -- 0-40
+            </entry_generate>
+			
+          </entry_set>
+		  
+          <event_id value="INTEGER" /> -- usually always 0, gordon301.xml = 999999? some are 1, test000.xml 27232356, l078.xml 26577424, eventrace_test00.xml 2
+          <event_type value="RACE/RACE_WITH_QUALIFY/TRACKDAY/TIME_ATTACK/DRIFT_ATTACK/FREE_RUN" />
+          <game_mode value="EVENT_RACE/SINGLE_RACE/LICENSE/EVENT_RALLY/SCHOOL/TOUR/SPLIT_BATTLE/SPLIT_ONLINE_BATTLE/ONLINE_ROOM/ONLINE_BATTLE/ONLINE_TIME_ATTACK" /> -- SINGLE_RACE is edited_course_text.xml, license_User000.xml is 8
+		  -- And maybe:
+		    -- ADHOC_BATTLE_PRO
+		    -- ADHOC_BATTLE_AMA
+		    -- ADHOC_BATTLE_SHUFFLE
+		    -- MULTIMONITOR_CLIENT
+		    -- BEHAVIOR
+		    -- RACE_EDIT
+		    -- RANKING_VIEW
+		    -- COURSE_EDIT
+			-- ARENA
+			-- TOUR
+			
+		  -- For Licenses
+		  <eval_condition>
+            <bronze value="25000" />
+            <ghost_data_path value="" />
+            <gold value="22200" />
+            <silver value="22600" />
+            <type value="TIME" />
+          </eval_condition>
+		  
+		  -- Also for licenses
+		  <failure_condition>
+            <type_list>
+			  -- Array of "type"
+              <type value="HIT_WALL_HARD/HIT_CARD_HARD/PYLON/COURSE_OUT/LOW_MU_ROAD/STOP/SLALOM" />
+			  -- Maybe:
+			    -- SPIN_FULL
+			    -- SPIN_HALF
+			    -- WHEEL_SPIN
+			    -- LOCK_BRAKE
+			    -- SLIP_ANGLE
+			    -- LESS_SPEED
+			    -- MORE_SPEED
+			    -- MORE_GFORCE
+			    -- OVERTAKE_NUM
+            </type_list>
+          </failure_condition>
+		  
+		  -- Again, Licenses (l013 and l033)
+		  <event_v_list>
+            <v value="46" />
+            <v value="85" />
+            <v value="125" />
+            <v value="166" />
+            <v value="205" />
+            <v value="245" />
+            <v value="285" />
+            <v value="324" />
+            <v value="364" />
+            <v value="405" />
+          </event_v_list> 
+		  
+          <information>
+            <advanced_notice /> 
+            <description />
+            <flier_other_info value="" /> -- "color_index:0" in mygame_000.xml, "difficulty:0" in nascar_event_easy.xml
+            <logo_other_info value="" /> -- Always empty
+            <one_line_title />
+            <title />
+			-- WARNING - EBOOT entries, possibly not used
+			<logo_image_path />
+			<logo_image_buffer />
+			<flier_image_path value="image/gt5/test/cstm_nascar01.dds" /> -- found in nascar_event_easy.xml
+			<flier_image_buffer />
+			<race_label value="gt5_e3_demo__458_italia_09" /> -- found in nascar_event_easy.xml
+			<freezeT
+          </information>
+		   
+          <inheritance value="INTEGER" /> -- Always 0
+		  
+          <race>
+            <academy_event value="INTEGER" /> -- Always 0
+            <accumulation value="INTEGER" /> -- 1 or 0
+            <allow_codriver value="0" /> -- 1 or 0
+            <auto_standing_delay value="INTEGER" /> -- 12 for rally events
+            <autostart_pitout value="INTEGER" /> -- 0 or 1
+            <boost_params>
+	  		-- Array of param
+              <param value="INTEGER" /> -- 0 to 100, unknown
+            </boost_params>
+			<bspec_vitality10 value="INTEGER" /> 0-40+?
+            <complete_type value="BYLAPS/NONE" />
+			<consume_fuel value="INTEGER" /> -- 0 or 1
+            <consume_tire value="INTEGER" /> -- 0 or 1
+            <datetime datetime="2010/4/2 12:00" />
+			<decisive_weather value="SUNNY/NONE/0" /> -- ?
+            <disable_collision value="INTEGER" /> -- 0 or 1
+            <disable_recording_replay value="INTEGER" /> -- 0 or 1
+            <enable_pit value="INTEGER" />  -- 0 or 1
+            <endless value="INTEGER" />  -- 0 or 1
+            <entry_max value="INTEGER" /> -- Total amount of cars
+            <event_goal_v value="INTEGER" /> -- -1? Only set for license events? See l***.xml files
+            <event_goal_width value="INTEGER" /> -- Same as above, some events had 20-40
+            <finish_type value="TARGET" /> -- Always TARGET?
+			<fixed_retention value="INTEGER" /> -- Always 0? Present in few files
+			
+            <flagset value="FLAGSET_NORMAL/FLAGSET_NONE/FLAGSET_RALLY/FLAGSET_NASCAR/FLAGSET_F1" />
+            <ghost_type value="NONE/FULL" />
+            <grid_sort_type value="NONE/GRIDSORTNONE" />
+			<initial_retention10 value="INTEGER" /> -- ?
+            <immediate_finish value="INTEGER" /> -- 0 or 1, purpose unsure
+            <keep_load_ghost value="INTEGER" /> -- 0 or 1, 1 for certain events like vettel and loeb
+            <lighting_mode value="AUTO" /> -- Default is AUTO for all events
+			
+			-- Found in licenses and special events
+			<low_mu_type value="MODERATE/STRONG/REAL?" />
+            <mu_ratio100 value="INTEGER" /> -- 0-100
+			<enable_damage value="INTEGER" /> -- 0-1
+			<ghost_presence_type value="REAL/NORMAL" />
+			
+            <pace_note value="INTEGER" /> -- 0 or 1
+            <penalty_level value="INTEGER" /> -- Penalty in seconds when hitting walls etc, like in rally
+            <race_limit_laps value="INTEGER" /> -- 0-?
+            <race_limit_minute value="INTEGER" /> -- In minutes, amount of minutes race lasts (endu mainly)
+            <race_type value="COMPETITION/TIMEATTACK" />
+            <racers_max value="INTEGER" /> -- 0-16
+            <start_type value="GRID/ROLLING_DL/ROLLING_NOLIMIT/RALLY/PIT/NONE/STANDING/POINT_UP/PITIN" />
+			-- Maybe:
+			  -- ATTACK
+			  -- DISPERSED
+			  -- COURSEINFO
+			  -- ROLLING2
+			  -- SAMEGRID
+			  -- ROLLING3
+			  -- COURSEINFO_ROLLING
+			  -- FREE
+			  -- STANDING_L
+			  -- STANDING_R
+			  -- PITWORK
+			  -- ROLLING_DR
+			  -- GRID_FLYING
+			  -- 
+            <time_progress_speed value="FLOAT" /> -- 0.0 to 1.0
+            <time_to_finish value="INTEGER" /> -- Usually 3000, can be 0-15000+
+            <time_to_start value="INTEGER" /> -- Usually 3000 or 6000
+            <weather_accel100 value="100" />
+            <weather_no_precipitation value="1" />
+            <weather_no_schedule value="0" />
+            <weather_no_wind value="0" />
+            <weather_point_num value="4" />
+            <weather_prec_rain_only value="0" />
+            <weather_prec_snow_only value="0" />
+            <weather_random value="0" />
+            <weather_random_seed value="0" />
+			<weather_base_celcius value="0" />
+            <weather_max_celcius value="0" />
+            <weather_min_celcius value="0" />
+            <weather_rate_sec1 value="60" />
+            <weather_rate_sec2 value="120" />
+            <weather_total_sec value="180" />
+            <weather_value0 value="0" />
+            <weather_value1 value="0" />
+            <weather_value2 value="0" />
+            <weather_value3 value="0" />
+            <over_entry_max value="INTEGER" /> -- Always 0
+            <with_ghost value="0" />
+			
+			-- WARNING - EBOOT entries, possibly not used
+			<lucky_slot_id value="?"/>
+			<auto_end_session_with_finish value="?"/>
+			<online_on value="?"/>
+			<is_lan value="?"/>
+			<team_count value="?"/>
+			<penalty_condition value="?"/> -- below "penalty_level"
+			<complete_laps value="?"/>
+			<rolling_player_grid value="?"/>
+			<packet_timeout_interval value="?"/>
+			<packet_timeout_latency value="?"/>
+			<packet_timeout_lag value="?"/>
+			<consume_rigidity value="?"/>
+			<temperature_tire value="?"/>
+			<consume_nitro value="?"/>
+			<consume_brake value="?"/>
+			<replace_at_overturned value="?"/>
+			
+          </race>
+		  
+          <reward>
+            <point_table>
+	  	    -- Array of point, should be xp level, each entry in the array depends on placement
+              <point value="INTEGER" /> -- 0-20000+, unsure
+            </point_table>
+            <prize_table>
+	  	    -- Array of prize, should be credits, each entry in the array depends on placement
+              <prize value="INTEGER" /> -- 0-5000+, unsure
+            </prize_table>
+            <special_reward_code value="INTEGER" /> -- unsure, always 0
+          </reward>
+		  
+          <track>
+            <course_code label="mini" /> -- Course code to use, refer to a list of courses
+            <course_layout_no value="INTEGER" /> -- Always 0?
+            <goal_position value="-1" />
+            <goal_width value="-1" />
+            <use_generator value="0" />
+            <course_generator_param>
+              <use_random_seed value="0" />
+              <seed value="0" />
+              <course_generator_kind value="GENERATOR_CIRCUIT/GENERATOR_RALLY" />
+              <course_generator_length_type value="LENGTH" />
+              <lengthy value="0" />
+              <course_name value="" />
+            </course_generator_param>
+			
+			-- Array of "gadget", gadgets are objects on the tracks, very visible in top gear test track
+			<gadget>
+              <id value="6" />
+              <kind value="0" />
+              <x value="-520.790893" />
+              <y value="-2.399471" />
+              <z value="111.446701" />
+            </gadget>
+			
+			<course_layout_no value="0" />
+			
+			-- Generated Track data
+            <course_generator_param>
+              <use_random_seed value="0" />
+              <seed value="0" />
+              <course_generator_kind value="GENERATOR_CIRCUIT/GENERATOR_RALLY" />
+              <course_generator_length_type value="LENGTH" />
+              <lengthy value="0" />
+              <course_name value="" />
+            </course_generator_param>
+          </track>
+		  
+          <eval_condition>
+            <type value="NONE" />
+            <gold value="0" />
+            <silver value="0" />
+            <bronze value="0" />
+			<type value="VS_GHOST" /> -- vettel.xml, maybe OVERTAKE_NUM too
+          </eval_condition>
+		  
+		  -- Found for vettel only
+		  <replay>
+            <demo_data_path value="" />
+            <local_path value="" />
+            <replay_recording_quality value="FULL" />
+            <url value="" />
+			-- WARNING EBOOT Entries
+			upload_video
+			export_video
+			video_format
+			audio_format
+			data_logger
+
+          </replay>
+		
+		  -- Mainly BSpec Stuff
+          <play_style>
+            <bspec_type value="BOTH_A_AND_B/ONLY_A/ONLY_B" />
+            <leave_limit value="0" />
+            <no_instant_replay value="0" />
+            <no_quickmenu value="0" />
+            <play_type value="RACE" />
+            <time_limit value="0" />
+            <window_num value="1" />
+			<trackday_type value="SINGLE_RACE/ONLY_RACE/ONLY_FREERUN/DRIFT/SHUFFLE_RACE" />
+          </play_style>
+		  
+          <regulation>
+            <limit_aspec_level value="-1" />
+            <limit_bspec_level value="-1" />
+            <limit_power value="-1" />
+            <limit_pp value="-1" />
+            <limit_torque value="-1" />
+            <limit_weight value="-1" />
+            <limit_tire_f value="-1" />
+            <limit_tire_r value="-1" />
+            <limit_year value="-1" />
+            <need_aspec_level value="-1" />
+            <need_bspec_level value="-1" />
+            <need_power value="-1" />
+            <need_pp value="-1" />
+            <need_torque value="-1" />
+            <need_weight value="-1" />
+            <need_tire_f value="-1" />
+            <need_tire_r value="-1" />
+            <need_year value="-1" />
+            <need_aspiration value="-1" />
+            <need_drivetrain value="-1" />
+            <need_license value="-1" />
+			
+			<countries>
+			  -- Array of "country"
+              <country value="US" />
+            </countries>
+			
+			-- WARNING EBOOT Entries
+			<tuners><tuners/>
+			<year></year>
+			-- other unsorted eboot entries
+			car_categories
+			power
+			torque
+			weight
+			length
+			drivetrain
+			aspiration
+			year
+			tuners
+			countries
+			entitlement
+			cars
+          </regulation>
+		  
+          <constraint>
+            <abs value="-1" />
+            <active_steering value="-1" />
+            <asm value="-1" />
+            <driving_line value="-1" />
+            <limit_tire_f value="-1" />
+            <limit_tire_r value="-1" />
+            <need_tire_f value="-1" />
+            <need_tire_r value="-1" />
+            <suggest_tire_f value="-1" />
+            <suggest_tire_r value="-1" />
+            <simulation value="-1" />
+            <tcs value="-1" />
+          </constraint>
+		  
+		  -- Always empty?
+          <failure_condition>
+            <type_list />
+          </failure_condition>
+		  
+		  -- Additional Information listed for convinience, found in l061.xml
+		  -- Text goes like <GB> TEST </GB> according to text in nascar_event_easy.xml
+		  <information>
+            <advanced_notice>
+             <CN />
+             <DE />
+             <ES />
+             <FR />
+             <GB />
+             <IT />
+             <JP />
+             <KR />
+             <NL />
+             <PT />
+             <RU />
+             <TW />
+             <US />
+            </advanced_notice>
+            <description>
+             <CN />
+             <DE />
+             <ES />
+             <FR />
+             <GB />
+             <IT />
+             <JP />
+             <KR />
+             <NL />
+             <PT />
+             <RU />
+             <TW />
+             <US />
+            </description>
+            <flier_other_info value="" />
+            <logo_other_info value="" />
+            <narration_id value="16" />
+            <one_line_title>
+             <CN />
+             <DE />
+             <ES />
+             <FR />
+             <GB />
+             <IT />
+             <JP />
+             <KR />
+             <NL />
+             <PT />
+             <RU />
+             <TW />
+             <US />
+            </one_line_title>
+            <title>
+             <CN />
+             <DE />
+             <ES />
+             <FR />
+             <GB />
+             <IT />
+             <JP />
+             <KR />
+             <NL />
+             <PT />
+             <RU />
+             <TW />
+             <US />
+            </title>
+           </information>
+		   
+		   
+        </event>
+      </events>
+    <game_id value="0" />
+  </GameParameter>
+</xml>
