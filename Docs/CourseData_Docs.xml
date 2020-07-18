@@ -67,8 +67,8 @@
             -- Generated Entry
             <entry_generate>
               <ai_skill value="INTEGER" /> --  0-100
-              <ai_skill_breaking value="INTEGER" /> --  0-100
-              <ai_skill_cornering value="INTEGER" /> --  0-100
+              <ai_skill_breaking value="INTEGER" /> --  How early or late they will brake, 0-200, recommend 105-115 for tough play
+              <ai_skill_cornering value="INTEGER" /> --  How early or late they will corner? 0-200
               <cars>
               -- Array of "car"
                 <car label="gt5_sun_vitz_rs_turbo_02" /> -- example
@@ -80,9 +80,9 @@
               </delays>
               <enemy_list_type value="SAME/ONLY_PREMIUM/ONLY_STANDARD" />
               <enemy_lv value="INTEGER" /> -- Usually always 0?
-              <entry_num value="INTEGER" /> -- Amount of cars, usually 0-16
+              <entry_num value="INTEGER" /> -- Amount of cars, usually 0-16, more crashes
               <generate_type value="SHUFFLE/ONE_MAKE/SPEC_DB/0/DEMO/GAMBLE" /> -- DEMO and GAMBLE unused?
-              <player_pos value="INTEGER" /> -- 0-7, probably more depending on amount of cars
+              <player_pos value="INTEGER" /> -- Where the actual player will start in the grid pos, 0-7
               <race_code value="0xffffffffffffffff" /> -- ?
               <ai_breaking value="INTEGER" /> -- -1 or 0? -1 was found in rally files
               <ai_cornering value="0" />  -- -1 or 0? -1 was found in rally files
@@ -92,26 +92,27 @@
         
           <event_id value="INTEGER" /> -- usually always 0, gordon301.xml = 999999? some are 1, test000.xml 27232356, l078.xml 26577424, eventrace_test00.xml 2
           <event_type value="RACE/RACE_WITH_QUALIFY/TRACKDAY/TIME_ATTACK/DRIFT_ATTACK/FREE_RUN" />
-          <game_mode value="EVENT_RACE/SINGLE_RACE/LICENSE/EVENT_RALLY/SCHOOL/TOUR/SPLIT_BATTLE/SPLIT_ONLINE_BATTLE/ONLINE_ROOM/ONLINE_BATTLE/ONLINE_TIME_ATTACK" /> -- SINGLE_RACE is edited_course_text.xml, license_User000.xml is 8
-           And maybe:
-          -- ADHOC_BATTLE_PRO
-          -- ADHOC_BATTLE_AMA
-          -- ADHOC_BATTLE_SHUFFLE
+          <game_mode value="EVENT_RACE/SINGLE_RACE/LICENSE/EVENT_RALLY/SCHOOL/SPLIT_BATTLE/SPLIT_ONLINE_BATTLE" /> -- The type of mode upon starting the event SINGLE_RACE is edited_course_text.xml, license_User000.xml is 8
+		  -- ONLINE_ROOM & ONLINE_BATTLE (https://cdn.discordapp.com/attachments/290238097180852225/734049191051132948/Gran_Turismo_5_7.png)
+		  -- ONLINE_TIME_ATTACK (shows a prompt about ranking, can still play but yeah)
+          -- ADHOC_BATTLE_PRO (broken, don't use)
+          -- ADHOC_BATTLE_AMA (possibly same)
+          -- ADHOC_BATTLE_SHUFFLE (possibly same)
           -- MULTIMONITOR_CLIENT
           -- BEHAVIOR
-          -- RACE_EDIT
+          -- RACE_EDIT (Allows xml creation (broken), only works if no AI, else endless loading bar)
           -- RANKING_VIEW
           -- COURSE_EDIT
-          -- ARENA
-          -- TOUR
+          -- ARENA (Basically replay mode, but car is still driveable)
+          -- TOUR (Grand Tour)
           
           -- For Licenses
           <eval_condition>
-            <bronze value="25000" />
-            <ghost_data_path value="" />
-            <gold value="22200" />
-              <silver value="22600" />
-              <type value="TIME" />
+            <bronze value="25000" /> In MS
+            <gold value="22200" /> In MS
+            <silver value="22600" /> In MS
+            <type value="TIME" />
+			<ghost_data_path value="" />
           </eval_condition>
           
           -- Also for licenses
@@ -119,16 +120,16 @@
             <type_list>
             -- Array of "type"
               <type value="HIT_WALL_HARD/HIT_CARD_HARD/PYLON/COURSE_OUT/LOW_MU_ROAD/STOP/SLALOM" />
-              -- Maybe:
-              -- SPIN_FULL
-              -- SPIN_HALF
-              -- WHEEL_SPIN
-              -- LOCK_BRAKE
-              -- SLIP_ANGLE
-              -- LESS_SPEED
-              -- MORE_SPEED
-              -- MORE_GFORCE
-              -- OVERTAKE_NUM
+              -- The below don't seem to work
+               -- SPIN_FULL
+               -- SPIN_HALF
+               -- WHEEL_SPIN
+               -- LOCK_BRAKE
+               -- SLIP_ANGLE
+               -- LESS_SPEED
+               -- MORE_SPEED
+               -- MORE_GFORCE
+               -- OVERTAKE_NUM
             </type_list>
           </failure_condition>
               
@@ -167,7 +168,7 @@
             <academy_event value="INTEGER" /> -- Always 0
             <accumulation value="INTEGER" /> -- 1 or 0
             <allow_codriver value="0" /> -- 1 or 0
-            <auto_standing_delay value="INTEGER" /> -- 12 for rally events
+            <auto_standing_delay value="INTEGER" /> -- 12 for rally events, probably each car starts with a 12s delay?
             <autostart_pitout value="INTEGER" /> -- 0 or 1
             <boost_params>
               -- Array of param
@@ -175,15 +176,15 @@
             </boost_params>
             <bspec_vitality10 value="INTEGER" /> 0-40+?
             <complete_type value="BYLAPS/NONE" />
-            <consume_fuel value="INTEGER" /> -- 0 or 1
-            <consume_tire value="INTEGER" /> -- 0 or 1
+            <consume_fuel value="INTEGER" /> -- Whether to consume fuel in this event, 0 or 1
+            <consume_tire value="INTEGER" /> -- Whether to consume tires in this event, 0 or 1
             <datetime datetime="2010/4/2 12:00" />
             <decisive_weather value="SUNNY/NONE/0" /> -- ?
-            <disable_collision value="INTEGER" /> -- 0 or 1
+            <disable_collision value="INTEGER" /> -- Whether if there is collision between the cars, 0 or 1
             <disable_recording_replay value="INTEGER" /> -- 0 or 1
-            <enable_pit value="INTEGER" />  -- 0 or 1
+            <enable_pit value="INTEGER" />  -- Whether if pitting is allowed, 0 or 1
             <endless value="INTEGER" />  -- 0 or 1
-            <entry_max value="INTEGER" /> -- Total amount of cars
+            <entry_max value="INTEGER" /> -- Total amount of cars?
             <event_goal_v value="INTEGER" /> -- -1? Only set for license events? See l***.xml files
             <event_goal_width value="INTEGER" /> -- Same as above, some events had 20-40
             <finish_type value="TARGET" /> -- Always TARGET?
@@ -210,21 +211,21 @@
             <race_type value="COMPETITION/TIMEATTACK" />
             <racers_max value="INTEGER" /> -- 0-16
             <start_type value="GRID/ROLLING_DL/ROLLING_NOLIMIT/RALLY/PIT/NONE/STANDING/POINT_UP/PITIN" />
-            -- Maybe:
-            -- ATTACK
-            -- DISPERSED
-            -- COURSEINFO
-            -- ROLLING2
-            -- SAMEGRID
-            -- ROLLING3
-            -- COURSEINFO_ROLLING
-            -- FREE
-            -- STANDING_L
-            -- STANDING_R
-            -- PITWORK
-            -- ROLLING_DR
-            -- GRID_FLYING
-            -- 
+            -- Also:
+             -- ATTACK
+             -- DISPERSED (All cars start in a different place on the track)
+             -- COURSEINFO
+             -- ROLLING2
+             -- SAMEGRID
+             -- ROLLING3
+             -- COURSEINFO_ROLLING
+             -- FREE
+             -- STANDING_L
+             -- STANDING_R
+             -- PITWORK
+             -- ROLLING_DR
+             -- GRID_FLYING
+             -- 
             <time_progress_speed value="FLOAT" /> -- 0.0 to 1.0
             <time_to_finish value="INTEGER" /> -- Usually 3000, can be 0-15000+
             <time_to_start value="INTEGER" /> -- Usually 3000 or 6000
@@ -281,11 +282,12 @@
             <special_reward_code value="INTEGER" /> -- unsure, always 0
           </reward>
           
+		-- Track Data goes here
         <track>
           <course_code label="mini" /> -- Course code to use, refer to a list of courses
           <course_layout_no value="INTEGER" /> -- Always 0?
-          <goal_position value="-1" />
-          <goal_width value="-1" />
+          <goal_position value="-1" /> -- Position of a custom finish on the track, value is in meters within the track length
+          <goal_width value="-1" /> -- Width of the custom finish..?
           <use_generator value="0" />
           <course_generator_param>
             <use_random_seed value="0" />
@@ -351,7 +353,8 @@
            <window_num value="1" />
           <trackday_type value="SINGLE_RACE/ONLY_RACE/ONLY_FREERUN/DRIFT/SHUFFLE_RACE" />
         </play_style>
-            
+        
+		-- All regulations to play
         <regulation>
           <limit_aspec_level value="-1" />
           <limit_bspec_level value="-1" />
@@ -379,7 +382,7 @@
             -- Array of "country"
             <country value="US" />
           </countries>
-          
+
           -- WARNING EBOOT Entries
           <tuners><tuners/>
           <year></year>
@@ -397,7 +400,7 @@
           entitlement
           cars
         </regulation>
-          
+        
         <constraint>
           <abs value="-1" />
           <active_steering value="-1" />
