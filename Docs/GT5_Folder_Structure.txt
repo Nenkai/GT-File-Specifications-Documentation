@@ -1,0 +1,45 @@
+/textdata
+  /gt5
+    /aspec_race - A-Spec Event Listing
+	  gamelist.xml - Lists all registered events
+	  r*.xml - Number defines X event in a league
+	/bot - Leftover data?
+	  bot.xml - ???
+	  carlist.xml
+	/bspec_race - B-Spec Event listings
+	  gamelist.xml - Lists all registered events
+	  r*.xml - Number defines X event in a league
+	/concept - Leftover data?
+	/event_race - Needs more info
+	/license - Contains License Events
+	  l001-060.xml - Regular License, each 10 being a different set
+	  l061-079.xml & test000-001.xml & license_User000.xml - Unused
+	/rally - Rally events, seemingly unused/placeholder
+	/vettel - Probably unused/placeholder
+	/special_event - All special events in the gamelist
+	  amg*.xml - Mercedes events
+	  gordon*.xml - Nascar events
+	  kart*.xml - Kart events
+	  loeb*.xml - Special Sebastien Loeb events
+	  rally*.xml - Generated Rally events
+	  special_event_data.xml - Needs more info
+	  stig*.xml - Top Gear events
+	  tour*.xml - Grand Tour events
+	  vettel*.xml - Red Bull events
+	arcade_carlist.xml - Cars usable in arcade mode
+	arcade_carlist_e3.xml - Placeholder
+	arcade_courselist.xml - Tracks usable in arcade mode
+	arcade_courselist_e3.xml - Placeholder
+	arcade_difficulty.xml - Difficulty definitions for arcade mode
+	bspec_driver_list.xml - Driver definitions and stats for B-Spec Mode
+	carlist.xml - Cars purchasable in premium dealership
+	corner_nurburgring*.xml - Corner names in Nurburgring track that shows up while driving
+	corner_topgear.xml - Corner names in Top Gear Test track that shows up while driving
+	course_list.xml - List of all selectable tracks by the player
+	course_list_e3.xml - Unused/Placeholder
+	dealer_carlist.xml - Needs more info
+	dealerlist.xml - Ordered list of brands in the premium dealership
+	enemy*.xml - PP definitions for cars
+	event_present.xml - Voucher definitions
+	fnames.txt - Driver names, needs more info
+	gameitem_category.xml - Category of items available in the game
