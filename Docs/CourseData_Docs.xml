@@ -32,7 +32,7 @@
             -- Fixed entry, non generated, used for events where you can only drive a specific car for instance
             <entry>
               <car color="0" label="_147_ti_20_ts_06" />
-              <delay value="INTEGER" /> -- ?
+              <delay value="INTEGER" /> -- Delay before the car starts the race, 24 would mean 27 ("3 2 1 start")
               <driver_name value="Player" /> -- Sets the player's name
               <initial_position value="INTEGER" /> -- ? 0-2000?
               <initial_velocity value="INTEGER" /> -- ? 50
@@ -81,7 +81,7 @@
               <enemy_list_type value="SAME/ONLY_PREMIUM/ONLY_STANDARD" />
               <enemy_lv value="INTEGER" /> -- Usually always 0?
               <entry_num value="INTEGER" /> -- Amount of cars, usually 0-16, more crashes
-              <generate_type value="SHUFFLE/ONE_MAKE/SPEC_DB/0/DEMO/GAMBLE" /> -- DEMO and GAMBLE unused?
+              <generate_type value="SHUFFLE/ONE_MAKE/SPEC_DB/0/DEMO/GAMBLE" /> -- NONE means manual grid entries, DEMO and GAMBLE unused?
               <player_pos value="INTEGER" /> -- Where the actual player will start in the grid pos, 0-7
               <race_code value="0xffffffffffffffff" /> -- ?
               <ai_breaking value="INTEGER" /> -- -1 or 0? -1 was found in rally files
@@ -211,6 +211,7 @@
             <race_type value="COMPETITION/TIMEATTACK" />
             <racers_max value="INTEGER" /> -- 0-16
             <start_type value="GRID/ROLLING_DL/ROLLING_NOLIMIT/RALLY/PIT/NONE/STANDING/POINT_UP/PITIN" />
+			-- RALLY - cars will start with a set delay, everyone starts in a single file, see "auto_standing_delay"
             -- Also:
              -- ATTACK
              -- DISPERSED (All cars start in a different place on the track)
