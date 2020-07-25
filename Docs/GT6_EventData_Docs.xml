@@ -1,0 +1,161 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<event_list>
+  <event>
+  
+		<!-- 
+			The localised titles of the event to appear in the licence category list - seemingly overridden by contents of t_event_folder_localize in menudb
+		-->
+    <title>
+      <JP>5ミニッツレース</JP>
+      <US>5-Minute Races</US>
+      <GB>5-Minute Races</GB>
+      <FR>Courses de 5 minutes</FR>
+      <DE>5-Minuten-Rennen</DE>
+      <IT>Gare da 5 minuti</IT>
+      <ES>Carreras de 5 minutos</ES>
+      <PT>Corridas de 5 Minutos</PT>
+      <NL>5-minutenraces</NL>
+      <RU>Пятиминутки</RU>
+      <KR>5분 레이스</KR>
+      <TW>5分競速</TW>
+      <EL>Αγώνες των 5 Λεπτών</EL>
+      <TR>5-Dakika Yarışları</TR>
+      <PL>Wyścigi 5-minutowe</PL>
+      <CZ>Pětiminutovky</CZ>
+      <HU>5 perces versenyek</HU>
+      <BP>Corridas de 5 Minutos</BP>
+      <MS>Carreras de 5 minutos</MS>
+    </title>
+	
+		<!-- 
+			The localised descriptions of the event - appears on event race selection screen next to image
+		-->
+    <description>
+      <JP>5分間の時間制限式レースイベントです。規定時間に到達したのちのコントロールライン通過順で最終順位が決まります。</JP>
+      <US>A series of races with five-minute time limits. The final standings will be decided based on who crosses the line in first place after the time limit has elapsed.</US>
+      <GB>A series of races with five-minute time limits. The final standings will be decided based on who crosses the line in first place after the time limit has elapsed.</GB>
+      <FR>Une série de courses avec une limite de temps de 5 minutes. Le classement final sera déterminé selon celui qui franchit la ligne d'arrivée en premier une fois que le temps imparti s'est écoulé.</FR>
+      <DE>Eine Reihe von Rennen mit einem Zeitlimit von 5 Minuten. Die Endergebnisse werden danach entschieden, wer die Ziellinie als Erster nach Ablauf des Zeitlimits überfährt.</DE>
+      <IT>Una serie di gare con tempo limite pari a cinque minuti. La classifica finale si basa su chi sfreccia per primo sul traguardo una volta scaduto il tempo.</IT>
+      <ES>Una serie de carreras con un límite de tiempo de cinco minutos. La clasificación final se decidirá según el orden en que se cruce la línea de meta una vez finalizado el tiempo.</ES>
+      <PT>Uma série de corridas com um tempo limite de cinco minutos. A classificação final será decidida com base nas posições em que os pilotos passarem a meta, depois do tempo terminar.</PT>
+      <NL>Een serie races met tijdslimieten van vijf minuten. Het eindklassement wordt bepaald op basis van wie de streep op de eerste plaats passeert na het verstrijken van de tijdslimiet.</NL>
+      <RU>Серия заездов, длительность которых ограничена пятью минутами. Побеждает гонщик, первым пересекший финишную черту после окончания этого времени.</RU>
+      <KR>5분간의 시간 제한 레이스 이벤트. 규정시간에 도달한 후 컨트롤 라인을 통과하는 순서로 최종 순위가 결정된다.</KR>
+      <TW>限時5分鐘的競賽活動。在規定時間結束後，依通過終點線的順序決定最終排名。</TW>
+      <EL>Σειρά αγώνων με χρονικό όριο πέντε λεπτών. Η τελική κατάταξη θα βασιστεί στο ποιος θα περάσει βρισκόμενος στην πρώτη θέση τη γραμμή τερματισμού μετά το πέρας του χρονικού ορίου.</EL>
+      <TR>Beş dakika zaman sınırlamasına sahip bir yarış. Sonuçlar, beş dakika sona erdikten sonra bitişi ilk geçene göre belirlenecek.</TR>
+      <PL>Seria wyścigów z limitem czasowym, który wynosi pięć minut. Ostateczna klasyfikacja zostanie ustalona na podstawie tego, kto na pierwszym miejscu przejedzie linię mety po upływie wyznaczonego czasu.</PL>
+      <CZ>Série závodů s časovým limitem pěti minut. O konečném pořadí rozhodne to, kdo projede cílem po vypršení časového limitu jako první.</CZ>
+      <HU>A verseny öt percen keresztül tart, és az nyeri meg, aki az idő letelte után első helyezettként halad át a célvonalon.</HU>
+      <BP>Uma série de corridas com limite de tempo de 5 minutos. As posições finais serão decididas baseadas em quem cruza a linha primeiro quando o tempo limite tiver terminado.</BP>
+      <MS>Una serie de carreras con un límite de tiempo de cinco minutos. Las posiciones finales se decidirán según quién cruce primero la meta después de que haya transcurrido el límite de tiempo.</MS>
+    </description>
+    <copy>
+      <JP>プライドを掛けた、5分間の戦い</JP>
+      <US>Pride is at stake in this series of five-minute fights for the finish line!</US>
+      <GB>Pride is at stake in this series of five-minute fights for the finish line!</GB>
+      <FR>C'est votre fierté qui est en jeu dans ces batailles de cinq minutes jusqu'à la ligne d'arrivée !</FR>
+      <DE>Bei dieser Serie fünfminütiger Wettfahrten zur Ziellinie geht es um die Ehre!</DE>
+      <IT>In questa serie di gare da cinque minuti ti giochi l'orgoglio nella corsa verso il traguardo!</IT>
+      <ES>¡Te juegas el orgullo en esta serie de luchas de cinco minutos hasta la meta!</ES>
+      <PT>O orgulho está em jogo, nesta série de batalhas de cinco minutos pela linha da meta!</PT>
+      <NL>Je trots staat op het spel in deze races van vijf minuten!</NL>
+      <RU>Победителя этой серии пятиминутных гонок ждет почет и слава!</RU>
+      <KR>자존심을 건 5분간의 싸움</KR>
+      <TW>賭上自尊，5分鐘的競賽</TW>
+      <EL>Σε αυτή τη σειρά αγώνων των πέντε λεπτών διακυβεύεται η αξιοπρέπειά σου!</EL>
+      <TR>Bitiş çizgisine ulaşmak için beş dakikalık seri mücadelesinde gurur savaşı verilecek!</TR>
+      <PL>W tej serii 5-minutowych gonitw do linii mety stawką jest twoja duma!</PL>
+      <CZ>V této sérii pětiminutových jízd jde hlavně o čest!</CZ>
+      <HU>A dicsőség a tét ebben az öt perc hosszú, a célvonalig tartó csatákból álló sorozatban.</HU>
+      <BP>O orgulho está em jogo nesta série de batalhas de cinco minutos até a linha de chegada!</BP>
+      <MS>¡El orgullo está en juego en esta serie de batallas de cinco minutos para alcanzar la meta!</MS>
+    </copy>
+    <ranking_list />
+	
+		<!--
+			The r*.xml file linked to this event in game_parameter\gt6\
+		-->
+    <id>103</id>
+    <voucher />
+    <registration>0</registration>
+    <bg_image />
+    <icon_image />
+    <folder_image />
+	
+		<!--
+			The category in which the event will appear - possibly overridden by, or has to match Type in t_event_folder in menudb
+			
+			Event types:
+			0 - Unused/overridden by scripts (Sierra, Senna)
+			1000 - Novice races
+			1100 - National B licences (accessed from Novice)
+			1300 - Novice Coffee Breaks
+			2000 - National B races
+			2100 - National A licences (accessed from National B)
+			2200 - National B Mission Races
+			2300 - National B Coffee Breaks
+			2400 - National B One Make Races
+			3000 - National A races
+			3100 - International B licences (Accessed from National A)
+			3200 - National A Mission Races
+			3300 - National A Coffee Breaks
+			3400 - National A One Make Races
+			4000 - International B races
+			4100 - International A licences (Accessed from International B)
+			4200 - International B Mission Races
+			4300 - International B Coffee Breaks
+			4400 - International B One Make Races
+			5000 - International A races
+			5100 - Super licences (Accessed from International A)
+			5200 - International A Mission Races
+			5300 - International A Coffee Breaks
+			5400 - International A One Make Races
+			6000 - Super races
+			6200 - Super Mission Races
+			6300 - Super Coffee Breaks
+			7000 - Red Bull X competition events
+			8000 - Moon exploration events
+			9000 - Goodwood Festival of Speed events
+		-->
+    <event_type>2000</event_type>
+    <gameitem_type>0</gameitem_type>
+    <gameitem_category>0</gameitem_category>
+    <gameitem_id>0</gameitem_id>
+    <gameitem_value />
+    <dlc_flag>0</dlc_flag>
+	
+		<!-- 
+			The number of stars the event can award in total - possibly overridden by Star in t_event_folder in menudb
+			Not required for game to work, but mismatching this can possibly affect progression
+		-->
+    <star>9</star>
+	
+		<!--
+			The number of stars needed to enter the event - possibly overridden by NeedStart in t_event_folder in menudb
+		-->
+    <need_star>0</need_star>
+	
+		<!--
+			If the event is a championship
+		-->
+    <championship_value>0</championship_value>
+	
+		<!--
+			The r*.xml ID of the event needed to complete to unlock this one - possibly overridden by NeedFolderID in t_event_folder in menudb
+			Used by Super GT, Touring Car, and Red Bull X events
+		-->
+    <need_folder_id />
+	
+		<!--
+			The list of event_id in r*.xml for each race that will be within this event
+			Unsure if required as it appears that adding events to r*.xml is all that's needed to make them show - possibly used for progression tracking?
+		-->
+    <event_id_list>1000270,1000271,1000272</event_id_list>
+    <argument1>-1</argument1>
+    <argument2 />
+    <argument3>0</argument3>
+    <argument4 />
+  </event>
+</event_list>
