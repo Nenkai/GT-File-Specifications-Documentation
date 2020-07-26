@@ -939,7 +939,22 @@
 						Set to percentage / 10 (so 95 = 9.5%, 950 = 95.0%)
 					-->
 					<restrictor_limit value="-1" />
-
+					
+					<ban_cars>
+						<!--
+							An array of specific vehicles not allowed to enter, using label names
+							Handy if only a few vehicles should be disallowed, as opposed to allowing a huge listitem
+						-->
+						<car label="_787b_91" />
+					</ban_cars>
+					
+					<tuners>
+						<!--
+							An array of allowed vehicle manufacturers, using label names
+						-->
+						<tuner value="alfaromeo" />
+					</tuners>
+					
 					<cars>
 						<!--
 							An array of specific vehicles allowed to enter, using label names
