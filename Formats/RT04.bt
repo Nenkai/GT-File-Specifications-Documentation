@@ -1,0 +1,69 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo Localization Database (RText)
+//   Authors: Nenkai#9075 (spec file), xFileFIN (research)
+//   Version: 4
+//   Purpose: Localizing Strings
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+local int curPos;
+
+typedef struct
+{
+    uint ID <fgcolor=0x00FF00>;
+    uint stringIdOffset <format=hex, fgcolor=0x0000FF>;
+    uint stringValueOffset <format=hex, fgcolor=0x0000FF>;
+
+    local int pPos = FTell();
+    FSeek(stringIdOffset);
+    string str;
+
+    FSeek(stringValueOffset);
+    string str2;
+
+    FSeek(pPos);
+    
+} RT04StringEntry <optimize=false>;
+
+typedef struct (int entryCount)
+{
+    RT04StringEntry Entries[entryCount];
+} RT04StringEntryMap <optimize=false, bgcolor=0xFF0000>;
+
+typedef struct
+{
+    uint categoryOffset;
+    if (categoryOffset != 0)
+    {
+        curPos = FTell();
+        FSeek(categoryOffset);
+        string categoryName;
+        FSeek(curPos);
+    }
+
+    uint stringEntryCount;
+    uint stringTableOffset <format=hex>;
+    if (stringTableOffset != 0)
+    {
+        curPos = FTell();
+        FSeek(stringTableOffset);
+        RT04StringEntryMap Entries(stringEntryCount);
+        FSeek(curPos);
+    }
+
+    uint _unk_ <format=hex>;
+} RT04Category <optimize=false, bgcolor=0x0000FF>;
+
+struct RT04
+{
+    char Magic[4];
+    unsigned int unk[2];
+    uint categoryCount;
+    RT04Category categoryOffsets[categoryCount];
+} rt04;
