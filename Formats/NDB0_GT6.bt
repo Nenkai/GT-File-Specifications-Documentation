@@ -1,0 +1,82 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+BigEndian();
+
+typedef struct
+{
+    uint specDBCarID;
+    uint unkID2;
+    uint nameOffset;
+    local int cPos = FTell();
+    FSeek(nameOffset);
+    string carName;
+    FSeek(cPos);
+
+    ubyte prefixIndex1;
+    ubyte prefixIndex2;
+    ubyte prefixIndex3;
+    ubyte prefixIndex4;
+
+} CarNameEntry <optimize=false>;
+
+typedef struct (int mapSize)
+{
+    CarNameEntry map[mapSize];
+} CarNameMap;
+
+typedef struct
+{
+    uint brandNameOffset <format=hex>;
+    local int cPos = FTell();
+    FSeek(brandNameOffset);
+    string brandName;
+    FSeek(cPos);
+
+} CarBrandEntry <optimize=false>;
+
+typedef struct (int mapSize)
+{
+    CarBrandEntry map[mapSize];
+} CarPrefixMap;
+
+local int tempPos;
+
+struct NDB0
+{
+    char Magic[4];
+    uint unk;
+    uint brandsMapOffset;
+    
+    tempPos = FTell();
+    FSeek(brandsMapOffset);
+    uint prefixCount;
+    CarPrefixMap carPrefixes(prefixCount);
+    FSeek(tempPos);
+
+    uint unk3;
+    uint firstMapOffset;
+    uint secondMapOffset;
+    uint pad[2] <hidden=true>; // 5E 5E 5E 5E 5E 5E 5E 5E
+    uint unk5;
+    uint carCount;
+    uint pad2[2] <hidden=true>; // 5E 5E 5E 5E 5E 5E 5E 5E
+
+    CarNameMap mapName(carCount);
+    FSeek(secondMapOffset);
+    
+    uint unk9;
+    uint carCount2;
+    uint pad3[2] <hidden=true>; // 5E 5E 5E 5E 5E 5E 5E 5E
+    CarNameMap mapName2(carCount2);
+} ndb0;
+
