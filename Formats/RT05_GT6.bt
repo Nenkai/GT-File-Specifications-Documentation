@@ -1,0 +1,72 @@
+//----------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo Localization Database (RText)
+//   Authors: Nenkai#9075 (spec file), xFileFIN (research)
+//   Version: 5
+//   Purpose: Localizing Strings
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+local int curPos;
+
+typedef struct
+{
+    uint ID <fgcolor=0x00FF00>;
+    ushort labelLen;
+    ushort valueLen;
+    uint labelOffset <format=hex>;
+    uint valueOffset <format=hex>;
+    local int ccPos = FTell();
+    FSeek(labelOffset);
+    char label[labelLen];
+    FSeek(ccPos);
+
+    ccPos = FTell();
+    FSeek(valueOffset);
+    char value[valueLen];
+    FSeek(ccPos);
+    
+} RT05StringEntry <optimize=false>;
+
+typedef struct (int entryCount)
+{
+    RT05StringEntry Entries[entryCount];
+} RT05StringEntryMap <optimize=false, bgcolor=0xFF0000>;
+
+typedef struct
+{
+    uint categoryOffset;
+    if (categoryOffset != 0)
+    {
+        curPos = FTell();
+        FSeek(categoryOffset);
+        string categoryName;
+        FSeek(curPos);
+    }
+
+    uint stringEntryCount <format=hex>;
+    uint _unk_;
+    uint stringTableOffset <format=hex>;
+    if (stringTableOffset != 0)
+    {
+        curPos = FTell();
+        FSeek(stringTableOffset);
+        RT05StringEntryMap Entries(stringEntryCount);
+        FSeek(curPos);
+    }
+
+} RT05Category <optimize=false, bgcolor=0x0000FF>;
+
+struct RT05
+{
+    char Magic[4];
+    uint categoryCount;
+    byte isCompressed;
+	byte unk[7];
+    RT05Category categoryOffsets[categoryCount];
+} rt05;
