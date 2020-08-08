@@ -1,0 +1,48 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: GT6 ADHOC Package
+//   Authors: Nenkai#9075
+//   Version: 1
+//   Purpose: Script Dependencies
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct
+{
+    local int cPos = FTell();
+    uint stringOffset <format=hex, fgcolor=0x0000FF>;
+    FSeek(stringOffset);
+
+    string fileName <bgcolor=0x00FF00>;
+    FSeek(cPos + 4);
+
+    uint fileDataOffset <format=hex, fgcolor=0x0000FF>;
+    uint compressedSizeOffset <format=hex, fgcolor=0x0000FF>;
+    FSeek(fileDataOffset);
+    char compressedFileData[compressedSizeOffset] <bgcolor=0x00FFFF>;
+
+    FSeek(cPos + 12);
+} MKPGEntry <optimize=false>;
+
+typedef struct (int mapSize)
+{
+    MKPGEntry entry[mapSize];
+} MKPGFileMap;
+
+struct MPKG
+{
+    char Magic[4];
+    uint empty;
+    uint fileCount;
+    uint tableOfContentsOffset;
+
+    FSeek(tableOfContentsOffset);
+    MKPGFileMap files(fileCount);
+
+} mpkg;
