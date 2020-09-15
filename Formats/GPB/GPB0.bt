@@ -1,0 +1,46 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo Project Assets
+//   Authors: 
+//   Version: 0
+//   Purpose: Containing Assets for certain UI components
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct
+{
+    uint nameOffset  <format=hex, fgcolor=0x0000FF>;
+    uint dataOffset <format=hex, fgcolor=0x0000FF>;
+    
+    local int cPos = FTell();
+    FSeek(nameOffset);
+    string fileName <bgcolor=0x884444>;
+    
+    FSeek(dataOffset);
+    uint magic <hidden=true>;
+
+    // Create an output buffer and feed data and uncompressed size to zlib deflate
+    int uncompressedFileSize;
+
+    FSeek(cPos);
+
+} FileEntry <optimize=false>;
+
+typedef struct (int arrSize)
+{
+    FileEntry entry[arrSize];
+} FileMap;
+
+struct GPB
+{
+    char Magic[4];
+    uint entryCount;
+
+    FileMap map(entryCount);
+} gpb0;

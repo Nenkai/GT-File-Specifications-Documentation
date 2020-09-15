@@ -1,0 +1,122 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+
+typedef struct
+{
+    short unkSwitch; // -1 or 1
+    short a2;
+    float unkPos;
+    float unkPos2;
+    uint d;
+    short unkSwitch2; // -1 or 1
+    short e2;
+    uint f;
+    float unkPos3;
+    uint h;
+    uint j;
+    float unkFloat; // -5 to 5?
+    byte _reserved_[24];
+} TrackPoint;
+
+typedef struct
+{
+    byte unk1; // 100?
+    byte unk2; // 95-100?
+    byte unk3; // 100?
+    byte unk4; // 28-40?
+    short unk5; // 100?
+    byte unk6; // 60-100?
+    byte unk7; // 2-5?
+    byte unk8; // 25-30?
+    ubyte unk9; // 150-250?
+    byte unk10; // 0-20?
+    short _empty_;
+    byte unk11; // 0-30?
+    byte unk12; // 100?
+    byte _empty2_;
+    short unk13; // 9?
+    byte unk14; // 80?
+    byte unk15; // 85?
+    ubyte unk16; // 70-200?
+    ubyte unk17; // 150-160-250?
+    byte unk18; // 0-2-3?
+    ubyte unk19; // 150-190?
+    ubyte unk20; // 0-50-100?
+    ubyte unk21; // 55-68-19?
+    ubyte unk22; // 6? 3? maybe ushort flag?
+    ubyte unk23; // 32
+    byte unk24; // 10?
+    byte unk25; // 15-20-50?
+    byte unk26; // 0-1?
+    byte _empty3_[2];
+
+} ADUnk;
+
+typedef struct (int basePos)
+{
+    uint offset <format=hex>;
+    FSeek(basePos + offset);
+    uint mapCount;
+    byte _reserved_[60] <hidden=true>;
+    TrackPoint trackPoints[mapCount];
+} ADLNMapEntry <optimize=false>;
+
+typedef struct (int arrSize, int basePos)
+{
+    local int i;
+
+    // 0 empty, 1 aswell? 2 aswell? 3 actual, 4 was some weird curve
+    for (i = 0; i < arrSize; i++)
+    {
+        FSeek(basePos + 0x30 + (i * 4));
+        ADLNMapEntry entries(basePos);
+    }
+
+} ADLNMap;
+
+typedef struct
+{
+    local int baseADLNPos = FTell();
+
+    char magic[4];
+    byte _empty_[8];
+    uint ADLNDataSize <format=hex>; // Does not include padding
+    uint unkCount;
+    uint entryCount;
+    uint dataOffset;
+    byte _reserved_[20];
+    
+    ADLNMap adln (entryCount, baseADLNPos);
+
+} ADLN;
+
+struct TrackAutoDrive
+{
+    // Base Header, 0x80
+    uint _empty_;
+    uint ADNLHeaderOffset <format=hex>;
+    uint unkTree1Offset <format=hex>;
+    uint unkTree2Offset <format=hex>;
+    uint unkTree3Offset <format=hex>;
+    uint unkTree4Offset <format=hex>;
+
+    FSeek(ADNLHeaderOffset);
+    ADLN adln; 
+    
+    FSeek(unkTree1Offset);
+    ADUnk unk;
+
+} trackAutoDrive;

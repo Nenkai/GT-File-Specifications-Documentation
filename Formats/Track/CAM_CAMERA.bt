@@ -1,0 +1,52 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    LittleEndian();
+    char magic[4]; // REP4
+    uint _empty_;
+    uint unk;
+} Rep4;
+
+typedef struct 
+{
+    uint unk;
+    uint entryOffset <format=hex>;
+    byte _reserved_[24] <hidden=true>;
+    FSeek(entryOffset);
+    Rep4 repData;
+
+} Rep4EntryInfo;
+
+typedef struct (int arrSize)
+{
+    Rep4EntryInfo entryInfo[arrSize];
+} Rep4Map;
+
+struct TrackCamera
+{
+    char Magic[4]; // Gcam
+    uint _empty_[2];
+    uint fileSize;
+    uint repCount;
+    uint repMapOffset <format=hex>;
+    uint _empty_; 
+    uint unk; // Always 0x80
+    byte _reserved_[32];
+    
+    Rep4Map repMap(repCount);
+
+} trackCamera;

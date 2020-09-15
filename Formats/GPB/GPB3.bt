@@ -1,0 +1,55 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo Project Assets
+//   Authors: 
+//   Version: 3
+//   Purpose: Containing Assets for certain UI components
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct
+{
+    uint nameOffset  <format=hex, fgcolor=0x0000FF>;
+    uint dataOffset <format=hex, fgcolor=0x0000FF>;
+    uint dataSize <format=hex, fgcolor=0x00FF00>;
+    uint _empty_ <hidden=true>;
+     
+    local int cPos = FTell();
+    FSeek(nameOffset);
+    string fileName <bgcolor=0x884444>;
+    
+    FSeek(dataOffset);
+    byte fileData[dataSize] <bgcolor=0x00AAAA>;
+
+    FSeek(cPos);
+
+} FileEntry <optimize=false>;
+
+typedef struct (int arrSize)
+{
+    FileEntry entry[arrSize];
+} FileMap;
+
+struct GPB
+{
+    char Magic[4];
+    if (Magic[0] == '3')
+        BigEndian();
+
+    uint _reserved_; // Possibly filled at runtime
+    uint empty <hidden=true>;
+    uint entryCount;
+
+    uint namesOffsetMapOffset <format=hex, fgcolor=0x0000FF>;
+    uint namesMapOffset <format=hex, fgcolor=0x0000FF>;
+    uint dataOffset <format=hex, fgcolor=0x0000FF>;
+    uint _empty_;
+
+    FileMap map(entryCount);
+} gpb3;

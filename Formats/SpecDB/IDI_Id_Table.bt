@@ -1,0 +1,45 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo 5 SpecDB ID Table
+//   Authors: Nenkai#9075
+//   Version: 1
+//   Purpose: Storing IDs for various tables
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+BigEndian();
+
+
+typedef struct IDKey (int tableEndOffset)
+{
+    uint keyNameOffset <format=hex, fgcolor=0x0000FF>; // Offset from the beginning of the string table
+    
+    local int cPos = FTell();
+    FSeek(tableEndOffset + keyNameOffset);
+
+    ushort keyNameLength;
+    char keyName[keyNameLength];
+    FSeek(cPos);
+
+    uint entryDataID;
+} idKey;
+
+typedef struct IDKeyMap (int arrSize)
+{
+    local int tableEndOffset = 16 + (8 * arrSize);  // Header + key size
+    local int i;
+    for (i = 0; i < arrSize; i++)
+        IDKey key(tableEndOffset);
+} idkeymap;
+
+struct IDI
+{
+    char Magic[4];
+    uint keyCount;
+    uint _empty_;
+    int unk2; // Can be -1, 0-40..
+    IDKeyMap keys(keyCount);
+} idi;
