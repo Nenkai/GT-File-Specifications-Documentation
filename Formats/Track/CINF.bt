@@ -1,0 +1,87 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Course Information (drift sector, gps data, some other sectors I don't know about)
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    uint vCoordOffset <format=hex>;
+
+    local int cPos = FTell();
+    FSeek(vCoordOffset);
+    float startV;
+    float finishV;
+    FSeek(cPos);
+} Sector <optimize=false>;
+
+
+typedef struct
+{
+    uint sectorOffset <format=hex>;
+    FSeek(sectorOffset);
+    uint sectorCount;
+    uint sectorEntryOffset <format=hex>;
+    float firstSectorStartV;
+    float firstSectorFinishV;
+    local int i;
+    for (i = 0; i < sectorCount; i++)
+    {
+        FSeek(sectorEntryOffset + (i * 4));
+        Sector map2;
+    }
+    
+} TrackPart;
+
+typedef struct
+{
+    uint entryOffset <format=hex>;
+    FSeek(entryOffset);
+    float value;
+} GPSValue;
+
+struct CourseInfo
+{
+    char magic[4];
+    uint runtimeFileStartPtr <format=hex>;
+    uint empty;
+    uint fileSize <format=hex>;
+    uint trackPartCount;
+    uint trackPartMapOffset <format=hex>;
+    uint unkGpsValueCount;
+    uint gpsDataMapOffset <format=hex>;
+    uint unkCount3;
+    uint unkOffset3 <format=hex>;
+
+    local int i;
+    for (i = 0; i < trackPartCount; i++)
+    {   
+        // First is usually the drift sectors
+        // The others are unknown
+        FSeek(trackPartMapOffset + (i * 4));
+        TrackPart part;
+    }
+
+    for (i = 0; i < unkGpsValueCount; i++)
+    {
+        FSeek(gpsDataMapOffset + (i * 4));
+        GPSValue gps;
+    }
+    
+    for (i = 0; i < unkCount3; i++)
+    {
+        FSeek(unkOffset3 + (i * 4));
+        // Points to an offset.. which is empty?
+    }
+
+   
+} courseInfo;
