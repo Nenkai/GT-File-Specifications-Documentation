@@ -1,7 +1,7 @@
-# GT5-File-Specifications
-File specifications & documentation for various Gran Turismo 5 file types.
+# GT-File-Specifications
+File specifications & documentation for various Gran Turismo 5/6/? file types.
 
-This is an on-going effort to document file types used by Gran Turismo 5. 
+This is an on-going effort to document file types.
 Any help is welcome.
 
 
