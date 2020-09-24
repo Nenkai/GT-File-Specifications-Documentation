@@ -1,981 +1,981 @@
 <!-- -->
 <xml>
-	<GameParameter version="106">
-		<championship value="0"/>
-		<!--
-			File name of the current file, where value is the xxx in rxxx.xml
-		-->
-		<folder_id value="5000"/>
-		<events>
-			<event>
-				<constraint>
-					<abs value="-1"/>
-					<active_steering value="-1"/>
-					<asm value="-1"/>
-					<drift_type value="-1"/>
-					<driving_line value="-1"/>
-					<enemy_tire value="-1"/>
-					<limit_tire_f value="-1"/>
-					<limit_tire_r value="-1"/>
-					<need_tire_f value="-1"/>
-					<need_tire_r value="-1"/>
-					<simulation value="-1"/>
-					<!-- Skid Recovery Force -->
-					<suggest_tire_f value="-1"/>
-					<suggest_tire_r value="-1"/>
-					<tcs value="-1"/>
-					<transmission value="-1"/>
-				</constraint>
-				<entry_set>
-					<!--
-						Entry_generate can seemingly be removed, allowing for a fixed grid to be specified
-						If a fixed grid is specified, the player will be assigned whichever vehicle lines up with the set player_pos
-					-->
-					<entry_generate>
-						<delays/>
-						<!--
-							Global AI skill values - unsure if overridden by individual ones
-						-->
-						<ai_skill value="90"/>
-						<ai_skill_breaking value="90"/>
-						<ai_skill_cornering value="90"/>
-						<ai_skill_accelerating value="90"/>
-						<!--
-							Number of vehicles in the race, and the player's starting position
-						-->
-						<entry_num value="16"/>
-						<player_pos value="12"/>
-						<enemy_lv value="0"/>
-						<enemy_bspec_lv value="8"/>
-						<!--
-							The way potential AI entries are picked from the entry_base_array below
-							
-							Generate types:
-							NONE - No AI entries in the race (use for licence and time attacks)
-							ENTRY_BASE_ORDER - AI entries will be assigned in the specific order of the array (so first entry is 1st place, second entry is 2nd etc) - number of which MUST match or exceed entry_num or will softlock on loading
-							ENTRY_BASE_SHUFFLE - AI entries will be picked randomly from the array like a pool of entries
-						-->
-						<generate_type value="ENTRY_BASE_SHUFFLE"/>
-						<!--
-							The order in which AI entries will appear on the starting grid_sort_type
-							
-							Sort types:
-							PP_ASCEND - Lowest PP cars will be at the front
-							PP_DESCEND - Lowest PP cars will be at the rear
-						-->
-						<enemy_sort_type value="NONE"/>
-						<use_rolling_start_param value="0"/>
-						<rolling_start_v value="0"/>
-						<gap_for_start_rolling_distance value="0"/>
-						<ai_skill_starting value="97"/>
-						<ai_roughness value="0"/>
-						<!-- 
-							An array of (AI) entry parameters, one entry_base per potential entry
-						-->
-						<entry_base_array>
-							<entry_base>
-								<!--
-									Optional - How far around the track, in metres (as with vcoord), the entrant will start
-								-->
-								<initial_position value="100"/>
-								<!--
-									Optional - The speed (in km/h) at which the entrant will start
-								-->
-								<initial_velocity value="100"/>
-								<!-- 
-									Set to "Player" if its the player in an entry in entry_set
-								-->
-								<driver_name value="W. Armstrong"/>
-								<!--
-									Country code for the driver's flag - set to anything invalid to remove flag
-								-->
-								<driver_region value="PD"/>
-								<!--
-									How many seconds after "3, 2, 1" this AI will start
-								-->
-								<delay value="0"/>
-								<!--
-									Car that a player/AI is driving.
-									Color is the index of the vehicle's available colours (0 is default, potential colours can be found against each vehicle in VARIATION table of specdb)
-									Label is the internal name of the vehicle the AI will use, from specdb
-									
-									This makes the event act as you rent the car for the event, to limit tyres uses the fields in the restriction category
-									The game will appropriately not show them in the menu, as you're not supplying your own car
-								-->
-								<car color="0" label="ts030_hybrid_12"/>
-								<!--
-									race_class_id is the "bucket" the AI racer will be in
-									E.g. 6 cars assigned to race_class_id 0 and 6 assigned to race_class_id 1 will have 12 cars on track, but each bucket only competes against others within that bucket
-								-->
-								<race_class_id value="0"/>
-								<!--
-									Individual values for AI skill
-									From 0-200, but typically 0-100
-									Values over 100 may be used to make AI extra aggressive/confident, although values too high will make them more mistake-prone or ignore braking points
-								-->
-								<ai_skill_breaking value="90"/>
-								<ai_skill_cornering value="90"/>
-								<ai_skill_accelerating value="90"/>
-								<!-- 
-									Effects unknown, assumed to be AI aggression
-									Most events are set to -1, but some are 0, 7, and 10
-								-->
-								<ai_roughness value="-1"/>
-								<!-- 
-									The name of the tire compounds the AI will use
-									Presumable AI that start with dry tires in a wet race will eventually try to pit and change them
-								-->
-								<tire_f value="RACING_HARD"/>
-								<tire_r value="RACING_HARD"/>
-							</entry_base>
-						</entry_base_array>
-					</entry_generate>
-				</entry_set>
-				<failure_condition>
-					<type_list>
-						<!--
-							Array of failure types to use with MISSION, LICENSE, possibly COFFEE_BREAK
-							HIT_WALL_HARD - Hard Crash
-							HIT_CAR_HARD - Car collision with AI
-							PYLON - Hit a cone
-							COURSE_OUT - Out of the track
-						-->
-						<type value="HIT_WALL_HARD"/>
-					</type_list>
-					<no_failure_at_result value="1"/>
-				</failure_condition>
-				<!--
-					Only present if a licence or Coffee Break 
-				-->
-				<license_condition>
-					<failure_condition/>
-					<use_basic_finish value="0"/>
-					<stop_on_finish value="1"/>
-					<!--
-						Display_mode determines which custom objective to show on screen
-						
-						Display mode types:
-						DRIFT_SCORE - Player's drift score used for mission races
-						FUEL_DIST - How far the current fuel amount will last - used for eco challenges*
-						FUEL_TIME - How long the current fuel amount will last - used for echo challenges*
-						PYLON_NUM - How many cones (or possibly all gadgets) have been hit - used for cone challenges*
-						PYLON_TIME - How long the player has to hit the cones - used for cone challenges*
-						
-						* = Possibly only works if event set to COFFEE_BREAK
-					-->
-					<display_mode value="PYLON_NUM"/>
-					<gadget_names>
-						<!-- 
-							An array of the gadget (physics props) types used (labels from GADGETS in specdb) for PYLON_NUM scoring
-						-->
-						<gadget value="pylon_24h"/>
-					</gadget_names>
-					<!-- 
-						An array of conditions that will trigger the end of the event
-					-->
-					<finish_condition>
-						<data>
-							<!--
-								The type of occurrence that will trigger the end
-								
-								Check types:
-								BEST_LAP_TIME - The time of the current best lap
-								COMPLETE_FLAG - Unknown
-								COURSE_OUT - Player has left the course (unsure if bit or count of times left course)
-								GADGET_COUNT - How many gadgets have been hit
-								FUEL_AMOUNT - The amount of fuel left in the player's vehicle
-								HIT_COUNT - How many times the player has collided with something
-								HIT_POWER - How hard the player has collided with something (unsure of unit)
-								HIT_WALL - If the player has hit a wall
-								LAP_COUNT - How many laps have been completed
-								LAP_TIME - The run time of the current lap
-								ROAD_DISTANCE - Unknown (distance to finish?)
-								STANDING_TIME - Unknown (how long the player has stood still?)
-								TOTAL_TIME - The run time of the whole event
-								V_POSITION - The player's current distance around the track (in metres)
-								VELOCITY - The player's current speed (in km/h)
-								WRONG_WAY_COUNT - How many times the player has gone the wrong way
-							-->
-							<check_type value="TOTAL_TIME"/>
-							<!--
-								How the check_type should be compared to the value(s)
-								
-								Condition types:
-								EQUAL - Equal to the value
-								GREATER - Greater than the value
-								GREATER_EQUAL - Greater than or equal to the value
-								LESS - Less than the value
-								LESS_EQUAL - Less than or equal to the value
-								NOTEQUAL - Not equal to the value
-							-->
-							<condition value="GREATER_EQUAL"/>
-							<!--
-								The logic against which the check_types are evaluated
-								
-								Connection types:
-								AND - All of the specified checks are true
-								OR - Any of the specified checks are true
-								XOR - Only one of the specified checks is true
-							-->
-							<connection value="OR"/>
-							<!--
-								Unknown, always set to 0
-							-->
-							<result_type value="0"/>
-							<!--
-								The value being compared against by the checks above
-								
-								Value types:
-								float_value - Floating point value (decimal)
-								uint_value - Unsigned integer value (allows larger value but no negative value)
-								int_value - Signed integer value (does not allow larger value but negative values allowed)
-							-->
-							<float_value value="0"/>
-							<uint_value value="30000"/>
-							<int_value value="0"/>
-						</data>
-					</finish_condition>
-					<success_condition>
-						<!--
-							An array of conditions that are checked when the finish is triggered
-							Check types appear to be the same as those in finish_condition
-							
-							First = Gold, Second = Silver, Third = Bronze
-						-->
-						<data>
-							<check_type value="GADGET_COUNT"/>
-							<condition value="GREATER_EQUAL"/>
-							<connection value="AND"/>
-							<result_type value="0"/>
-							<float_value value="0"/>
-							<uint_value value="180"/>
-							<int_value value="0"/>
-						</data>
-						<data>
-							<check_type value="GADGET_COUNT"/>
-							<condition value="GREATER_EQUAL"/>
-							<connection value="AND"/>
-							<result_type value="0"/>
-							<float_value value="0"/>
-							<uint_value value="140"/>
-							<int_value value="0"/>
-						</data>
-						<data>
-							<check_type value="GADGET_COUNT"/>
-							<condition value="GREATER_EQUAL"/>
-							<connection value="AND"/>
-							<result_type value="0"/>
-							<float_value value="0"/>
-							<uint_value value="100"/>
-							<int_value value="0"/>
-						</data>
-					</success_condition>
-				</license_condition>
-				<!--
-					The unique identifier of this race
-					Connected to the array of event_ids in the main event XML
+    <GameParameter version="106">
+        <championship value="0"/>
+        <!--
+            File name of the current file, where value is the xxx in rxxx.xml
+        -->
+        <folder_id value="5000"/>
+        <events>
+            <event>
+                <constraint>
+                    <abs value="-1"/>
+                    <active_steering value="-1"/>
+                    <asm value="-1"/>
+                    <drift_type value="-1"/>
+                    <driving_line value="-1"/>
+                    <enemy_tire value="-1"/>
+                    <limit_tire_f value="-1"/>
+                    <limit_tire_r value="-1"/>
+                    <need_tire_f value="-1"/>
+                    <need_tire_r value="-1"/>
+                    <simulation value="-1"/>
+                    <!-- Skid Recovery Force -->
+                    <suggest_tire_f value="-1"/>
+                    <suggest_tire_r value="-1"/>
+                    <tcs value="-1"/>
+                    <transmission value="-1"/>
+                </constraint>
+                <entry_set>
+                    <!--
+                        Entry_generate can seemingly be removed, allowing for a fixed grid to be specified
+                        If a fixed grid is specified, the player will be assigned whichever vehicle lines up with the set player_pos
+                    -->
+                    <entry_generate>
+                        <delays/>
+                        <!--
+                            Global AI skill values - unsure if overridden by individual ones
+                        -->
+                        <ai_skill value="90"/>
+                        <ai_skill_breaking value="90"/>
+                        <ai_skill_cornering value="90"/>
+                        <ai_skill_accelerating value="90"/>
+                        <!--
+                            Number of vehicles in the race, and the player's starting position
+                        -->
+                        <entry_num value="16"/>
+                        <player_pos value="12"/>
+                        <enemy_lv value="0"/>
+                        <enemy_bspec_lv value="8"/>
+                        <!--
+                            The way potential AI entries are picked from the entry_base_array below
+                            
+                            Generate types:
+                            NONE - No AI entries in the race (use for licence and time attacks)
+                            ENTRY_BASE_ORDER - AI entries will be assigned in the specific order of the array (so first entry is 1st place, second entry is 2nd etc) - number of which MUST match or exceed entry_num or will softlock on loading
+                            ENTRY_BASE_SHUFFLE - AI entries will be picked randomly from the array like a pool of entries
+                        -->
+                        <generate_type value="ENTRY_BASE_SHUFFLE"/>
+                        <!--
+                            The order in which AI entries will appear on the starting grid_sort_type
+                            
+                            Sort types:
+                            PP_ASCEND - Lowest PP cars will be at the front
+                            PP_DESCEND - Lowest PP cars will be at the rear
+                        -->
+                        <enemy_sort_type value="NONE"/>
+                        <use_rolling_start_param value="0"/>
+                        <rolling_start_v value="0"/>
+                        <gap_for_start_rolling_distance value="0"/>
+                        <ai_skill_starting value="97"/>
+                        <ai_roughness value="0"/>
+                        <!-- 
+                            An array of (AI) entry parameters, one entry_base per potential entry
+                        -->
+                        <entry_base_array>
+                            <entry_base>
+                                <!--
+                                    Optional - How far around the track, in metres (as with vcoord), the entrant will start
+                                -->
+                                <initial_position value="100"/>
+                                <!--
+                                    Optional - The speed (in km/h) at which the entrant will start
+                                -->
+                                <initial_velocity value="100"/>
+                                <!-- 
+                                    Set to "Player" if its the player in an entry in entry_set
+                                -->
+                                <driver_name value="W. Armstrong"/>
+                                <!--
+                                    Country code for the driver's flag - set to anything invalid to remove flag
+                                -->
+                                <driver_region value="PD"/>
+                                <!--
+                                    How many seconds after "3, 2, 1" this AI will start
+                                -->
+                                <delay value="0"/>
+                                <!--
+                                    Car that a player/AI is driving.
+                                    Color is the index of the vehicle's available colours (0 is default, potential colours can be found against each vehicle in VARIATION table of specdb)
+                                    Label is the internal name of the vehicle the AI will use, from specdb
+                                    
+                                    This makes the event act as you rent the car for the event, to limit tyres uses the fields in the restriction category
+                                    The game will appropriately not show them in the menu, as you're not supplying your own car
+                                -->
+                                <car color="0" label="ts030_hybrid_12"/>
+                                <!--
+                                    race_class_id is the "bucket" the AI racer will be in
+                                    E.g. 6 cars assigned to race_class_id 0 and 6 assigned to race_class_id 1 will have 12 cars on track, but each bucket only competes against others within that bucket
+                                -->
+                                <race_class_id value="0"/>
+                                <!--
+                                    Individual values for AI skill
+                                    From 0-200, but typically 0-100
+                                    Values over 100 may be used to make AI extra aggressive/confident, although values too high will make them more mistake-prone or ignore braking points
+                                -->
+                                <ai_skill_breaking value="90"/>
+                                <ai_skill_cornering value="90"/>
+                                <ai_skill_accelerating value="90"/>
+                                <!-- 
+                                    Effects unknown, assumed to be AI aggression
+                                    Most events are set to -1, but some are 0, 7, and 10
+                                -->
+                                <ai_roughness value="-1"/>
+                                <!-- 
+                                    The name of the tire compounds the AI will use
+                                    Presumable AI that start with dry tires in a wet race will eventually try to pit and change them
+                                -->
+                                <tire_f value="RACING_HARD"/>
+                                <tire_r value="RACING_HARD"/>
+                            </entry_base>
+                        </entry_base_array>
+                    </entry_generate>
+                </entry_set>
+                <failure_condition>
+                    <type_list>
+                        <!--
+                            Array of failure types to use with MISSION, LICENSE, possibly COFFEE_BREAK
+                            HIT_WALL_HARD - Hard Crash
+                            HIT_CAR_HARD - Car collision with AI
+                            PYLON - Hit a cone
+                            COURSE_OUT - Out of the track
+                        -->
+                        <type value="HIT_WALL_HARD"/>
+                    </type_list>
+                    <no_failure_at_result value="1"/>
+                </failure_condition>
+                <!--
+                    Only present if a licence or Coffee Break 
+                -->
+                <license_condition>
+                    <failure_condition/>
+                    <use_basic_finish value="0"/>
+                    <stop_on_finish value="1"/>
+                    <!--
+                        Display_mode determines which custom objective to show on screen
+                        
+                        Display mode types:
+                        DRIFT_SCORE - Player's drift score used for mission races
+                        FUEL_DIST - How far the current fuel amount will last - used for eco challenges*
+                        FUEL_TIME - How long the current fuel amount will last - used for echo challenges*
+                        PYLON_NUM - How many cones (or possibly all gadgets) have been hit - used for cone challenges*
+                        PYLON_TIME - How long the player has to hit the cones - used for cone challenges*
+                        
+                        * = Possibly only works if event set to COFFEE_BREAK
+                    -->
+                    <display_mode value="PYLON_NUM"/>
+                    <gadget_names>
+                        <!-- 
+                            An array of the gadget (physics props) types used (labels from GADGETS in specdb) for PYLON_NUM scoring
+                        -->
+                        <gadget value="pylon_24h"/>
+                    </gadget_names>
+                    <!-- 
+                        An array of conditions that will trigger the end of the event
+                    -->
+                    <finish_condition>
+                        <data>
+                            <!--
+                                The type of occurrence that will trigger the end
+                                
+                                Check types:
+                                BEST_LAP_TIME - The time of the current best lap
+                                COMPLETE_FLAG - Unknown
+                                COURSE_OUT - Player has left the course (unsure if bit or count of times left course)
+                                GADGET_COUNT - How many gadgets have been hit
+                                FUEL_AMOUNT - The amount of fuel left in the player's vehicle
+                                HIT_COUNT - How many times the player has collided with something
+                                HIT_POWER - How hard the player has collided with something (unsure of unit)
+                                HIT_WALL - If the player has hit a wall
+                                LAP_COUNT - How many laps have been completed
+                                LAP_TIME - The run time of the current lap
+                                ROAD_DISTANCE - Unknown (distance to finish?)
+                                STANDING_TIME - Unknown (how long the player has stood still?)
+                                TOTAL_TIME - The run time of the whole event
+                                V_POSITION - The player's current distance around the track (in metres)
+                                VELOCITY - The player's current speed (in km/h)
+                                WRONG_WAY_COUNT - How many times the player has gone the wrong way
+                            -->
+                            <check_type value="TOTAL_TIME"/>
+                            <!--
+                                How the check_type should be compared to the value(s)
+                                
+                                Condition types:
+                                EQUAL - Equal to the value
+                                GREATER - Greater than the value
+                                GREATER_EQUAL - Greater than or equal to the value
+                                LESS - Less than the value
+                                LESS_EQUAL - Less than or equal to the value
+                                NOTEQUAL - Not equal to the value
+                            -->
+                            <condition value="GREATER_EQUAL"/>
+                            <!--
+                                The logic against which the check_types are evaluated
+                                
+                                Connection types:
+                                AND - All of the specified checks are true
+                                OR - Any of the specified checks are true
+                                XOR - Only one of the specified checks is true
+                            -->
+                            <connection value="OR"/>
+                            <!--
+                                Unknown, always set to 0
+                            -->
+                            <result_type value="0"/>
+                            <!--
+                                The value being compared against by the checks above
+                                
+                                Value types:
+                                float_value - Floating point value (decimal)
+                                uint_value - Unsigned integer value (allows larger value but no negative value)
+                                int_value - Signed integer value (does not allow larger value but negative values allowed)
+                            -->
+                            <float_value value="0"/>
+                            <uint_value value="30000"/>
+                            <int_value value="0"/>
+                        </data>
+                    </finish_condition>
+                    <success_condition>
+                        <!--
+                            An array of conditions that are checked when the finish is triggered
+                            Check types appear to be the same as those in finish_condition
+                            
+                            First = Gold, Second = Silver, Third = Bronze
+                        -->
+                        <data>
+                            <check_type value="GADGET_COUNT"/>
+                            <condition value="GREATER_EQUAL"/>
+                            <connection value="AND"/>
+                            <result_type value="0"/>
+                            <float_value value="0"/>
+                            <uint_value value="180"/>
+                            <int_value value="0"/>
+                        </data>
+                        <data>
+                            <check_type value="GADGET_COUNT"/>
+                            <condition value="GREATER_EQUAL"/>
+                            <connection value="AND"/>
+                            <result_type value="0"/>
+                            <float_value value="0"/>
+                            <uint_value value="140"/>
+                            <int_value value="0"/>
+                        </data>
+                        <data>
+                            <check_type value="GADGET_COUNT"/>
+                            <condition value="GREATER_EQUAL"/>
+                            <connection value="AND"/>
+                            <result_type value="0"/>
+                            <float_value value="0"/>
+                            <uint_value value="100"/>
+                            <int_value value="0"/>
+                        </data>
+                    </success_condition>
+                </license_condition>
+                <!--
+                    The unique identifier of this race
+                    Connected to the array of event_ids in the main event XML
 
-					Set a unique one and add it to your main event XML.
-				-->
-				<event_id value="5000001"/>
-				<!--
-					Unknown, seems to always be set to race
-				-->
-				<event_type value="RACE"/>
-				<!--
-					Game mode type
-					Varies depending on the event, effects unknown as may depend on other variables set 
-					
-					Game mode types:
-					EVENT_RACE - Typical GT Mode race
-					EVENT_RALLY - Used for GT5 Rally Special Events - possibly triggers staggered entrant starts
-					LICENSE - Licence test
-					MISSION - Used for GT6 Mission Races - potentially sets time-based trophies similar to licences
-					SCHOOL - Used for GT5 Special Events - possibly similar to Mission
-					SINGLE_RACE - Possibly arcade-like races with no rewards
-					TOUR - Used for GT5 Grand Tour - possibly similar to mission
-					TIME_ATTACK - Arcade Time Trial
-					ONLINE_TIME_ATTACK - Seasonal Time Trial
-				-->
-				<game_mode value="EVENT_RACE"/>
-				<information>
-					<advanced_notice/>
-					<flier_other_info value=""/>
-					<logo_other_info value=""/>
-					<race_info_minute value="0"/>
-					<!--
-						Title is shown on the pre-race screen where entry restrictions/typical opponents are shown
-						At top left near licence category
-					-->
-					<title>
-						<JP/>
-						<US>Prototype Cup: Race 1</US>
-						<GB/>
-						<FR/>
-						<DE/>
-						<IT/>
-						<ES/>
-						<PT/>
-						<NL/>
-						<RU/>
-						<KR/>
-						<TW/>
-						<EL/>
-						<TR/>
-						<PL/>
-						<CZ/>
-						<HU/>
-						<BP/>
-						<MS/>
-					</title>
-					<!-- 
-						One_line_title is shown where the events are presented as bigger banners - e.g. GT6 Goodwood, licences, missions
-					-->
-					<one_line_title>
-						<JP/>
-						<US/>
-						<GB/>
-						<FR/>
-						<DE/>
-						<IT/>
-						<ES/>
-						<PT/>
-						<NL/>
-						<RU/>
-						<KR/>
-						<TW/>
-						<EL/>
-						<TR/>
-						<PL/>
-						<CZ/>
-						<HU/>
-						<BP/>
-						<MS/>
-					</one_line_title>
-					<!--
-						Description is shown on the pre-race screen where entry restrictions/typical opponents are shown
-						In details box below current player vehicle
-					-->
-					<description>
-						<JP/>
-						<US>An intense competition between prototype chassis racers.</US>
-						<GB/>
-						<FR/>
-						<DE/>
-						<IT/>
-						<ES/>
-						<PT/>
-						<NL/>
-						<RU/>
-						<KR/>
-						<TW/>
-						<EL/>
-						<TR/>
-						<PL/>
-						<CZ/>
-						<HU/>
-						<BP/>
-						<MS/>
-					</description>
-				</information>
-				<!--
-					Unknown, always set to 0 in existing events
-				-->
-				<inheritance value="0"/>
-				<race>
-					<!--
-						Possibly GT Academy related, possibly online-only
-						Always set to 0 in existing events
-					-->
-					<academy_event value="0"/>
-					<!-- 
-						Possibly related to GT Mode progression/award earning
-						Usually set to 1 for A and B-Spec races, usually set to 0 for licence/specials
-					-->
-					<accumulation value="1"/>
-					<!--
-						Used to toggle visible co-driver in rally events
-						May depend on another parameter as setting this alone doesn't seem to have an effect
-					-->
-					<allow_codriver value="0"/>
-					<!--
-						May be related to GT5 rally event staggered starts
-						Set to 0 in every GT6 event, and every GT5 event outside of rally
-					-->
-					<auto_standing_delay value="0"/>
-					<!--
-						Unknown effect, typically set to 0 or 1
-					-->
-					<autostart_pitout value="0"/>
-					<!--
-						Vehicle damage effects
-						
-						Damage types:
-						WEAK - Only visual damage (?)
-						MIDDLE - Mechanical damage, may repair itself over time (?)
-						STRONG - Mechanical damage
-					-->
-					<behavior_damage_type value="WEAK"/>
-					<!--
-						Presumably slipstream strength
-						Appears to always be set to GAME
-					-->
-					<behavior_slip_stream_type value="GAME"/>
-					<!--
-						Unknown, possibly a bit for whether or not AI rubber banding is allowed
-					-->
-					<boost_type value="1"/>
-					<bspec_vitality10 value="10"/>
-					<!--
-						How the race end is determined
-						
-						Complete types:
-						BYLAPS - Ends after laps defined in race_limit_laps
-						BYSECTION - Ends after crossing a defined section of track, most likely depends on event_goal_v being defined
-						BYSTOP - Ends after stopping in zone - licences
-						BYTIME - Triggers final lap when race_limit_minute is reached, ends after finishing final lap
-						NONE - Use for time trials if its endless and meant to give rewards for the best time - also used for drift events, maybe automatially determined by track sections
-					-->
-					<complete_type value="BYLAPS"/>
-					<!--
-						Whether or not, and how quickly, tires and fuel are consumed
-						In GT5 appears to be a bit - yes/no
-						In GT6 appears to be a bit - most likely a multiplier (e.g. 5 = 5x faster), 0 = off
-					-->
-					<consume_fuel value="0"/>
-					<consume_tire value="0"/>
-					<!--
-						Possibly used to set the starting time on tracks with dynamic time
-					-->
-					<datetime datetime="1970/00/00 00:00:00"/>
-					<!--
-						Appears to be unused in GT6
-						In GT5 uses SUNNY or RAINY to force that particular weather
-					-->
-					<decisive_weather value="NONE"/>
-					<!--
-						Both apparently unused in GT Mode, presumably a bit - yes/no
-					-->
-					<disable_collision value="0"/>
-					<disable_recording_replay value="0"/>
-					<!--
-						Enable damage and pits, presumably both bits - yes/no
-						Unsure if disabling pit will cause any pit entry to be a drive-through
-					-->
-					<enable_damage value="1"/>
-					<enable_pit value="0"/>
-					<!--
-						Possibly overrides the BYLAPS and/or BYTIME finish conditions so that custom conditions can be provided in finish_condition
-					-->
-					<endless value="0"/>
-					<!--
-						The distance around the track and width of the custom finish line (in metres)
-					-->
-					<event_goal_v value="-1"/>
-					<event_goal_width value="-1"/>
-					<!--
-						Possibly how the final rankings are determined
-						
-						Finish types:
-						FASTEST - First to finish or fastest lap holder?
-						TARGET - Finishing position (?)
-					-->
-					<finish_type value="TARGET"/>
-					<fixed_retention value="0"/>
-					<!--
-						Unsure if racing flag rules or data flagset
-					-->
-					<flagset value="FLAGSET_NORMAL"/>
-					<ghost_presence_type value="NORMAL"/>
-					<ghost_type value="NONE"/>
-					<grid_sort_type value="NONE"/>
-					<immediate_finish value="0"/>
-					<initial_retention10 value="0"/>
-					<keep_load_ghost value="0"/>
-					<lighting_mode value="AUTO"/>
-					<!-- 
-						Presumably track edge/wet surface friction type and grip percentage
-					-->
-					<low_mu_type value="MODERATE"/>
-					<mu_ratio100 value="100"/>
-					<online_on value="0"/>
-					<!--
-						Whether or not rally event pace notes are used
-						May depend on course generator track and rally parameters being set elsewhere
-					-->
-					<pace_note value="0"/>
-					<!--
-						Penalties for cutting and/or hitting barriers/AI too hard
-						Values unknown
-					-->
-					<penalty_level value="0"/>
-					<penalty_no_reset value="0"/>
-					<!-- 
-						How many laps or minutes the race will last
-						The one used is determined by complete_type
-						
-						Will override "endless"!
-						Set to 1 if its a time trial properly set to keep on going with rewards
-					-->
-					<race_limit_laps value="6"/>
-					<race_limit_minute value="0"/>
-					<!--
-						Possibly how the finish position is determined
-						
-						Race types:
-						COMPETITION - Standard race
-						DEMO - Unknown effects
-						TIMEATTACK - By completion time, used for licences and mission races
-					-->
-					<race_type value="COMPETITION"/>
-					<!--
-						How the entrants start the race
-						Unknown if initial_position and initial_velocity override this
-						
-						Start types:
-						GRID - Entrants are sat on the starting grid, overrides custom position
-						ROLLING - Single-file rolling start
-						ROLLING_DL - Double-file rolling start
-						ROLLING_NOLIMIT - Rolling start, presumably at max acceleration
-						STANDING - Standing at a certain position
-						ATTACK - Starts behind the grid (automatically sets the position for you unless custom via initial_position), timer starts as soon as you cross the start line/sector
-					-->
-					<start_type value="GRID"/>
-					<!-- 
-						Multiplier of how fast time progresses (1.0 = real-time, 60.0 = 60x (i.e. 24 minute day))
-					-->
-					<time_progress_speed value="0.000000"/>
-					<!--
-						How long until the race starts or the player has control of the car
-						How long the vehicles behind 1st place are given to finish before showing the result/reward screen
-					-->
-					<time_to_finish value="3000"/>
-					<time_to_start value="6000"/>
-					<!--
-						Temperature on track - unknown effect and whether or not temperature only works on tracks with time/weather progression
-					-->
-					<weather_base_celsius value="24"/>
-					<weather_max_celsius value="3"/>
-					<weather_min_celsius value="3"/>
-					<!--
-						Whether or not the weather can progress to rain/snow
-					-->
-					<weather_no_precipitation value="0"/>
-					<!--
-						Whether or not the weather can vary
-					-->
-					<weather_no_schedule value="0"/>
-					<!--
-						Whether or not the weather can progress to windy (unknown how wind affects race)
-					-->
-					<weather_no_wind value="0"/>
-					<!--
-						Unknown
-					-->
-					<weather_point_num value="1"/>
-					<!--
-						Forces any allowed precipitation to be either rain or snow
-					-->
-					<weather_prec_rain_only value="1"/>
-					<weather_prec_snow_only value="0"/>
-					<!--
-						Forces the weather to be random or predetermined
-					-->
-					<weather_random value="1"/>
-					<weather_random_seed value="0"/>
-					<!--
-						Unknown - length of total weather progression?
-					-->
-					<weather_total_sec value="180.000000"/>
-					<over_entry_max value="0"/>
-					<with_ghost value="0"/>
-					<replace_at_courseout value="0"/>
-					<!--
-						How fast weather and water can change
-					-->
-					<weather_accel10 value="10"/>
-					<weather_accel_water_retention10 value="10"/>
-					<boost_flag value="1"/>
-					<new_weather_data>
-						<point>
-							<time_rate value="0"/>
-							<low value="1"/>
-							<high value="1"/>
-						</point>
-					</new_weather_data>
-					<!--
-						How many vehicles total (both player and AI) are allowed to enter the race
-					-->
-					<entry_max value="16"/>
-					<racers_max value="16"/>
-					<!-- 
-						Rubber banding params - values unknown (can be positive and negative)
-						Unknown how assigned to specific vehicles - starting pos or order in entry_base_array?
-					-->
-					<boost_table_array>
-						<boost_table>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-						</boost_table>
-						<boost_table>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-							<param value="0"/>
-						</boost_table>
-					</boost_table_array>
-				</race>
-				<reward>
-					<!-- 
-						Whether or not the rewards can be repeated - set to 1 for licences/missions/seasonals
-					-->
-					<is_once value="0"/>
-					<!--
-						Unknown - possibly prizes scaled to PP restriction (e.g. if max PP is 500, win with 250, double reward?)
-					-->
-					<percent_at_pp100 value="0"/>
-					<pp_base value="0"/>
-					<present_type value="ORDER"/>
-					<!-- Custom Prizes. These will only work on certain game modes
-						 Mainly seasonal ones - note that cars won't be given unless you go to the seasonal events menu itself
-						 Missions can also give prizes, initially hardcoded on the folder id - can be bypassed 
-						-->
-					<present>
-						<!-- 
-							category_id types:
-							301 - Racing helmets
-							302 - Racing suits (argument4 = ID of suit from somewhere)
-							303 - Racing suits (used for Senna rewards) (argument4 = ID of suit from somewhere)
-							601 - Paint chips (argument1 = ID from PAINT_COLOR_INFO of chip to award)
-							901 - Vehicles (f_name = Label of vehicle to award)
-							902 - Vehicles with parts installed (how are parts selected?)
-						-->
-						<item argument1="-1" argument2="" argument3="0" argument4="" category_id="901" f_name="gtr_black_12_ac14" type_id="9"/>
-						<!-- Leave empty if you need a tier (i.e Silver for this one) to have no present -->
-						<item/>
-					</present>
-					<!-- 
-						prize_type types:
-						0 - Normal A-Spec awards (1st place = Gold)
-						1 - Seasonal/Special awards (1st place = Gold + Silver + Bronze)
-					  -->
-					<prize_type value="0"/>
-					<!-- 
-						entry_present_type types:
-						FINISH - Player will receive extra rewards just for finishing the event
-						LAP - Player will receive extra rewards just for completing one lap (mainly used for time trial seasonals)
+                    Set a unique one and add it to your main event XML.
+                -->
+                <event_id value="5000001"/>
+                <!--
+                    Unknown, seems to always be set to race
+                -->
+                <event_type value="RACE"/>
+                <!--
+                    Game mode type
+                    Varies depending on the event, effects unknown as may depend on other variables set 
+                    
+                    Game mode types:
+                    EVENT_RACE - Typical GT Mode race
+                    EVENT_RALLY - Used for GT5 Rally Special Events - possibly triggers staggered entrant starts
+                    LICENSE - Licence test
+                    MISSION - Used for GT6 Mission Races - potentially sets time-based trophies similar to licences
+                    SCHOOL - Used for GT5 Special Events - possibly similar to Mission
+                    SINGLE_RACE - Possibly arcade-like races with no rewards
+                    TOUR - Used for GT5 Grand Tour - possibly similar to mission
+                    TIME_ATTACK - Arcade Time Trial
+                    ONLINE_TIME_ATTACK - Seasonal Time Trial
+                -->
+                <game_mode value="EVENT_RACE"/>
+                <information>
+                    <advanced_notice/>
+                    <flier_other_info value=""/>
+                    <logo_other_info value=""/>
+                    <race_info_minute value="0"/>
+                    <!--
+                        Title is shown on the pre-race screen where entry restrictions/typical opponents are shown
+                        At top left near licence category
+                    -->
+                    <title>
+                        <JP/>
+                        <US>Prototype Cup: Race 1</US>
+                        <GB/>
+                        <FR/>
+                        <DE/>
+                        <IT/>
+                        <ES/>
+                        <PT/>
+                        <NL/>
+                        <RU/>
+                        <KR/>
+                        <TW/>
+                        <EL/>
+                        <TR/>
+                        <PL/>
+                        <CZ/>
+                        <HU/>
+                        <BP/>
+                        <MS/>
+                    </title>
+                    <!-- 
+                        One_line_title is shown where the events are presented as bigger banners - e.g. GT6 Goodwood, licences, missions
+                    -->
+                    <one_line_title>
+                        <JP/>
+                        <US/>
+                        <GB/>
+                        <FR/>
+                        <DE/>
+                        <IT/>
+                        <ES/>
+                        <PT/>
+                        <NL/>
+                        <RU/>
+                        <KR/>
+                        <TW/>
+                        <EL/>
+                        <TR/>
+                        <PL/>
+                        <CZ/>
+                        <HU/>
+                        <BP/>
+                        <MS/>
+                    </one_line_title>
+                    <!--
+                        Description is shown on the pre-race screen where entry restrictions/typical opponents are shown
+                        In details box below current player vehicle
+                    -->
+                    <description>
+                        <JP/>
+                        <US>An intense competition between prototype chassis racers.</US>
+                        <GB/>
+                        <FR/>
+                        <DE/>
+                        <IT/>
+                        <ES/>
+                        <PT/>
+                        <NL/>
+                        <RU/>
+                        <KR/>
+                        <TW/>
+                        <EL/>
+                        <TR/>
+                        <PL/>
+                        <CZ/>
+                        <HU/>
+                        <BP/>
+                        <MS/>
+                    </description>
+                </information>
+                <!--
+                    Unknown, always set to 0 in existing events
+                -->
+                <inheritance value="0"/>
+                <race>
+                    <!--
+                        Possibly GT Academy related, possibly online-only
+                        Always set to 0 in existing events
+                    -->
+                    <academy_event value="0"/>
+                    <!-- 
+                        Possibly related to GT Mode progression/award earning
+                        Usually set to 1 for A and B-Spec races, usually set to 0 for licence/specials
+                    -->
+                    <accumulation value="1"/>
+                    <!--
+                        Used to toggle visible co-driver in rally events
+                        May depend on another parameter as setting this alone doesn't seem to have an effect
+                    -->
+                    <allow_codriver value="0"/>
+                    <!--
+                        May be related to GT5 rally event staggered starts
+                        Set to 0 in every GT6 event, and every GT5 event outside of rally
+                    -->
+                    <auto_standing_delay value="0"/>
+                    <!--
+                        Unknown effect, typically set to 0 or 1
+                    -->
+                    <autostart_pitout value="0"/>
+                    <!--
+                        Vehicle damage effects
+                        
+                        Damage types:
+                        WEAK - Only visual damage (?)
+                        MIDDLE - Mechanical damage, may repair itself over time (?)
+                        STRONG - Mechanical damage
+                    -->
+                    <behavior_damage_type value="WEAK"/>
+                    <!--
+                        Presumably slipstream strength
+                        Appears to always be set to GAME
+                    -->
+                    <behavior_slip_stream_type value="GAME"/>
+                    <!--
+                        Unknown, possibly a bit for whether or not AI rubber banding is allowed
+                    -->
+                    <boost_type value="1"/>
+                    <bspec_vitality10 value="10"/>
+                    <!--
+                        How the race end is determined
+                        
+                        Complete types:
+                        BYLAPS - Ends after laps defined in race_limit_laps
+                        BYSECTION - Ends after crossing a defined section of track, most likely depends on event_goal_v being defined
+                        BYSTOP - Ends after stopping in zone - licences
+                        BYTIME - Triggers final lap when race_limit_minute is reached, ends after finishing final lap
+                        NONE - Use for time trials if its endless and meant to give rewards for the best time - also used for drift events, maybe automatially determined by track sections
+                    -->
+                    <complete_type value="BYLAPS"/>
+                    <!--
+                        Whether or not, and how quickly, tires and fuel are consumed
+                        In GT5 appears to be a bit - yes/no
+                        In GT6 appears to be a bit - most likely a multiplier (e.g. 5 = 5x faster), 0 = off
+                    -->
+                    <consume_fuel value="0"/>
+                    <consume_tire value="0"/>
+                    <!--
+                        Possibly used to set the starting time on tracks with dynamic time
+                    -->
+                    <datetime datetime="1970/00/00 00:00:00"/>
+                    <!--
+                        Appears to be unused in GT6
+                        In GT5 uses SUNNY or RAINY to force that particular weather
+                    -->
+                    <decisive_weather value="NONE"/>
+                    <!--
+                        Both apparently unused in GT Mode, presumably a bit - yes/no
+                    -->
+                    <disable_collision value="0"/>
+                    <disable_recording_replay value="0"/>
+                    <!--
+                        Enable damage and pits, presumably both bits - yes/no
+                        Unsure if disabling pit will cause any pit entry to be a drive-through
+                    -->
+                    <enable_damage value="1"/>
+                    <enable_pit value="0"/>
+                    <!--
+                        Possibly overrides the BYLAPS and/or BYTIME finish conditions so that custom conditions can be provided in finish_condition
+                    -->
+                    <endless value="0"/>
+                    <!--
+                        The distance around the track and width of the custom finish line (in metres)
+                    -->
+                    <event_goal_v value="-1"/>
+                    <event_goal_width value="-1"/>
+                    <!--
+                        Possibly how the final rankings are determined
+                        
+                        Finish types:
+                        FASTEST - First to finish or fastest lap holder?
+                        TARGET - Finishing position (?)
+                    -->
+                    <finish_type value="TARGET"/>
+                    <fixed_retention value="0"/>
+                    <!--
+                        Unsure if racing flag rules or data flagset
+                    -->
+                    <flagset value="FLAGSET_NORMAL"/>
+                    <ghost_presence_type value="NORMAL"/>
+                    <ghost_type value="NONE"/>
+                    <grid_sort_type value="NONE"/>
+                    <immediate_finish value="0"/>
+                    <initial_retention10 value="0"/>
+                    <keep_load_ghost value="0"/>
+                    <lighting_mode value="AUTO"/>
+                    <!-- 
+                        Presumably track edge/wet surface friction type and grip percentage
+                    -->
+                    <low_mu_type value="MODERATE"/>
+                    <mu_ratio100 value="100"/>
+                    <online_on value="0"/>
+                    <!--
+                        Whether or not rally event pace notes are used
+                        May depend on course generator track and rally parameters being set elsewhere
+                    -->
+                    <pace_note value="0"/>
+                    <!--
+                        Penalties for cutting and/or hitting barriers/AI too hard
+                        Values unknown
+                    -->
+                    <penalty_level value="0"/>
+                    <penalty_no_reset value="0"/>
+                    <!-- 
+                        How many laps or minutes the race will last
+                        The one used is determined by complete_type
+                        
+                        Will override "endless"!
+                        Set to 1 if its a time trial properly set to keep on going with rewards
+                    -->
+                    <race_limit_laps value="6"/>
+                    <race_limit_minute value="0"/>
+                    <!--
+                        Possibly how the finish position is determined
+                        
+                        Race types:
+                        COMPETITION - Standard race
+                        DEMO - Unknown effects
+                        TIMEATTACK - By completion time, used for licences and mission races
+                    -->
+                    <race_type value="COMPETITION"/>
+                    <!--
+                        How the entrants start the race
+                        Unknown if initial_position and initial_velocity override this
+                        
+                        Start types:
+                        GRID - Entrants are sat on the starting grid, overrides custom position
+                        ROLLING - Single-file rolling start
+                        ROLLING_DL - Double-file rolling start
+                        ROLLING_NOLIMIT - Rolling start, presumably at max acceleration
+                        STANDING - Standing at a certain position
+                        ATTACK - Starts behind the grid (automatically sets the position for you unless custom via initial_position), timer starts as soon as you cross the start line/sector
+                    -->
+                    <start_type value="GRID"/>
+                    <!-- 
+                        Multiplier of how fast time progresses (1.0 = real-time, 60.0 = 60x (i.e. 24 minute day))
+                    -->
+                    <time_progress_speed value="0.000000"/>
+                    <!--
+                        How long until the race starts or the player has control of the car
+                        How long the vehicles behind 1st place are given to finish before showing the result/reward screen
+                    -->
+                    <time_to_finish value="3000"/>
+                    <time_to_start value="6000"/>
+                    <!--
+                        Temperature on track - unknown effect and whether or not temperature only works on tracks with time/weather progression
+                    -->
+                    <weather_base_celsius value="24"/>
+                    <weather_max_celsius value="3"/>
+                    <weather_min_celsius value="3"/>
+                    <!--
+                        Whether or not the weather can progress to rain/snow
+                    -->
+                    <weather_no_precipitation value="0"/>
+                    <!--
+                        Whether or not the weather can vary
+                    -->
+                    <weather_no_schedule value="0"/>
+                    <!--
+                        Whether or not the weather can progress to windy (unknown how wind affects race)
+                    -->
+                    <weather_no_wind value="0"/>
+                    <!--
+                        Unknown
+                    -->
+                    <weather_point_num value="1"/>
+                    <!--
+                        Forces any allowed precipitation to be either rain or snow
+                    -->
+                    <weather_prec_rain_only value="1"/>
+                    <weather_prec_snow_only value="0"/>
+                    <!--
+                        Forces the weather to be random or predetermined
+                    -->
+                    <weather_random value="1"/>
+                    <weather_random_seed value="0"/>
+                    <!--
+                        Unknown - length of total weather progression?
+                    -->
+                    <weather_total_sec value="180.000000"/>
+                    <over_entry_max value="0"/>
+                    <with_ghost value="0"/>
+                    <replace_at_courseout value="0"/>
+                    <!--
+                        How fast weather and water can change
+                    -->
+                    <weather_accel10 value="10"/>
+                    <weather_accel_water_retention10 value="10"/>
+                    <boost_flag value="1"/>
+                    <new_weather_data>
+                        <point>
+                            <time_rate value="0"/>
+                            <low value="1"/>
+                            <high value="1"/>
+                        </point>
+                    </new_weather_data>
+                    <!--
+                        How many vehicles total (both player and AI) are allowed to enter the race
+                    -->
+                    <entry_max value="16"/>
+                    <racers_max value="16"/>
+                    <!-- 
+                        Rubber banding params - values unknown (can be positive and negative)
+                        Unknown how assigned to specific vehicles - starting pos or order in entry_base_array?
+                    -->
+                    <boost_table_array>
+                        <boost_table>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                        </boost_table>
+                        <boost_table>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                            <param value="0"/>
+                        </boost_table>
+                    </boost_table_array>
+                </race>
+                <reward>
+                    <!-- 
+                        Whether or not the rewards can be repeated - set to 1 for licences/missions/seasonals
+                    -->
+                    <is_once value="0"/>
+                    <!--
+                        Unknown - possibly prizes scaled to PP restriction (e.g. if max PP is 500, win with 250, double reward?)
+                    -->
+                    <percent_at_pp100 value="0"/>
+                    <pp_base value="0"/>
+                    <present_type value="ORDER"/>
+                    <!-- Custom Prizes. These will only work on certain game modes
+                         Mainly seasonal ones - note that cars won't be given unless you go to the seasonal events menu itself
+                         Missions can also give prizes, initially hardcoded on the folder id - can be bypassed 
+                        -->
+                    <present>
+                        <!-- 
+                            category_id types:
+                            301 - Racing helmets
+                            302 - Racing suits (argument4 = ID of suit from somewhere)
+                            303 - Racing suits (used for Senna rewards) (argument4 = ID of suit from somewhere)
+                            601 - Paint chips (argument1 = ID from PAINT_COLOR_INFO of chip to award)
+                            901 - Vehicles (f_name = Label of vehicle to award)
+                            902 - Vehicles with parts installed (how are parts selected?)
+                        -->
+                        <item argument1="-1" argument2="" argument3="0" argument4="" category_id="901" f_name="gtr_black_12_ac14" type_id="9"/>
+                        <!-- Leave empty if you need a tier (i.e Silver for this one) to have no present -->
+                        <item/>
+                    </present>
+                    <!-- 
+                        prize_type types:
+                        0 - Normal A-Spec awards (1st place = Gold)
+                        1 - Seasonal/Special awards (1st place = Gold + Silver + Bronze)
+                    -->
+                    <prize_type value="0"/>
+                    <!-- 
+                        entry_present_type types:
+                        FINISH - Player will receive extra rewards just for finishing the event
+                        LAP - Player will receive extra rewards just for completing one lap (mainly used for time trial seasonals)
 
-						entry_present array is required!
-					-->
-					<!-- 
-						Same as present, these prizes will be given depending on the condition above - no order, just your list of rewards 
-					-->
-					<entry_present>
-						<item argument1="-1" argument2="" argument3="0" argument4="" category_id="901" f_name="corvette_stingray_gtc_13" type_id="9"/>
-					</entry_present>
-					<!-- Unused? -->
-					<special_reward_code value="0"/>
-					<point_table>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-						<point value="0"/>
-					</point_table>
-					<prize_table>
-						<!-- An array of prizes, each corresponds to the placement - Value is in Credits -->
-						<prize value="85000"/>
-						<prize value="60000"/>
-						<prize value="45000"/>
-						<prize value="32500"/>
-						<prize value="20000"/>
-						<prize value="10000"/>
-						<prize value="5000"/>
-						<prize value="2500"/>
-						<prize value="0"/>
-						<prize value="0"/>
-						<prize value="0"/>
-						<prize value="0"/>
-						<prize value="0"/>
-						<prize value="0"/>
-						<prize value="0"/>
-						<prize value="0"/>
-					</prize_table>
-					<star_table>
-						<!-- An array of stars, obtention depends on your value -->
-						<star value="RANK_1"/>
-						<star value="RANK_3"/>
-						<star value="COMPLETE"/>
-					</star_table>
-				</reward>
-				<track>
-					<!-- This is where you put your actual track you want to load -->
-					<course_code label="midfield"/>
-					<course_layout_no value="0"/>
-					<is_omedeto_difficulty value="0"/>
-					<map_offset_world_x value="0"/>
-					<map_offset_world_y value="0"/>
-					<map_scale value="0"/>
-					<use_generator value="0"/>
-					<course_generator_param>
-						<use_random_seed value="0"/>
-						<seed value="0"/>
-						<course_generator_kind value="GENERATOR_CIRCUIT"/>
-						<course_generator_length_type value="LENGTH"/>
-						<lengthy value="0"/>
-						<course_name value=""/>
-					</course_generator_param>
-				</track>
-				<play_style>
-					<!-- ONLY_A = A Spec 
-						 ONLY_B = B Spec
-						 BOTH_A_AND_B = Both
-					-->
-					<bspec_type value="BOTH_A_AND_B"/>
-				</play_style>
-				<regulation>
-					<countries>
-						<!--
-							An array of specific countries by their abbreviation (e.g. "GB", "IT")
-						-->
-						<country value="GB"/>
-					</countries>
-					<car_categories>
-						<!--
-							An array of car categories (only "NORMAL" used?) - unknown how assigned to vehicles
-						-->
-						<category value="NORMAL"/>
-					</car_categories>
-					<!--
-						A and B-Spec levels are unused in GT6
-					-->
-					<limit_aspec_level value="-1"/>
-					<limit_bspec_level value="-1"/>
-					<!--
-						limit_power is used to set a maximum (in PS) power value for entry
-						Could be used in conjunction with need_power to restrict to a certain power range for BoP
-					-->
-					<limit_power value="-1"/>
-					<!--
-						PP is unitless so any value here will be exactly the same in game
-						Could be used in conjunction with need_pp to restrict to a certain PP range for BoP
-					-->
-					<limit_pp value="-1"/>
-					<!--
-						limit_torque appears to have no effect
-					-->
-					<limit_torque value="-1"/>
-					<!--
-						limit_weight is used to set a maximum (in KG) weight value for entry
-						Could be used in conjunction with need_weight to restrict to a certain power range for BoP 
-					-->
-					<limit_weight value="-1"/>
-					<!--
-						limit_tire_f/r is used to assign the maximum grade the player is allowed (e.g. Racing Hard or less)
-						
-						Tire types:
-						0 - Comfort Hard
-						1 - Comfort Medium
-						2 - Comfort Soft
-						3 - Sports Hard
-						4 - Sports Medium
-						5 - Sports Soft
-						6 - Sports Super-Soft*
-						7 - Racing Hard
-						8 - Racing Medium
-						9 - Racing Soft
-						10 - Racing Super-Soft*
-						11 - Racing Rain Intermediate*
-						12 - Racing Heavy Wet*
-						13 - Dirt
-						14 - Spiked Snow
-						
-						
-						* = Shouldn't be assigned as event restriction (Super-Softs are unused and Rain tires are automatically allowed with any racing tire)
-					-->
-					<limit_tire_f value="15"/>
-					<limit_tire_r value="15"/>
-					<!--
-						limit_year is used to set a maximum (inclusive) production year for entry
-						Could be used in conjunction with need_year to set an age range of vehicles
-					-->
-					<limit_year value="-1"/>
-					<!--
-						All need_ values are the same units and structure as limit_ values and are used to set lower bounds
-					-->
-					<need_aspec_level value="-1"/>
-					<need_bspec_level value="-1"/>
-					<need_power value="-1"/>
-					<need_pp value="-1"/>
-					<need_torque value="-1"/>
-					<need_weight value="-1"/>
-					<!--
-						need_tire_f/r is used to assign the minimum grade the player is allowed (e.g. Min. Racing Hard)
-						
-						Can be used in tandem with limit_tire_f/r to assign a specific range of allowed tires, or set the same to enforce a specific compound (e.g. Dirt tires for rally events)
-					-->
-					<need_tire_f value="-1"/>
-					<need_tire_r value="-1"/>
-					<need_year value="-1"/>
-					<!--
-						need_aspiration is used to restrict to specific types of engine aspiration
-						
-						Aspiration types: 
-						-1 - Any
-						2 - Naturally Aspirated (NA)
-						4 - Turbo (T)
-						6 - NA and T
-						8 - Supercharger (SC)
-						10 - NA and SC
-						12 - T and SC
-						14 - NA, T, and SC (presumably to exclude any unknown/electric)
-					-->
-					<need_aspiration value="-1"/>
-					<!--
-						need_drivetrain is used to restrict to specific types of vehicle layout
-						
-						Drivetrain types:
-						-1 - Any
-						2 - Front-engine, rear wheel drive (FR)
-						4 - Front-engine, front wheel drive (FF)
-						6 - FR and FF
-						8 - Four wheel drive (4WD)
-						10 - FR and 4WD
-						12 - FF and 4WD
-						14 - FR, FF, and 4WD
-						16 - MR
-						18 - FR and MR
-						20 - FF and MR
-						22 - FR, FF, and MR
-						24 - 4WD and MR
-						26 - FR, 4WD, and MR
-						28 - FF, 4WD, and MR
-						30 - FR, FF, 4WD, and MR
-						32 - RR
-						34 - FR and RR
-						36 - FF and RR
-						38 - FR, FF, and RR
-						40 - 4WD and RR
-						42 - FR, 4WD, and RR
-						44 - FF, 4WD, and RR
-						46 - FR, FF, 4WD, and RR
-						48 - MR and RR
-						50 - FR, MR, and RR
-						52 - FF, MR, and RR
-						54 - FR, FF, MR, and RR
-						56 - 4WD, MR, and RR
-						58 - FR, 4WD, MR, and RR
-						60 - FF, 4WD, MR, and RR
-						62 - FR, FF, 4WD, MR, and RR
-					-->
-					<need_drivetrain value="-1"/>
-					<need_license value="-1"/>
-					<limit_length value="-1"/>
-					<kart_permitted value="0"/>
-					<!--
-						restrictor_limit is the percentage of engine power the vehicle's restrictor must be set to
-						Set to percentage / 10 (so 95 = 9.5%, 950 = 95.0%)
-					-->
-					<restrictor_limit value="-1"/>
-					<ban_cars>
-						<!--
-							An array of specific vehicles not allowed to enter, using label names
-							Handy if only a few vehicles should be disallowed, as opposed to allowing a huge listitem
-						-->
-						<car label="_787b_91"/>
-					</ban_cars>
-					<tuners>
-						<!--
-							An array of allowed vehicle manufacturers, using label names
-						-->
-						<tuner value="alfaromeo"/>
-					</tuners>
-					<cars>
-						<!--
-							An array of specific vehicles allowed to enter, using label names
-						-->
-						<car label="_787b_91"/>
-					</cars>
-				</regulation>
-				<penalty_script value=""/>
-				<ai_script value=""/>
-				<eval_condition>
-					<!-- 
-						If target is time, in MS
-						Else drift score or overtake count
-					-->
-					<gold value="0"/>
-					<silver value="0"/>
-					<bronze value="0"/>
-				</eval_condition>
-				<!-- If present, will mark event as seasonal and have additional requirements such as ranking registration dates and event dates -->
-				<is_seasonal_event value="0"/>
-				<!-- Event start times, required if seasonal -->
-				<begin_date>2014/01/28 12:00:00</begin_date>
-				<end_date>3014/02/25 12:37:00</end_date>
-				<ranking>
-					<!-- Event registration dates, required if seasonal-->
-					<begin_date>2014/01/01 03:00:00</begin_date>
-					<end_date>2014/01/01 03:00:00</end_date>
-					<!-- Unique Identifier for the ranking-->
-					<board_id value="1010007"/>
-					<!-- Max amount of players to show in the rankings -->
-					<display_rank_limit value="-1"/>
-					<is_local value="0"/>
-					<replay_rank_limit value="0"/>
-					<type value="DRIFT"/>
-					<!-- or TIME, or OVERTAKE? -->
-					<registration value="0"/>
-				</ranking>
-			</event>
-		</events>
-		<series_reward>
-			<point_table/>
-			<prize_table>
-				<prize value="40000"/>
-				<prize value="17500"/>
-				<prize value="12500"/>
-				<prize value="10000"/>
-				<prize value="5000"/>
-				<prize value="3000"/>
-				<prize value="2000"/>
-				<prize value="1000"/>
-				<prize value="0"/>
-				<prize value="0"/>
-				<prize value="0"/>
-				<prize value="0"/>
-				<prize value="0"/>
-				<prize value="0"/>
-				<prize value="0"/>
-				<prize value="0"/>
-			</prize_table>
-		</series_reward>
-	</GameParameter>
+                        entry_present array is required!
+                    -->
+                    <!-- 
+                        Same as present, these prizes will be given depending on the condition above - no order, just your list of rewards 
+                    -->
+                    <entry_present>
+                        <item argument1="-1" argument2="" argument3="0" argument4="" category_id="901" f_name="corvette_stingray_gtc_13" type_id="9"/>
+                    </entry_present>
+                    <!-- Unused? -->
+                    <special_reward_code value="0"/>
+                    <point_table>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                        <point value="0"/>
+                    </point_table>
+                    <prize_table>
+                        <!-- An array of prizes, each corresponds to the placement - Value is in Credits -->
+                        <prize value="85000"/>
+                        <prize value="60000"/>
+                        <prize value="45000"/>
+                        <prize value="32500"/>
+                        <prize value="20000"/>
+                        <prize value="10000"/>
+                        <prize value="5000"/>
+                        <prize value="2500"/>
+                        <prize value="0"/>
+                        <prize value="0"/>
+                        <prize value="0"/>
+                        <prize value="0"/>
+                        <prize value="0"/>
+                        <prize value="0"/>
+                        <prize value="0"/>
+                        <prize value="0"/>
+                    </prize_table>
+                    <star_table>
+                        <!-- An array of stars, obtention depends on your value -->
+                        <star value="RANK_1"/>
+                        <star value="RANK_3"/>
+                        <star value="COMPLETE"/>
+                    </star_table>
+                </reward>
+                <track>
+                    <!-- This is where you put your actual track you want to load -->
+                    <course_code label="midfield"/>
+                    <course_layout_no value="0"/>
+                    <is_omedeto_difficulty value="0"/>
+                    <map_offset_world_x value="0"/>
+                    <map_offset_world_y value="0"/>
+                    <map_scale value="0"/>
+                    <use_generator value="0"/>
+                    <course_generator_param>
+                        <use_random_seed value="0"/>
+                        <seed value="0"/>
+                        <course_generator_kind value="GENERATOR_CIRCUIT"/>
+                        <course_generator_length_type value="LENGTH"/>
+                        <lengthy value="0"/>
+                        <course_name value=""/>
+                    </course_generator_param>
+                </track>
+                <play_style>
+                    <!-- ONLY_A = A Spec 
+                         ONLY_B = B Spec
+                         BOTH_A_AND_B = Both
+                        -->
+                    <bspec_type value="BOTH_A_AND_B"/>
+                </play_style>
+                <regulation>
+                    <countries>
+                        <!--
+                            An array of specific countries by their abbreviation (e.g. "GB", "IT")
+                        -->
+                        <country value="GB"/>
+                    </countries>
+                    <car_categories>
+                        <!--
+                            An array of car categories (only "NORMAL" used?) - unknown how assigned to vehicles
+                        -->
+                        <category value="NORMAL"/>
+                    </car_categories>
+                    <!--
+                        A and B-Spec levels are unused in GT6
+                    -->
+                    <limit_aspec_level value="-1"/>
+                    <limit_bspec_level value="-1"/>
+                    <!--
+                        limit_power is used to set a maximum (in PS) power value for entry
+                        Could be used in conjunction with need_power to restrict to a certain power range for BoP
+                    -->
+                    <limit_power value="-1"/>
+                    <!--
+                        PP is unitless so any value here will be exactly the same in game
+                        Could be used in conjunction with need_pp to restrict to a certain PP range for BoP
+                    -->
+                    <limit_pp value="-1"/>
+                    <!--
+                        limit_torque appears to have no effect
+                    -->
+                    <limit_torque value="-1"/>
+                    <!--
+                        limit_weight is used to set a maximum (in KG) weight value for entry
+                        Could be used in conjunction with need_weight to restrict to a certain power range for BoP 
+                    -->
+                    <limit_weight value="-1"/>
+                    <!--
+                        limit_tire_f/r is used to assign the maximum grade the player is allowed (e.g. Racing Hard or less)
+                        
+                        Tire types:
+                        0 - Comfort Hard
+                        1 - Comfort Medium
+                        2 - Comfort Soft
+                        3 - Sports Hard
+                        4 - Sports Medium
+                        5 - Sports Soft
+                        6 - Sports Super-Soft*
+                        7 - Racing Hard
+                        8 - Racing Medium
+                        9 - Racing Soft
+                        10 - Racing Super-Soft*
+                        11 - Racing Rain Intermediate*
+                        12 - Racing Heavy Wet*
+                        13 - Dirt
+                        14 - Spiked Snow
+                        
+                        
+                        * = Shouldn't be assigned as event restriction (Super-Softs are unused and Rain tires are automatically allowed with any racing tire)
+                    -->
+                    <limit_tire_f value="15"/>
+                    <limit_tire_r value="15"/>
+                    <!--
+                        limit_year is used to set a maximum (inclusive) production year for entry
+                        Could be used in conjunction with need_year to set an age range of vehicles
+                    -->
+                    <limit_year value="-1"/>
+                    <!--
+                        All need_ values are the same units and structure as limit_ values and are used to set lower bounds
+                    -->
+                    <need_aspec_level value="-1"/>
+                    <need_bspec_level value="-1"/>
+                    <need_power value="-1"/>
+                    <need_pp value="-1"/>
+                    <need_torque value="-1"/>
+                    <need_weight value="-1"/>
+                    <!--
+                        need_tire_f/r is used to assign the minimum grade the player is allowed (e.g. Min. Racing Hard)
+                        
+                        Can be used in tandem with limit_tire_f/r to assign a specific range of allowed tires, or set the same to enforce a specific compound (e.g. Dirt tires for rally events)
+                    -->
+                    <need_tire_f value="-1"/>
+                    <need_tire_r value="-1"/>
+                    <need_year value="-1"/>
+                    <!--
+                        need_aspiration is used to restrict to specific types of engine aspiration
+                        
+                        Aspiration types: 
+                        -1 - Any
+                        2 - Naturally Aspirated (NA)
+                        4 - Turbo (T)
+                        6 - NA and T
+                        8 - Supercharger (SC)
+                        10 - NA and SC
+                        12 - T and SC
+                        14 - NA, T, and SC (presumably to exclude any unknown/electric)
+                    -->
+                    <need_aspiration value="-1"/>
+                    <!--
+                        need_drivetrain is used to restrict to specific types of vehicle layout
+                        
+                        Drivetrain types:
+                        -1 - Any
+                        2 - Front-engine, rear wheel drive (FR)
+                        4 - Front-engine, front wheel drive (FF)
+                        6 - FR and FF
+                        8 - Four wheel drive (4WD)
+                        10 - FR and 4WD
+                        12 - FF and 4WD
+                        14 - FR, FF, and 4WD
+                        16 - MR
+                        18 - FR and MR
+                        20 - FF and MR
+                        22 - FR, FF, and MR
+                        24 - 4WD and MR
+                        26 - FR, 4WD, and MR
+                        28 - FF, 4WD, and MR
+                        30 - FR, FF, 4WD, and MR
+                        32 - RR
+                        34 - FR and RR
+                        36 - FF and RR
+                        38 - FR, FF, and RR
+                        40 - 4WD and RR
+                        42 - FR, 4WD, and RR
+                        44 - FF, 4WD, and RR
+                        46 - FR, FF, 4WD, and RR
+                        48 - MR and RR
+                        50 - FR, MR, and RR
+                        52 - FF, MR, and RR
+                        54 - FR, FF, MR, and RR
+                        56 - 4WD, MR, and RR
+                        58 - FR, 4WD, MR, and RR
+                        60 - FF, 4WD, MR, and RR
+                        62 - FR, FF, 4WD, MR, and RR
+                    -->
+                    <need_drivetrain value="-1"/>
+                    <need_license value="-1"/>
+                    <limit_length value="-1"/>
+                    <kart_permitted value="0"/>
+                    <!--
+                        restrictor_limit is the percentage of engine power the vehicle's restrictor must be set to
+                        Set to percentage / 10 (so 95 = 9.5%, 950 = 95.0%)
+                    -->
+                    <restrictor_limit value="-1"/>
+                    <ban_cars>
+                        <!--
+                            An array of specific vehicles not allowed to enter, using label names
+                            Handy if only a few vehicles should be disallowed, as opposed to allowing a huge listitem
+                        -->
+                        <car label="_787b_91"/>
+                    </ban_cars>
+                    <tuners>
+                        <!--
+                            An array of allowed vehicle manufacturers, using label names
+                        -->
+                        <tuner value="alfaromeo"/>
+                    </tuners>
+                    <cars>
+                        <!--
+                            An array of specific vehicles allowed to enter, using label names
+                        -->
+                        <car label="_787b_91"/>
+                    </cars>
+                </regulation>
+                <penalty_script value=""/>
+                <ai_script value=""/>
+                <eval_condition>
+                    <!-- 
+                        If target is time, in MS
+                        Else drift score or overtake count
+                    -->
+                    <gold value="0"/>
+                    <silver value="0"/>
+                    <bronze value="0"/>
+                </eval_condition>
+                <!-- If present, will mark event as seasonal and have additional requirements such as ranking registration dates and event dates -->
+                <is_seasonal_event value="0"/>
+                <!-- Event start times, required if seasonal -->
+                <begin_date>2014/01/28 12:00:00</begin_date>
+                <end_date>3014/02/25 12:37:00</end_date>
+                <ranking>
+                    <!-- Event registration dates, required if seasonal-->
+                    <begin_date>2014/01/01 03:00:00</begin_date>
+                    <end_date>2014/01/01 03:00:00</end_date>
+                    <!-- Unique Identifier for the ranking-->
+                    <board_id value="1010007"/>
+                    <!-- Max amount of players to show in the rankings -->
+                    <display_rank_limit value="-1"/>
+                    <is_local value="0"/>
+                    <replay_rank_limit value="0"/>
+                    <type value="DRIFT"/>
+                    <!-- or TIME, or OVERTAKE? -->
+                    <registration value="0"/>
+                </ranking>
+            </event>
+        </events>
+        <series_reward>
+            <point_table/>
+            <prize_table>
+                <prize value="40000"/>
+                <prize value="17500"/>
+                <prize value="12500"/>
+                <prize value="10000"/>
+                <prize value="5000"/>
+                <prize value="3000"/>
+                <prize value="2000"/>
+                <prize value="1000"/>
+                <prize value="0"/>
+                <prize value="0"/>
+                <prize value="0"/>
+                <prize value="0"/>
+                <prize value="0"/>
+                <prize value="0"/>
+                <prize value="0"/>
+                <prize value="0"/>
+            </prize_table>
+        </series_reward>
+    </GameParameter>
 </xml>
