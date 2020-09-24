@@ -92,7 +92,7 @@
 								<initial_velocity value="100" />
 
 								<!-- 
-									Set to "Player" if its the player
+									Set to "Player" if its the player in an entry in entry_set
 								-->
 								<driver_name value="W. Armstrong" />
 
@@ -303,6 +303,8 @@
 				<!--
 					The unique identifier of this race
 					Connected to the array of event_ids in the main event XML
+
+					Set a unique one and add it to your main event XML.
 				-->
 				<event_id value="5000001" />
 
@@ -324,6 +326,7 @@
 					SINGLE_RACE - Possibly arcade-like races with no rewards
 					TOUR - Used for GT5 Grand Tour - possibly similar to mission
 					TIME_ATTACK - Arcade Time Trial
+					ONLINE_TIME_ATTACK - Seasonal Time Trial
 				-->
 				<game_mode value="EVENT_RACE" />
 				<information>
@@ -337,25 +340,25 @@
 						At top left near licence category
 					-->
 					<title>
-						<JP>サンデーカートレース ジュニア : レース 1</JP>
+						<JP />
 						<US>Prototype Cup: Race 1</US>
-						<GB>Prototype Cup: Race 1</GB>
-						<FR>Courses de kart Junior Sunday : Course 1</FR>
-						<DE>Sunday-"Kart Jr."-Rennen 1</DE>
-						<IT>Gare amatori di Kart Junior: gara 1</IT>
-						<ES>Carreras Sunday de karts Junior: Primera carrera</ES>
-						<PT>Corridas Sunday de Karts Junior: Corrida 1</PT>
-						<NL>Junioren Sunday kartraces: race 1</NL>
-						<RU>Воскресный картинг Jr.: заезд 1</RU>
-						<KR>선데이 카트 레이스 Jr. : 레이스 1</KR>
-						<TW>假日盃小型賽車 Jr. ：第1戰</TW>
-						<EL>Αγώνες Jr. Sunday Καρτ: 1ος Αγώνας</EL>
-						<TR>Junior Sunday Go-Kart Yarışları: 1. Yarış</TR>
-						<PL>Niedzielne wyścigi gokartów Junior: Wyścig 1</PL>
-						<CZ>Junior Sunday - závody motokár: 1. závod</CZ>
-						<HU>Junior Sunday gokart versenyek: 1. verseny</HU>
-						<BP>Corridas de Kart Júnior Sunday: Corrida 1</BP>
-						<MS>Carreras de Karting Sunday Junior: Carrera 1</MS>
+						<GB />
+						<FR />
+						<DE />
+						<IT />
+						<ES />
+						<PT />
+						<NL />
+						<RU />
+						<KR />
+						<TW />
+						<EL />
+						<TR />
+						<PL />
+						<CZ />
+						<HU />
+						<BP />
+						<MS />
 					</title>
 
 					<!-- 
@@ -388,25 +391,25 @@
 						In details box below current player vehicle
 					-->
 					<description>
-						<JP>グランツーリスモ レーシングカート ジュニアで参戦する、初心者向けレーシングカートレースです。レーシングカートならではのダイレクトなハンドリングを楽しもう！ レーシングカートはカーディーラー「グランツーリスモ」で購入できます。</JP>
+						<JP />
 						<US>An intense competition between prototype chassis racers.</US>
-						<GB>An intense competition between prototype chassis racers.</GB>
-						<FR>Une course de kart pour débutants. Seuls les karts Jr. sont autorisés. Prenez le volant et découvrez les sensations uniques du pilotage de kart ! Les karts peuvent être achetés à partir du concessionnaire Gran Turismo.</FR>
-						<DE>Eine Rennkart-Veranstaltung für Anfänger. Man kann nur in einem Racing Kart Jr. teilnehmen. Erleben Sie das superdirekte Handling, das Ihnen nur ein Kart bieten kann! Rennkarts können beim "Gran Turismo"-Händler gekauft werden.</DE>
-						<IT>Una gara di kart per principianti. Sono ammessi solo Kart Junior. Scendi in pista e goditi l'estrema maneggevolezza che solo un go-kart può garantire! Puoi acquistare i kart alla concessionaria Gran Turismo.</IT>
-						<ES>Una carrera de karts para principiantes. Solo se puede participar con un kart Junior. ¡Sal ahí y disfruta de la conducción ultradirecta que solo puede ofrecerte un kart! Los karts de competición pueden adquirirse en el concesionario de Gran Turismo.</ES>
-						<PT>Uma corrida de karts para principiantes. Aberta apenas a karts junior. Vai para a pista e aprecia a condução ultradireta que só um kart te dá! Podes comprar estes karts no concessionário do Gran Turismo. </PT>
-						<NL>Een kartrace voor beginners, alleen voor de Jr.-kart. Ga het circuit op en geniet van de ultradirecte besturing die alleen karts te bieden hebben! Karts kunnen gekocht worden bij de Gran Turismo Dealers. </NL>
-						<RU>Картинговые гонки для начинающих. Допускаются только карты класса Jr.. Выходите на трассу и испытайте чувство прямого управления машиной, которое дает только гоночный карт!</RU>
-						<KR>그란 투리스모 레이싱 카트 Jr.로 도전하는 초보자를 위한 레이싱 카트 이벤트입니다. 레이싱 카트만이 주는 직관적인 핸들링을 맛보세요! 레이싱 카트는 카 딜러 [Gran Turismo]에서 구입할 수 있습니다.</KR>
-						<TW>駕駛Gran Turismo 小型賽車Jr.參加，適合初學者的小型賽車競賽。請享受小型賽車特有的直覺式操作吧！小型賽車可在汽車經銷商「Gran Turismo」購買。</TW>
-						<EL>Αγωνιστική διοργάνωση με καρτ για αρχάριους. Επιτρέπονται συμμετοχές μόνο σε Jr. καρτ. Βγες στην πίστα και απόλαυσε τον απίστευτα άμεσο χειρισμό που μόνο ένα καρτ μπορεί να προσφέρει! Μπορείς να αγοράσεις Αγωνιστικά Καρτ από την αντιπροσωπεία Gran Turismo.</EL>
-						<TR>Yeni başlayanlar için bir go-kart yarış etkinliği. Yalnızca bir Jr. go-kart ile katılınabilir. Gelin ve sadece bir go-kartın sunabileceği üst düzey yol tutuşunun tadını çıkarın! Yarış go-kartları Gran Turismo bayiliğinden satın alınabilir.</TR>
-						<PL>Wyścig gokartów dla początkujących. Można wziąć w nim udział tylko w gokarcie Junior. Poznaj niesamowitą sterowność, jaką charakteryzują się tylko gokarty! Gokarty zakupić można w salonie marki Gran Turismo.</PL>
-						<CZ>Motokárový závod pro začátečníky. Vstoupit můžete pouze s motokárou třídy Jr. Vyrazte do boje a užijte si řízení v jeho ryzí podobě, které vám nabídne jedině motokára! Zakoupit si ji můžete v autosalónu Gran Turismo. </CZ>
-						<HU>Gokartverseny kezdők számára, melyen kizárólag junior gokarttal lehet indulni. Irány a pálya, és élvezd a szuperközvetlen vezetési élményt, amit csak a gokart nyújthat! Versenygokartokat a Gran Turismo autókereskedésben vehetsz.</HU>
-						<BP>Um evento de karts de corrida para iniciantes. Somente karts Jr. podem participar. Entre na pista e aproveite a dirigibilidade direta que somente um kart pode proporcionar! Karts de corrida podem ser comprados na concessionária Gran Turismo.</BP>
-						<MS>Un evento de carreras de karting para principiantes. Solo se puede ingresar en un kart Jr. ¡Sal y disfruta de un manejo ultra directo que solo un kart puede ofrecer! Los karts pueden adquirirse en el concesionario de Gran Turismo.</MS>
+						<GB />
+						<FR />
+						<DE />
+						<IT />
+						<ES />
+						<PT />
+						<NL />
+						<RU />
+						<KR />
+						<TW />
+						<EL />
+						<TR />
+						<PL />
+						<CZ />
+						<HU />
+						<BP />
+						<MS />
 					</description>
 				</information>
 
@@ -474,7 +477,7 @@
 						BYSECTION - Ends after crossing a defined section of track, most likely depends on event_goal_v being defined
 						BYSTOP - Ends after stopping in zone - licences
 						BYTIME - Triggers final lap when race_limit_minute is reached, ends after finishing final lap
-						NONE - Appears to be used for drift events, maybe automatially determined by track sections
+						NONE - Use for time trials if its endless and meant to give rewards for the best time - also used for drift events, maybe automatially determined by track sections
 					-->
 					<complete_type value="BYLAPS" />
 
@@ -569,6 +572,7 @@
 						The one used is determined by complete_type
 						
 						Will override "endless"!
+						Set to 1 if its a time trial properly set to keep on going with rewards
 					-->
 					<race_limit_laps value="6" />
 					<race_limit_minute value="0" />
@@ -603,7 +607,8 @@
 					<time_progress_speed value="0.000000" />
 
 					<!--
-						Unknown - possibly how long in ms before the race starts, and how long the vehicles behind 1st place are given to finish?
+						How long until the race starts or the player has control of the car
+						How long the vehicles behind 1st place are given to finish before showing the result/reward screen
 					-->
 					<time_to_finish value="3000" />
 					<time_to_start value="6000" />
@@ -722,6 +727,11 @@
 					<pp_base value="0" />
 
 					<present_type value="ORDER" />
+
+					<!-- Custom Prizes. These will only work on certain game modes
+						 Mainly seasonal ones - note that cars won't be given unless you go to the seasonal events menu itself
+						 Missions can also give prizes, initially hardcoded on the folder id - can be bypassed 
+						-->
 					<present>
 						<!-- 
 							category_id types:
@@ -745,6 +755,21 @@
 					  -->
 					<prize_type value="0" />
 					
+					<!-- 
+						entry_present_type types:
+						FINISH - Player will receive extra rewards just for finishing the event
+						LAP - Player will receive extra rewards just for completing one lap (mainly used for time trial seasonals)
+
+						entry_present array is required!
+					-->
+
+					<!-- 
+						Same as present, these prizes will be given depending on the condition above - no order, just your list of rewards 
+					-->
+                    <entry_present>
+                      <item type_id="9" category_id="901" argument1="-1" argument2="" argument3="0" argument4="" f_name="corvette_stingray_gtc_13" />
+                    </entry_present>
+
 					<!-- Unused? -->
 					<special_reward_code value="0" />
 					<point_table>
@@ -1014,7 +1039,29 @@
 					<bronze value="0" />
 				</eval_condition>
 				
+				<!-- If present, will mark event as seasonal and have additional requirements such as ranking registration dates and event dates -->
 				<is_seasonal_event value="0" />
+
+				<!-- Event start times, required if seasonal -->
+				<begin_date>2014/01/28 12:00:00</begin_date>
+				<end_date>3014/02/25 12:37:00</end_date>
+
+				<ranking>
+					<!-- Event registration dates, required if seasonal-->
+					<begin_date>2014/01/01 03:00:00</begin_date>
+					<end_date>2014/01/01 03:00:00</end_date>
+
+					<!-- Unique Identifier for the ranking-->
+					<board_id value="1010007" />
+
+					<!-- Max amount of players to show in the rankings -->
+					<display_rank_limit value="-1" />
+					<is_local value="0" />
+					<replay_rank_limit value="0" />
+					<type value="DRIFT" /> <!-- or TIME, or OVERTAKE? -->
+					<registration value="0" />
+				</ranking>
+
 			</event>
 		</events>
 		<series_reward>
@@ -1037,46 +1084,6 @@
 				<prize value="0" />
 				<prize value="0" />
 			</prize_table>
-			<special_reward_code value="0" />
-			
-			<ranking>
-				<begin_date>2014/01/01 03:00:00</begin_date>
-				<end_date />
-				<board_id value="1010007" />
-				<display_rank_limit value="-1" />
-				<is_local value="0" />
-				<replay_rank_limit value="0" />
-				<type value="DRIFT" />
-				<registration value="0" />
-			</ranking>
-			<!-- 
-				GT5 only? RewardPresentType
-				How the present array should be displayed
-				ORDER: [0] = Gold, [1] = Silver, etc
-				RANDOM
-				LAP
-				CAR
-				DRIVER
-				DRIVER_ITEM
-				MONEY
-				TUNEPARTS
-				OTHERPARTS
-				MUSEUMCARD
-			-->
-			<present_type value="ORDER" />
-			
-			<present>
-				<!-- 
-					Presents, only works in Senna Events & Seasonals..
-					Ordered by placement.
-					
-					Category 901 = Car, 902 = Tuned Car, f_name is the car label
-					Category 601 = Paint, Argument1 = Paint ID
-					Category 301/302/303 = Racing Gear
-				-->
-				<item type_id="3" category_id="601" argument1="3265" argument2="" argument3="0" argument4="" f_name="" />
-				<item type_id="9" category_id="901" argument1="-1" argument2="" argument3="0" argument4="" f_name="r10_tdi_06_cf" />
-			</present>
 		</series_reward>
 	</GameParameter>
 </xml>
