@@ -1,7 +1,4 @@
-<!-- 
--------- GT6 Documentation for event course data ----------
-------------- game_parameter/gt6/<folder> -----------------
--->
+<!-- -->
 
 <xml>
 	<GameParameter version="106">
@@ -24,7 +21,7 @@
 					<limit_tire_r value="-1" />
 					<need_tire_f value="-1" />
 					<need_tire_r value="-1" />
-					<simulation value="-1" />
+					<simulation value="-1" /> <!-- Skid Recovery Force -->
 					<suggest_tire_f value="-1" />
 					<suggest_tire_r value="-1" />
 					<tcs value="-1" />
@@ -94,6 +91,9 @@
 								-->
 								<initial_velocity value="100" />
 
+								<!-- 
+									Set to "Player" if its the player
+								-->
 								<driver_name value="W. Armstrong" />
 
 								<!--
@@ -107,8 +107,12 @@
 								<delay value="0" />
 
 								<!--
+									Car that a player/AI is driving.
 									Color is the index of the vehicle's available colours (0 is default, potential colours can be found against each vehicle in VARIATION table of specdb)
 									Label is the internal name of the vehicle the AI will use, from specdb
+									
+									This makes the event act as you rent the car for the event, to limit tyres uses the fields in the restriction category
+									The game will appropriately not show them in the menu, as you're not supplying your own car
 								-->
 								<car color="0" label="ts030_hybrid_12" />
 
@@ -143,8 +147,20 @@
 						</entry_base_array>
 					</entry_generate>
 				</entry_set>
+
 				<failure_condition>
-					<type_list />
+					<type_list>
+
+						<!--
+							Array of failure types to use with MISSION, LICENSE, possibly COFFEE_BREAK
+							HIT_WALL_HARD - Hard Crash
+							HIT_CAR_HARD - Car collision with AI
+							PYLON - Hit a cone
+							COURSE_OUT - Out of the track
+						-->
+						<type value="HIT_WALL_HARD" />
+
+					</type_list>
 					<no_failure_at_result value="1" />
 				</failure_condition>
 
@@ -307,6 +323,7 @@
 					SCHOOL - Used for GT5 Special Events - possibly similar to Mission
 					SINGLE_RACE - Possibly arcade-like races with no rewards
 					TOUR - Used for GT5 Grand Tour - possibly similar to mission
+					TIME_ATTACK - Arcade Time Trial
 				-->
 				<game_mode value="EVENT_RACE" />
 				<information>
@@ -550,6 +567,8 @@
 					<!-- 
 						How many laps or minutes the race will last
 						The one used is determined by complete_type
+						
+						Will override "endless"!
 					-->
 					<race_limit_laps value="6" />
 					<race_limit_minute value="0" />
@@ -569,10 +588,12 @@
 						Unknown if initial_position and initial_velocity override this
 						
 						Start types:
-						GRID - Entrants are sat on the starting grid
+						GRID - Entrants are sat on the starting grid, overrides custom position
 						ROLLING - Single-file rolling start
 						ROLLING_DL - Double-file rolling start
 						ROLLING_NOLIMIT - Rolling start, presumably at max acceleration
+						STANDING - Standing at a certain position
+						ATTACK - Starts behind the grid (automatically sets the position for you unless custom via initial_position), timer starts as soon as you cross the start line/sector
 					-->
 					<start_type value="GRID" />
 
@@ -711,7 +732,11 @@
 							901 - Vehicles (f_name = Label of vehicle to award)
 							902 - Vehicles with parts installed (how are parts selected?)
 						-->
-						<!--<item type_id="9" category_id="901" argument1="-1" argument2="" argument3="0" argument4="" f_name="gtr_black_12_ac14" />-->
+						<item type_id="9" category_id="901" argument1="-1" argument2="" argument3="0" argument4="" f_name="gtr_black_12_ac14" />
+
+						<!-- Leave empty if you need a tier (i.e Silver for this one) to have no present -->
+						<item />
+
 					</present>
 					<!-- 
 						prize_type types:
@@ -719,6 +744,8 @@
 						1 - Seasonal/Special awards (1st place = Gold + Silver + Bronze)
 					  -->
 					<prize_type value="0" />
+					
+					<!-- Unused? -->
 					<special_reward_code value="0" />
 					<point_table>
 						<point value="0" />
@@ -738,7 +765,9 @@
 						<point value="0" />
 						<point value="0" />
 					</point_table>
+
 					<prize_table>
+						<!-- An array of prizes, each corresponds to the placement - Value is in Credits -->
 						<prize value="85000" />
 						<prize value="60000" />
 						<prize value="45000" />
@@ -756,13 +785,17 @@
 						<prize value="0" />
 						<prize value="0" />
 					</prize_table>
+
 					<star_table>
+						<!-- An array of stars, obtention depends on your value -->
 						<star value="RANK_1" />
 						<star value="RANK_3" />
 						<star value="COMPLETE" />
 					</star_table>
+
 				</reward>
 				<track>
+					<!-- This is where you put your actual track you want to load -->
 					<course_code label="midfield" />
 					<course_layout_no value="0" />
 					<is_omedeto_difficulty value="0" />
@@ -779,9 +812,15 @@
 						<course_name value="" />
 					</course_generator_param>
 				</track>
+
 				<play_style>
+					<!-- ONLY_A = A Spec 
+						 ONLY_B = B Spec
+						 BOTH_A_AND_B = Both
+					-->
 					<bspec_type value="BOTH_A_AND_B" />
 				</play_style>
+
 				<regulation>
 					<countries>
 						<!--
@@ -964,11 +1003,17 @@
 				</regulation>
 				<penalty_script value="" />
 				<ai_script value="" />
+				
 				<eval_condition>
+					<!-- 
+						If target is time, in MS
+						Else drift score or overtake count
+					-->
 					<gold value="0" />
 					<silver value="0" />
 					<bronze value="0" />
 				</eval_condition>
+				
 				<is_seasonal_event value="0" />
 			</event>
 		</events>
@@ -993,8 +1038,43 @@
 				<prize value="0" />
 			</prize_table>
 			<special_reward_code value="0" />
+			
+			<ranking>
+				<begin_date>2014/01/01 03:00:00</begin_date>
+				<end_date />
+				<board_id value="1010007" />
+				<display_rank_limit value="-1" />
+				<is_local value="0" />
+				<replay_rank_limit value="0" />
+				<type value="DRIFT" />
+				<registration value="0" />
+			</ranking>
+			<!-- 
+				GT5 only? RewardPresentType
+				How the present array should be displayed
+				ORDER: [0] = Gold, [1] = Silver, etc
+				RANDOM
+				LAP
+				CAR
+				DRIVER
+				DRIVER_ITEM
+				MONEY
+				TUNEPARTS
+				OTHERPARTS
+				MUSEUMCARD
+			-->
 			<present_type value="ORDER" />
+			
 			<present>
+				<!-- 
+					Presents, only works in Senna Events & Seasonals..
+					Ordered by placement.
+					
+					Category 901 = Car, 902 = Tuned Car, f_name is the car label
+					Category 601 = Paint, Argument1 = Paint ID
+					Category 301/302/303 = Racing Gear
+				-->
+				<item type_id="3" category_id="601" argument1="3265" argument2="" argument3="0" argument4="" f_name="" />
 				<item type_id="9" category_id="901" argument1="-1" argument2="" argument3="0" argument4="" f_name="r10_tdi_06_cf" />
 			</present>
 		</series_reward>
