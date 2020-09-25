@@ -54,6 +54,13 @@
                             NONE - No AI entries in the race (use for licence and time attacks)
                             ENTRY_BASE_ORDER - AI entries will be assigned in the specific order of the array (so first entry is 1st place, second entry is 2nd etc) - number of which MUST match or exceed entry_num or will softlock on loading
                             ENTRY_BASE_SHUFFLE - AI entries will be picked randomly from the array like a pool of entries
+
+                            Undocumented entries:
+                            SPEC_DB
+                            ORDER
+                            ONE_MAKE
+                            SHUFFLE
+                            ENEMY_LIST
                         -->
                         <generate_type value="ENTRY_BASE_SHUFFLE"/>
                         <!--
@@ -127,6 +134,14 @@
                                 -->
                                 <tire_f value="RACING_HARD"/>
                                 <tire_r value="RACING_HARD"/>
+
+                                <!-- Undocumented
+                                    NORMAL
+                                    LEADING
+                                    OVAL
+                                    OVALNASCAR
+                                -->
+                                <special_ai_type value="NORMAL" />
                             </entry_base>
                         </entry_base_array>
                     </entry_generate>
@@ -139,6 +154,24 @@
                             HIT_CAR_HARD - Car collision with AI
                             PYLON - Hit a cone
                             COURSE_OUT - Out of the track
+
+                            Undocumented
+                            HIT_CAR
+                            HIT_WALL
+                            SPIN_FULL
+                            SPIN_HALF
+                            WHEEL_SPIN
+                            LOCK_BRAKE
+                            SLIP_ANGLE
+                            LESS_SPEED
+                            MORE_SPEED
+                            MORE_GFORCE
+                            PENALTY_ROAD
+                            LOW_MU_ROAD
+                            SLALOM
+                            WRONGWAY
+                            WRONGWAY_LOOSE
+                            MAX
                         -->
                         <type value="HIT_WALL_HARD"/>
                     </type_list>
@@ -146,6 +179,7 @@
                 </failure_condition>
                 <!--
                     Only present if a licence or Coffee Break 
+                    If you're using this, generally don't provide eval_condition (especially for DRIFT_ATTACK's)
                 -->
                 <license_condition>
                     <failure_condition/>
@@ -155,7 +189,7 @@
                         Display_mode determines which custom objective to show on screen
                         
                         Display mode types:
-                        DRIFT_SCORE - Player's drift score used for mission races
+                        DRIFT_SCORE - Player's drift score used for mission races - use UINT for score
                         FUEL_DIST - How far the current fuel amount will last - used for eco challenges*
                         FUEL_TIME - How long the current fuel amount will last - used for echo challenges*
                         PYLON_NUM - How many cones (or possibly all gadgets) have been hit - used for cone challenges*
@@ -195,6 +229,12 @@
                                 V_POSITION - The player's current distance around the track (in metres)
                                 VELOCITY - The player's current speed (in km/h)
                                 WRONG_WAY_COUNT - How many times the player has gone the wrong way
+                                OTHER_SUBMODE - Used in drift events
+
+                                COURSE_OUT_TIME
+                                FUEL_CONSUMPTION
+                                FLOATING_TIME
+                                ILLEGAL
                             -->
                             <check_type value="TOTAL_TIME"/>
                             <!--
@@ -228,6 +268,8 @@
                                 Value types:
                                 float_value - Floating point value (decimal)
                                 uint_value - Unsigned integer value (allows larger value but no negative value)
+                                    If using drift this is the target score
+
                                 int_value - Signed integer value (does not allow larger value but negative values allowed)
                             -->
                             <float_value value="0"/>
@@ -280,6 +322,11 @@
                 <event_id value="5000001"/>
                 <!--
                     Unknown, seems to always be set to race
+
+                    Undocumented notes:
+                    RACE_WITH_QUALIFY
+                    TRACKDAY
+                    SINGLE_RACE
                 -->
                 <event_type value="RACE"/>
                 <!--
@@ -296,8 +343,35 @@
                     TOUR - Used for GT5 Grand Tour - possibly similar to mission
                     TIME_ATTACK - Arcade Time Trial
                     ONLINE_TIME_ATTACK - Seasonal Time Trial
+                    COFFEE_BREAK
+                    ONLINE_DRIFT_ATTACK - Seasonal Drift Attack
+                    ONLINE_SINGLE_RACE
+                    ARCADE_STYLE_RACE - Sierra Events
+
+                    Undocumented and possible leftovers:
+                    FREE_RUN
+                    SPLIT_BATTLE
+                    SPLIT_ONLINE_BATTLE
+                    ONLINE_ROOM
+                    ONLINE_BATTLE
+                    ADHOC_BATTLE_PRO
+                    ADHOC_BATTLE_AMA
+                    ADHOC_BATTLE_SHUFFLE
+                    MULTIMONITOR_CLIENT
+                    BEHAVIOR
+                    RACE_EDIT
+                    RANKING_VIEW
+                    COURSE_EDIT
+                    ARENA
+                    SPEED_TEST
+                    COURSE_MAKER
+                    DRAG_RACE
+                    TUTORIAL
+                    GPS_REPLAY
+                    PRACTICE
                 -->
                 <game_mode value="EVENT_RACE"/>
+
                 <information>
                     <advanced_notice/>
                     <flier_other_info value=""/>
@@ -388,25 +462,30 @@
                         Always set to 0 in existing events
                     -->
                     <academy_event value="0"/>
+
                     <!-- 
                         Possibly related to GT Mode progression/award earning
                         Usually set to 1 for A and B-Spec races, usually set to 0 for licence/specials
                     -->
                     <accumulation value="1"/>
+
                     <!--
                         Used to toggle visible co-driver in rally events
                         May depend on another parameter as setting this alone doesn't seem to have an effect
                     -->
                     <allow_codriver value="0"/>
+
                     <!--
                         May be related to GT5 rally event staggered starts
                         Set to 0 in every GT6 event, and every GT5 event outside of rally
                     -->
                     <auto_standing_delay value="0"/>
+
                     <!--
                         Unknown effect, typically set to 0 or 1
                     -->
                     <autostart_pitout value="0"/>
+
                     <!--
                         Vehicle damage effects
                         
@@ -421,6 +500,7 @@
                         Appears to always be set to GAME
                     -->
                     <behavior_slip_stream_type value="GAME"/>
+
                     <!--
                         Unknown, possibly a bit for whether or not AI rubber banding is allowed
                     -->
@@ -435,6 +515,9 @@
                         BYSTOP - Ends after stopping in zone - licences
                         BYTIME - Triggers final lap when race_limit_minute is reached, ends after finishing final lap
                         NONE - Use for time trials if its endless and meant to give rewards for the best time - also used for drift events, maybe automatially determined by track sections
+
+                        Undocumented Entries:
+                        OTHER
                     -->
                     <complete_type value="BYLAPS"/>
                     <!--
@@ -444,19 +527,23 @@
                     -->
                     <consume_fuel value="0"/>
                     <consume_tire value="0"/>
+
                     <!--
                         Possibly used to set the starting time on tracks with dynamic time
                     -->
                     <datetime datetime="1970/00/00 00:00:00"/>
+
                     <!--
                         Appears to be unused in GT6
                         In GT5 uses SUNNY or RAINY to force that particular weather
                     -->
                     <decisive_weather value="NONE"/>
+
                     <!--
                         Both apparently unused in GT Mode, presumably a bit - yes/no
                     -->
                     <disable_collision value="0"/>
+
                     <disable_recording_replay value="0"/>
                     <!--
                         Enable damage and pits, presumably both bits - yes/no
@@ -479,22 +566,83 @@
                         Finish types:
                         FASTEST - First to finish or fastest lap holder?
                         TARGET - Finishing position (?)
+                        NONE
                     -->
                     <finish_type value="TARGET"/>
+
                     <fixed_retention value="0"/>
                     <!--
                         Unsure if racing flag rules or data flagset
+                        Check GT5 docs for flags
                     -->
                     <flagset value="FLAGSET_NORMAL"/>
+
+                    <!-- 
+                        NONE/REAL
+                    -->
                     <ghost_presence_type value="NORMAL"/>
+
+                    <!-- 
+                        Was used for seasonals to show a line instead of a car for records. 
+                        Don't provide or value=OFF/ONE
+
+                        Undocumented entries:
+                        TRACKDAY
+                    -->
+                    <line_ghost_record_type value="OFF"/>
+
+                    <!-- 
+                        Unneeded, max amount of lines/records that can be displayed at once
+                        Some used 10
+                    -->
+                    <line_ghost_play_max value="1"/>
+
+                    <!-- 
+                        ONELAP - Will show ghost for previous lap?
+
+                        Undocumented Entries
+                        FULL
+                        RECORD
+                        SECTOR_ATTACK
+                        NORMAL
+                        TRGRANK_ALL
+                    -->
                     <ghost_type value="NONE"/>
+
+                    <!-- Undocumented Entries:
+                        RANDOM
+                        POINT_DOWN
+                        POINT_UP
+                        FASTEST_UP
+                        FASTEST_DOWN
+                        PREV_RANK
+                        PREV_RANK_REVERSE
+                    -->
                     <grid_sort_type value="NONE"/>
+
                     <immediate_finish value="0"/>
+
+                    <!--
+                        Default track wetness, from 0 to 10
+                        1 would be 10%
+                    -->
                     <initial_retention10 value="0"/>
+
                     <keep_load_ghost value="0"/>
+
+                    <!-- Depends how cars will turn on their lights
+                        AUTO
+                        OFF
+                        POSITION
+                        LOW_BEAM
+                        HIGH_BEAM -->
                     <lighting_mode value="AUTO"/>
+
                     <!-- 
                         Presumably track edge/wet surface friction type and grip percentage
+                        MODERATE
+                        STRONG
+                        REAL
                     -->
                     <low_mu_type value="MODERATE"/>
                     <mu_ratio100 value="100"/>
@@ -504,11 +652,14 @@
                         May depend on course generator track and rally parameters being set elsewhere
                     -->
                     <pace_note value="0"/>
+
                     <!--
                         Penalties for cutting and/or hitting barriers/AI too hard
-                        Values unknown
+                        0 -> PenaltyLevelType::OFF
+                        ? -> NOTIME/NOTIME/NOTIME2/NOTIME3/NOTIME4/NOTIME5
                     -->
                     <penalty_level value="0"/>
+
                     <penalty_no_reset value="0"/>
                     <!-- 
                         How many laps or minutes the race will last
@@ -526,8 +677,16 @@
                         COMPETITION - Standard race
                         DEMO - Unknown effects
                         TIMEATTACK - By completion time, used for licences and mission races
+                        DRIFTATTACK - By drift score
+
+                        Undocumented Entries:
+                        OVERTAKE
+                        SPEEDTEST
+                        DARALOGGER - (spelling mistake is intended)
+                        NONE
                     -->
                     <race_type value="COMPETITION"/>
+
                     <!--
                         How the entrants start the race
                         Unknown if initial_position and initial_velocity override this
@@ -535,10 +694,28 @@
                         Start types:
                         GRID - Entrants are sat on the starting grid, overrides custom position
                         ROLLING - Single-file rolling start
-                        ROLLING_DL - Double-file rolling start
+                        ROLLING_D(L/R) - Double-file rolling left
+
                         ROLLING_NOLIMIT - Rolling start, presumably at max acceleration
                         STANDING - Standing at a certain position
                         ATTACK - Starts behind the grid (automatically sets the position for you unless custom via initial_position), timer starts as soon as you cross the start line/sector
+                        COURSEINFO - Take sector information from .cinf/menudb, mainly for drift
+                        COURSEINFO_ROLLING - Same as above but rolling, mainly for drift
+
+                        Undocumented Entries:
+                        DISPERSED
+                        ROLLING2
+                        SAMEGRID
+                        ROLLING3
+                        PIT
+                        FREE
+                        STANDING_L
+                        STANDING_R
+                        PITWORK
+                        GRID_FLYING
+                        PITIN
+                        RALLY
+                        STANDING_CENTER
                     -->
                     <start_type value="GRID"/>
                     <!-- 
@@ -559,6 +736,7 @@
                     <weather_min_celsius value="3"/>
                     <!--
                         Whether or not the weather can progress to rain/snow
+                        To enable "Realtime Weather", set this to 0 and weather_prec_rain/snow_only to 1
                     -->
                     <weather_no_precipitation value="0"/>
                     <!--
@@ -596,6 +774,12 @@
                     <weather_accel10 value="10"/>
                     <weather_accel_water_retention10 value="10"/>
                     <boost_flag value="1"/>
+
+                    <!-- These are the settings that set the "strongness" of weather, similar to weather_value0-1-2-3 in GT5
+                        Needs more info.
+                        -1 would mean full rain - track wetness % increases
+                        0 or 1 would mean no rain at all?
+                    -->
                     <new_weather_data>
                         <point>
                             <time_rate value="0"/>
@@ -651,7 +835,14 @@
                     -->
                     <percent_at_pp100 value="0"/>
                     <pp_base value="0"/>
+
+                    <!-- How are the present disposed
+                         ORDER - Depends on the placement
+                         RANDOM - Undocumented
+                         NONE - Undocumented
+                     -->
                     <present_type value="ORDER"/>
+
                     <!-- Custom Prizes. These will only work on certain game modes
                          Mainly seasonal ones - note that cars won't be given unless you go to the seasonal events menu itself
                          Missions can also give prizes, initially hardcoded on the folder id - can be bypassed 
@@ -680,9 +871,12 @@
                         entry_present_type types:
                         FINISH - Player will receive extra rewards just for finishing the event
                         LAP - Player will receive extra rewards just for completing one lap (mainly used for time trial seasonals)
+                        ALL - Undocumented
 
                         entry_present array is required!
                     -->
+                    <entry_present_type value="LAP"/>
+
                     <!-- 
                         Same as present, these prizes will be given depending on the condition above - no order, just your list of rewards 
                     -->
@@ -754,7 +948,8 @@
                     </course_generator_param>
                 </track>
                 <play_style>
-                    <!-- ONLY_A = A Spec 
+                    <!-- 
+                    ONLY_A = A Spec 
                          ONLY_B = B Spec
                          BOTH_A_AND_B = Both
                         -->
@@ -819,6 +1014,7 @@
                         
                         
                         * = Shouldn't be assigned as event restriction (Super-Softs are unused and Rain tires are automatically allowed with any racing tire)
+                        Side note: if both are the same, the game will display them as one block rather than two
                     -->
                     <limit_tire_f value="15"/>
                     <limit_tire_r value="15"/>
@@ -929,11 +1125,24 @@
                 <eval_condition>
                     <!-- 
                         If target is time, in MS
-                        Else drift score or overtake count
                     -->
                     <gold value="0"/>
                     <silver value="0"/>
                     <bronze value="0"/>
+
+                    <!-- 
+                        How to interpret the above data
+                        Undocumented mainly
+                        TIME
+                        ORDER
+                        PYLON
+                        DRIFT
+                        VS_GHOST
+                        DIST
+                        FUEL
+                        OVER_TAKE
+                    -->
+                    <type value="TIME"/>
                 </eval_condition>
                 <!-- If present, will mark event as seasonal and have additional requirements such as ranking registration dates and event dates -->
                 <is_seasonal_event value="0"/>
@@ -950,9 +1159,14 @@
                     <display_rank_limit value="-1"/>
                     <is_local value="0"/>
                     <replay_rank_limit value="0"/>
+
+                    <!-- TIME or DRIFT -->
                     <type value="DRIFT"/>
-                    <!-- or TIME, or OVERTAKE? -->
+                    
                     <registration value="0"/>
+
+                    <!-- Not seen anywhere, NORMAL/ENTRY/RANKING/HIDDEN -->
+                    <registration_type value="NORMAL"/>
                 </ranking>
             </event>
         </events>
