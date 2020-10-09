@@ -1,0 +1,91 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Background Music Library (BGML)
+//   Authors: Nenkai, Additional research notes by TheAdmiester
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    uint FileNameOffset <format=hex, fgcolor=0x0000FF>;
+    uint Format <comment="0 = AT3, 2 = SGB?">;
+    uint IDStringOffset <format=hex, fgcolor=0x0000FF>;
+    uint _empty_[2];
+    uint TrackNameOffset <format=hex, fgcolor=0x0000FF>;
+    uint ArtistNameOffset <format=hex, fgcolor=0x0000FF>;
+    uint GenreNameOffset <format=hex, fgcolor=0x0000FF>;
+
+    FSeek(FileNameOffset);
+    string FileName <bgcolor=0xAAAAAA>;
+
+    FSeek(IDStringOffset);
+    string ID <bgcolor=0xAAAAAA>;
+    
+    FSeek(TrackNameOffset);
+    string TrackName <bgcolor=0xAAAAAA>;
+    
+    FSeek(ArtistNameOffset);
+    string ArtistName <bgcolor=0xAAAAAA>;
+
+    FSeek(GenreNameOffset);
+    string GenreName <bgcolor=0xAAAAAA>;
+} BGMLTrack <bgcolor=0x00BBBB>;
+
+typedef struct (int arrSize, int offset)
+{
+    local int i;
+    for (i = 0; i < TrackCount; i++)
+    {
+        FSeek(offset + (i * 0x30));
+        BGMLTrack track;
+    }
+} BGMLTrackMap;
+
+typedef struct
+{
+    uint PlaylistDataOffset <format=hex, fgcolor=0x0000FF>;
+
+    FSeek(PlaylistDataOffset);
+    uint PlaylistLabelOffset <format=hex, fgcolor=0x0000FF>;
+    uint _empty_[3] <hidden=true>;
+    uint trackCount <fgcolor=0x00FF00>;
+    uint trackIndexes[trackCount] <fgcolor=0x00AAAA>;
+    
+    FSeek(PlaylistLabelOffset);
+    string PlaylistName <bgcolor=0xAAAAAA>;
+} BGMLPlaylist;
+
+typedef struct (int arrSize, int offset)
+{
+    local int i;
+    for (i = 0; i < arrSize; i++)
+    {
+        FSeek(offset + (i * sizeof(uint)));
+        BGMLPlaylist sfx;
+    }
+} BGMLPlaylistMap;
+
+LittleEndian();
+struct BGML
+{
+    char Magic[4];
+    uint FileRuntimePtr <format=hex, fgcolor=0x0000FF>;
+    uint FileSize <format=hex, fgcolor=0x0000FF>;
+    uint Unk;
+    uint TrackCount <fgcolor=0x00FF00>;
+    uint TrackMapOffset <format=hex, fgcolor=0x0000FF>;
+    uint PlaylistCount <fgcolor=0x00FF00>;
+    uint PlaylistMapOffset <format=hex, fgcolor=0x0000FF>;
+    
+    FSeek(TrackMapOffset);
+    BGMLTrackMap tracks (TrackCount, TrackMapOffset);
+
+    FSeek(PlaylistMapOffset);
+    BGMLPlaylistMap playlists(PlaylistCount, PlaylistMapOffset);
+} bgml;
