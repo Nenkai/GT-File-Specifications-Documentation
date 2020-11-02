@@ -1,0 +1,157 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    int count;
+    if (count != 0)
+    {
+        int values[count];
+    }
+} HArray;
+
+typedef struct
+{
+    int limit_pp;
+    int need_pp;
+    int limit_tire_f;
+    int need_tire_f;
+    int limit_tire_r;
+    int need_tire_r;
+    HArray car_categories;
+    HArray cars;
+    int need_license;
+    int limit_power;
+    int need_power;
+    int limit_weight;
+    int need_weight;
+    int limit_length;
+    int need_length;
+    int need_drivetrain;
+    //int need_drivetrain_list;
+    int need_aspiration;
+    //int need_aspiration_list;
+    int limit_year;
+    int need_year;
+    int limit_aspec_level;
+    int need_aspec_level;
+    int limit_bspec_level;
+    int need_bspec_level;
+    int limit_bspec_driver_count;
+    int need_bspec_driver_count;
+    HArray tuners;
+    HArray countries;
+    int need_entitlement;
+    int tuning;
+    int NOS;
+    int kart_permitted;
+    int restrictor_limit;
+    int ban_cars;
+    int car_tag_id;
+} Regulations;
+
+typedef struct
+{
+    int unk;
+    int transmission;
+    int driving_line;
+    int asm;
+    int tcs;
+    int abs;
+    int limit_tire_f;
+    int need_tire_f;
+    int suggest_tire_f;
+    int limit_tire_r;
+    int need_tire_r;
+    int suggest_tire_r;
+    int simulation;
+    int active_steering;
+    HArray cars;
+    int drift_type;
+    int suggested_gear;
+    int in_car_view;
+    int enemy_tire;
+    int restrictor_limit;
+} Constraints;
+
+typedef struct
+{
+    byte a;
+    byte race_type;
+    byte session_type;
+    byte start_type;
+    byte complete_type;
+    byte finish_type;
+    short race_initial_laps;
+    short race_limit_laps;
+    short race_limit_minutes;
+    int time_to_start;
+    int time_to_finish;
+    byte over_entry_max;
+    byte entry_max;
+    byte large_entry_max;
+    byte racers_max;
+    int class_id;
+    int unk;
+    byte what;
+    byte what;
+    short what;
+    int what;
+    int what;
+    short what;
+    short what;
+    short what;
+    byte what;
+    byte entriesAgain;
+    int what;
+    byte autostart_pitout;
+    byte idk;
+    byte endless;
+} RaceParameters;
+
+struct FGP
+{
+    byte Version;
+    uint FileSize <format=hex>;
+    uint unk;
+    uint unk;
+    byte unk;
+    uint coreXmlSize <format=hex>;
+
+    uint nodeMaybe <format=hex>;
+    uint unk;
+    uint game_id;
+    uint folder_id;
+    uint unk;
+    uint eventCount;
+    uint unk;
+    uint gameParameterVersion;
+    uint empty;
+    uint firstEventID;
+
+    uint unku[10];
+    int unk;
+    uint unk;
+    int unk;
+
+    Regulations regulations;
+    int unk;
+    int unk;
+    Constraints c;
+
+    int unk;
+    RaceParameters params;
+
+} fgp;

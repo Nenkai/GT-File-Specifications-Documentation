@@ -1,0 +1,75 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo Standard Definition
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+LittleEndian();
+
+enum<short> ValueType
+{
+    Nothing,
+    Null,
+    Array = 2,
+    Char = 4,
+    Bool = 7,
+    Int = 10,
+    UInt = 11,
+    Float = 12,
+};
+
+typedef enum<ushort>
+{
+    False,
+    True
+} bool16;
+
+typedef struct
+{
+    uint strLen;
+    char name[strLen];
+    ushort dataTypeOrParameterTypeIndex;
+    bool16 IsCustomType;
+
+    if (dataTypeOrParameterTypeIndex == Array && IsCustomType == False)
+    {
+        ushort ArrayCategoryIndex;
+        ushort ArrayCustomType;
+        int ArrayLength;
+    }
+
+} SDEFEntry <optimize=false>;
+
+typedef struct
+{
+    uint categoryStrLen;
+    char categoryName[categoryStrLen];
+    uint entryCount;
+    SDEFEntry entries[entryCount];
+
+} SDEFCategory <optimize=false>;
+
+typedef struct (int arrSize)
+{
+    SDEFCategory category[arrSize];
+} SDEFStringMap;
+
+struct SDEF
+{
+    char magic[4];
+    uint _empty_ <hidden=true>;
+    uint unk;
+    byte unk2;
+    uint categoryCount;
+    SDEFStringMap categories(categoryCount);
+
+
+    ushort TreeStartCategoryIndex;
+    bool16 TreeStartHasCustomType;
+} sdef;
