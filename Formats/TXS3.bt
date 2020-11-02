@@ -11,19 +11,76 @@
 //   History: 
 //------------------------------------------------
 
-struct TXS2 {
-    char Magic[4];
-    uint FileSize;
-    uint Unk;
-    uint RealSize;
-    byte UnkData[120];
-    uint ImageSize;
-    byte Two;
-    ubyte Type;
+typedef struct 
+{
+    uint unk;
+    uint unk2;
+    short unk3;
+    ubyte imageFormat;
+    byte unk34;
+
+    byte unkB1;
+    byte unkB2;
+    byte unkB3;
+    byte unkB4;
+    uint unk5;
+    uint unk6;
+    uint unk7;
+    ushort Width;
+    ushort Height;
+    uint what;
+    uint what2;
+    ushort what3;
+    ushort Stride;
+    uint what4;
+    uint what5;
+    uint what6;
+    uint imageID;
+    uint what7;
+    uint ImageNameOffset <format=hex>;
+} ImageMetadata;
+
+typedef struct ImageData
+{
+    uint ImageOffset <format=hex>;
+    uint ImageSize <format=hex>;
+    byte _two_;
+    ubyte ImageFormat;
     byte MipmapCount;
-    byte Unk2;
-    short Width;
-    short Height;
-    byte UnkData2[108];
-    byte ImageData[ImageSize];
+    byte _two2_;
+    ushort ImageWidth;
+    ushort ImageHeight;
+    ushort Unk;
+    ushort Unk2;
+
+} ImageData;
+
+typedef struct (int arrSize)
+{
+    ImageMetadata images[arrSize];
+} ImageMetadataMap;
+
+typedef struct (int arrSize)
+{
+    ImageData images[arrSize];
+} ImageDataMap;
+
+struct TXS3 {
+    char Magic[4];
+    if (Magic[0] == '3')
+        LittleEndian();
+    uint FileSize;
+    uint FileMemPtr <format=hex>;
+    uint RealSize;
+    uint Unk2;
+    ushort FileImageCount;
+    ushort FileStreamImageCount;
+    uint ImageMapHeaderOffset <format=hex>;
+    uint unkOffset2;
+
+    FSeek(ImageMapHeaderOffset);
+    ImageMetadataMap imageMetas(FileImageCount);
+
+    FSeek(unkOffset2);
+    ImageDataMap data(FileImageCount);
 } txs2;
