@@ -1,0 +1,47 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct 
+{
+    ubyte R;
+    ubyte G;
+    ubyte B;
+    ubyte A;
+} Pixel;
+
+typedef struct 
+{
+    int paintIndex;
+    int specDBID;
+    int _empty_[2];
+    float unkRatio1; // 0.01->0.1
+    ubyte unk;
+    ubyte unk2;
+    ubyte unk3;
+    ubyte unk4;
+    float unkRatio2;
+    int _empty2_[3];
+    float unkRatio3;
+    float unkRatio4;
+    float unkRatio5;
+    float unkRatio6;
+    Pixel pixel[0x820];
+    byte padding[0x28];
+} Paint;
+
+struct ALLPaint
+{
+    Paint paint[3928];
+} Allpaint;
