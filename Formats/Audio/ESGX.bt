@@ -1,0 +1,103 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo 5/6 ESGX Files
+//   Authors: Xenn
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+LittleEndian();
+
+local int curPos;
+local int arrSize, fileSize;
+
+typedef struct
+{
+    uint strLen;
+
+} ESGXEntry <optimize=false>;
+
+struct ESGX
+{
+    char Magic[4];
+    uint Magic_Pointer <format=hex>;
+    uint SGXD_Pointer <format=hex>;
+    uint SampleAmount <format=hex>;
+    uint Settings_Pointer <format=hex>;
+    uint UnkReserved <hidden=true>; //Could be reserved?
+    uint Magic_Pointer2 <format=hex>; //Maybe?
+    byte Unk1_1 <format=hex>; //Changes from 3 to 6
+    byte Unk1_2 <format=hex>; //Always 10
+    short Reserved <hidden=true>;
+    byte Unk2_1 <format=hex>; //Might not change
+    byte Unk2_2 <format=hex>; //Always 10
+    short Reserved2 <hidden=true>;
+    arrSize = SampleAmount;
+} Entry;
+
+struct SampleSetting
+{
+    short RPMPitch <comment="Higher value is lower pitch, lower is higher">; //Higher value is lower pitch, lower is higher
+    short RPMStart <comment="The RPM value at which the sample starts playing">;
+    short RPMEnd <comment="The RPM value at which the sample is fully faded out">;
+    short RPMVolume;
+    int RPMFrequency;
+    int SGXDOffset <format=hex>;
+} Chunk[arrSize];
+
+byte padding[12];
+
+struct SGXD
+{
+    char Magic[4];
+    uint Name_Pointer <format=hex>;
+    uint Data_Offset <format=hex>;
+    ushort FileSize; //<format=hex>;
+    ushort unknown;
+    struct WAVE
+    {
+    
+        char Magic[4] <fgcolor=0x00FFFF>;
+        uint ChunkSize <fgcolor=0x00FFFF>;
+        uint Reserved1 <hidden=true>;
+        uint SoundAmount; //Maybe?
+        uint Flag2 <format=hex>; //Unknown, multiples of two, 00-01 plays a sound, 02-03 doesn't, 04-05 does, etc?
+        uint Name_Offset <format=hex>; //Second sound name if applicable
+        enum <byte> Codec {PCM = 1, OGG = 2, PSADPCM = 3, ATRAC3plus = 4, ShortPSADPCM = 5, AC3 = 6} Type;
+        byte Channels; //Can this support more than 2?
+        short Reserved2 <hidden=true>;
+        uint SoundSampleRate;
+        uint BitRate; //Doesn't seem to matter for PSADPCM
+        uint Reserved3 <hidden=true>;
+        ushort VolumeLeft <format=hex>; //Uncertain
+        ushort VolumeRight <format=hex>; //Uncertain
+        uint LoopStart_Position;
+        uint LoopStart_Samples; //Make this the sample size of the audio
+        uint LoopStartSample <comment="Make this the starting point of the loop from Awave">;
+        uint LoopEndSample <comment="Make this the sample size of the audio">; //Make this the sample size of the audio
+        uint StreamSize1;//<format=hex>;
+        fileSize = StreamSize1;
+        uint Unk <format=hex>;
+        uint StreamSize2 <format=hex>;
+        uint Reserved_Unk; //Not sure if this even does anything here
+    
+    } WaveChunk;
+
+    byte padding[4];
+
+    struct NAME
+    {
+        char NAME[4];
+        uint ChunkSize;
+        byte dunno[24];
+        char fileName[32];
+    } NameChunk;
+
+    byte AudioStream[fileSize] <comment="The audio from exported VAG file offset 0x30 to end">;
+
+} SGXDEntry[arrSize] <optimize=false>;
+
