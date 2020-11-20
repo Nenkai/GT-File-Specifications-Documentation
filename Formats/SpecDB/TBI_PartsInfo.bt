@@ -1,0 +1,37 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    int CarID;
+    int DataStart;
+    int DataLength;
+    int padding <hidden=true>;
+} PartInfoPointer;
+
+struct GTST
+{
+    // Header 0x20
+    char Magic[4];
+    int Unk;
+    int VersionMaybe;
+    int empty;
+    int null;
+    int unkCount;
+    int Unk;
+    int SpecDBVersion;
+
+    PartInfoPointer partPtr[unkCount];
+} gtst;
