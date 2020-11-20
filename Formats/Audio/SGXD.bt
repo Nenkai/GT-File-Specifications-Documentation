@@ -1,0 +1,72 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo 5/6 SGXD
+//   Authors: Xenn
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+LittleEndian();
+
+local int curPos;
+
+typedef struct
+{
+    uint strLen;
+
+} SGXDEntry <optimize=false>;
+
+struct SGXD
+{
+    char Magic[4];
+    uint Name_Pointer <format=hex>;
+    uint Data_Offset <format=hex>;
+    uint FileSize <format=hex>;
+} Entry;
+
+struct WAVE
+{
+
+    char Magic[4] <fgcolor=0x00FFFF>;
+    uint ChunkSize <fgcolor=0x00FFFF>;
+    uint Reserved1 <hidden=true>;
+    uint SoundAmount; //Maybe?
+    uint Flag2 <format=hex>; //Unknown, multiples of two, 00-01 plays a sound, 02-03 doesn't, 04-05 does, etc?
+    uint Name_Offset <format=hex>; //Second sound name if applicable
+    enum <byte> Codec {PCM = 1, OGG = 2, PSADPCM = 3, ATRAC3plus = 4, ShortPSADPCM = 5, AC3 = 6} Type;
+    byte Channels;
+    short Reserved2 <hidden=true>;
+    uint SoundSampleRate;
+    uint BitRate; //Doesn't seem to matter for PSADPCM
+    uint Reserved3 <hidden=true>;
+    ushort VolumeLeft <format=hex>; //Uncertain
+    ushort VolumeRight <format=hex>; //Uncertain
+    uint LoopStart_Position;
+    uint LoopStart_Samples; //Make this the sample size of the audio
+    uint LoopStartSample <comment="Make this the starting point of the loop from Awave">;
+    uint LoopEndSample <comment="Make this the sample size of the audio">; //Make this the sample size of the audio
+    uint StreamSize1;//<format=hex>;
+    uint Unk <format=hex>;
+    uint StreamSize2 <format=hex>;
+    uint Reserved_Unk[2]; //Not sure if this even does anything here
+
+} Chunk;
+
+struct NAME
+{
+    char NAME[4];
+    uint ChunkSize;
+    int Reserved1;
+    int NameAmount; //not sure if int
+    short NameNumber; //not sure if short
+    short NameUnk; //Always 30?
+    int NameOffset <format=hex>;
+    int Reserved2; //Maybe?
+    int NameOffset2 <format=hex>; //Not sure
+    char fileName[16];
+} Chunk;
+
