@@ -15,13 +15,13 @@ BigEndian();
 
 typedef struct IDKey (int tableEndOffset)
 {
-    uint keyNameOffset <format=hex, fgcolor=0x0000FF>; // Offset from the beginning of the string table
+    uint labelOffset <format=hex, fgcolor=0x0000FF>; // Offset from the beginning of the string table
     
     local int cPos = FTell();
-    FSeek(tableEndOffset + keyNameOffset);
+    FSeek(tableEndOffset + labelOffset);
 
-    ushort keyNameLength;
-    char keyName[keyNameLength];
+    ushort labelLength;
+    char label[labelLength];
     FSeek(cPos);
 
     uint entryDataID;
@@ -29,7 +29,7 @@ typedef struct IDKey (int tableEndOffset)
 
 typedef struct IDKeyMap (int arrSize)
 {
-    local int tableEndOffset = 16 + (8 * arrSize);  // Header + key size
+    local int tableEndOffset = 0x10 + (8 * arrSize);  // Header + key size
     local int i;
     for (i = 0; i < arrSize; i++)
         IDKey key(tableEndOffset);
@@ -40,6 +40,6 @@ struct IDI
     char Magic[4];
     uint keyCount;
     uint _empty_;
-    int unk2; // Can be -1, 0-40..
+    int tableID; // Refer to the Table Enum, for GT5 Brake would be 2 (iirc)
     IDKeyMap keys(keyCount);
 } idi;
