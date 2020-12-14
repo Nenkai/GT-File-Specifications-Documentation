@@ -1,0 +1,40 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+typedef struct (int strTreePos)
+{
+    int offset <format=hex>;
+    FSeek(strTreePos + offset);
+    short strLen;
+    string str;
+} String;
+
+typedef struct (int arrSize)
+{
+    local int i;
+    for (i; i < arrSize; i++)
+    {
+        FSeek(0x10 + (i * 4));
+        String entry(0x10 + (arrSize * 4));
+    }
+} StringDB;
+
+struct 
+{
+    char Magic[4];
+    uint count;
+    uint _empty;
+    uint _empty;
+    StringDB strings(count);
+} GTST;
