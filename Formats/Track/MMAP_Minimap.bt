@@ -1,0 +1,72 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo 5 Course Map
+//   Authors: Nenkai#9075, help from Xenn
+//   Version: 
+//   Purpose: Track Minimap
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+// Notes: Found in Course Data files (c0**x)
+
+typedef struct
+{
+    short X;
+    short Y;
+    short Z;
+    short pad; // Always 00 FF
+
+} Vertex;
+
+
+typedef struct 
+{
+    signed byte ZIndexMaybe;
+    byte unkFlag;
+    short vertexCount;
+    Vertex verts[vertexCount];
+} VertexMap <optimize=false>;
+
+struct MMAP
+{
+    char Magic[4];
+    int VersionMaybe;
+    byte unk;
+    byte unk2;
+    byte unk3;
+    byte unk4;
+    int fileSize;
+    
+    short OffcourseMapFlag <format=hex>;
+    short OffcourseMapOffset <format=hex, fgcolor=0x0000FF>;
+
+    short RoadMapFlag <format=hex>;
+    short RoadMapOffset <format=hex, fgcolor=0x0000FF>;
+    
+    short PitlaneMapFlag <format=hex>;
+    short PitlaneMapOffset <format=hex, fgcolor=0x0000FF>;
+    
+    short SectionMapFlag <format=hex>;
+    short SectionMapOffset <format=hex, fgcolor=0x0000FF>;
+
+    signed short fullMapScaleX1;
+    signed short fullMapScaleX1;
+    signed short fullMapScaleY1;
+    signed short fullMapScaleY2;
+    FSeek(0x30);
+
+    FSeek(OffcourseMapOffset);
+    VertexMap offcourseVerts[2];
+    
+    FSeek(RoadMapOffset);
+    VertexMap roadVerts[2];
+
+    FSeek(PitlaneMapOffset);
+    VertexMap pitlaneVerts;
+
+    FSeek(SectionMapOffset);
+    VertexMap sectionVerts;
+} mmap <optimize=false>;
