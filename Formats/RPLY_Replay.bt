@@ -1,0 +1,270 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: GT5 & 6 Replay
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: Replay Files
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+string OutputDateTime( uint s )
+{
+    uint rawDateTime = s;
+    uint hh = (s / (60 * 60 * 1000)) % 24;
+    uint mm = (s / (60 * 1000)) % 60;
+    uint ss = (s / 1000) % 60;
+    uint ms = s % 1000;
+
+    string Hour_s;
+    string Minute_s;
+    string Second_s;
+    string Milli_s;
+    SPrintf ( Hour_s, "%02d", hh );
+    SPrintf ( Minute_s, "%02d", mm );
+    SPrintf ( Second_s, "%02d", ss );
+    SPrintf ( Milli_s, "%03d", ms );
+
+
+    return Hour_s + ":" + Minute_s + ":" + Second_s + "." + Milli_s;
+}
+
+typedef struct
+{
+    uint MDriverParameterVersion;
+    uint unk2;
+    short unk3;
+    char playerName[MDriverParameterVersion >= 110 ? 0x20 : 0x40];
+    if (MDriverParameterVersion >= 109)
+        char online_id[0x12];
+    char regionName[0x04];
+
+    struct DriverSettings
+    {
+        ubyte gtbehavior_version;
+        byte manual;
+        byte assist_tcs;
+        byte assist_asm;
+        byte steering_assist_type;
+        byte unk;
+        byte active_steering;
+        byte active_brake_level;
+        byte physics_pro;
+        byte competition_flags;
+        byte pad_yaw_gain;
+        byte assist_4was;
+        byte unk;
+        byte RTAUnadjustable;
+    } settings;
+    
+    byte cornering_skill;
+    byte accelerating_skill;
+    byte unk;
+    byte braking_skill;
+    byte special_driver_type;
+    byte starting_skill;
+    byte unk;
+    struct GrowthParameter
+    {
+        byte growable;
+        byte spec_id;
+        byte fatigue;
+        byte lv;
+        int experience;
+        short win_count;
+        short race_count;
+        short days;
+        byte dec_master_rate;
+        byte unk;
+        short stamina;
+        byte mentality;
+        byte condition;
+        byte temper;
+        byte flexibility;
+        byte skill_base_breaking;
+        byte skill_base_cornering;
+        byte skill_base_shift_up;
+        byte skill_base_cornerout;
+        byte skill_base_line_trace;
+        byte skill_base_steer_reaction;
+        byte skill_heat_offset;
+        byte unks[3];
+        byte bonus_skill_b;
+        byte bonus_skill_c;
+        byte bonus_skill_s;
+        byte bonus_skill_o;
+    } growth_parameter;
+
+    if (MDriverParameterVersion < 113)
+    {
+        if (MDriverParameterVersion >= 110)
+        {
+            short unk;
+            short unk;
+            short unk;
+            short unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+
+            short unk;
+            short unk;
+            short unk;
+            short unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+        }
+        else if (MDriverParameterVersion <= 106)
+        {
+            
+        }
+    }
+} MDriverParameter;
+
+typedef struct
+{
+    byte data[173];
+    int brakes;
+    int unk10;
+    int chassis;
+    int drivetrain;
+    int transmission;
+    int suspension;
+    int LSD;
+    int unk3;
+    int weightReduction;
+    int unk4;
+    int unk5;
+    int computer;
+    int natune;
+    int turbo;
+    int flywheel;
+    int clutch;
+    int driveshaft;
+    int exhaust;
+    int unk6;
+    int asm;
+    int tcs;
+    int unk7;
+    int supercharger;
+    int intakeManifold;
+    int exhaustManifold;
+    int catConverter;
+    int airFilter;
+    byte test[359];
+} MCarParameter;
+
+typedef struct
+{
+    int entryIndex; // If entryIndex is > -1, the offsets get replaced in the game's memory
+    uint CarParameterOffset <format=hex, fgcolor=cRed>;
+    if (entryIndex != -1)
+    {
+        local int cPos = FTell();
+        FSeek(CarParameterOffset);
+        MCarParameter carParameter;
+        FSeek(cPos);
+    }
+
+    uint _empty_[2];
+
+    uint driverParameterCount <format=hex, fgcolor=cGreen>;
+    uint driverParameterOffset <format=hex, fgcolor=cRed>; // In sets of 0x10's
+
+    uint unk;
+    uint unk;
+    uint sectorTimes[0x10] <comment=OutputDateTime>;
+    char EntryName[0x10];
+    int what;
+} Entry00 <optimize=false>;
+
+// 0x300
+struct RPLY
+{
+    char Magic[4];
+    int RuntimePtr;
+    uint Version; // GT6 consider it as valid if its under 0x74
+    uint bufferSizeMaybe <format=hex>;
+    uint unk;
+    uint unk;
+    uint unk;
+    uint unk;
+    uint gtbehavior_version;
+    uint specdbVersion;
+    int64 recorded_datetime;
+    char specDbName[0x30];
+
+    FSeek(0x74);
+    int race_complete;
+    int onelap;
+    int score;
+
+    FSeek(0x80);
+    short finishOrders[32];
+
+    FSeek(0xC0);
+    int totalTimes[32] <comment=OutputDateTime>;
+
+    FSeek(0x140);
+    int bestTimes[32] <comment=OutputDateTime>;
+
+    FSeek(0x208);
+    int raceParameterOffset <format=hex, fgcolor=cRed>;
+    int gameParameterOffset <format=hex, fgcolor=cRed>;
+    int gameParameterBufferSize <format=hex, fgcolor=cYellow>;
+    int gameParameterOffsetAgain <format=hex, fgcolor=cRed>;
+    byte _empty_[12];
+    uint carParametersOffset <format=hex, fgcolor=cRed>;
+    uint carParameterSize <format=hex, fgcolor=cYellow>;
+    byte _empty2_[8];
+    uint driverParametersOffset <format=hex, fgcolor=cRed>;
+    uint driverParameterBufferSize <format=hex, fgcolor=cYellow>;
+
+    FSeek(0x240);
+    int entry_max;
+    int entry00Offset <format=hex, fgcolor=cRed>;
+    int total_frame_count;
+    int unk;
+    int frameDataInfoCount <format=hex, fgcolor=cGreen>;
+    int frameDataInfoOffset <format=hex, fgcolor=cRed>; // In stride sets of 0x20, if provided
+    int unkCount <format=hex, fgcolor=cGreen>;
+    int unkOffset <format=hex, fgcolor=cRed>; // In stride sets of 0x08, if provided
+    int test[2];
+
+    int geometry_stream_size;
+    int geometry_quality_level;
+    int unk;
+    int filesystem_version;
+    int unk;
+    int entry_num <fgcolor=cGreen>;
+    short unk;
+    short entry00Size <format=hex, fgcolor=cYellow>;
+    short unkSize <format=hex, fgcolor=cYellow>;
+    byte unk;
+    byte unk;
+    int unkBits;
+    int replayChunkCount;
+    int unkOffset <format=hex, fgcolor=cRed>;
+
+    FSeek(0x300);
+    //int Times[60] <comment=OutputDateTime>;
+
+    FSeek(entry00Offset);
+    Entry00 entry00[entry_max];
+
+    FSeek(driverParametersOffset);
+    MDriverParameter drivers[entry_max * 2];
+
+} replay;
+
