@@ -1,0 +1,372 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: MCarParameter structure for GT6
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: Used to transmit car information in events (i.e prize cars with installed parts), saved in saves aswell
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+BigEndian();
+
+// Credits Razerman; Logic originally found used in ghidra, seen used in the custom tracks bts
+string OutputDateTime( uint s )
+{
+    uint rawDateTime = s;
+    uint Year = (((rawDateTime >> 0x1a)) + 1970);
+    uint Month = (((rawDateTime >> 0x16)) & 15); 
+    uint Day = (((rawDateTime >> 0x11)) & 0x1f);
+    uint Hour = (((rawDateTime >> 12)) & 0x1f);
+    uint Minute = (((rawDateTime >> 6)) & 0x3f);
+    uint Second = ((rawDateTime) & 0x3f);
+    string Year_s;
+    string Month_s;
+    string Day_s;
+    string Hour_s;
+    string Minute_s;
+    string Second_s;
+    string Formatted_DateTime;
+    SPrintf ( Year_s, "%d", Year );
+    SPrintf ( Month_s, "%02d", Month );
+    SPrintf ( Day_s, "%02d", Day );
+    SPrintf ( Hour_s, "%02d", Hour );
+    SPrintf ( Minute_s, "%02d", Minute );
+    SPrintf ( Second_s, "%02d", Second );
+    return Day_s+"/"+Month_s+"/"+Year_s+" "+Hour_s+":"+Minute_s;
+}
+
+struct MCarParameter
+{   
+    // 110 is GT5
+    // 109 is GT6
+
+    int version;
+    if (version >= 110)
+        int mainHeaderSize <format=hex>;
+
+    byte unkHeaderBits[4];
+
+    struct CarCondition
+    {
+        int odometer;
+    
+        // Cleared by "Overhall Engine"
+        int engine_life;
+    
+        // Cleared by "Overhall Engine"
+        float oil_life;
+        int body_life;
+        byte dirtiness100;
+        byte rainX; // Goes away when custom one is set
+        byte body_coating;
+        byte unk;
+        int everlasting;
+
+        if (version != 110)
+        {
+            short unk;
+            byte wheelDirtFront;
+            byte wheelDirtRear;
+            int unk;
+            int unk;
+            int unk;
+            int scratch;
+            int unk;
+
+            byte unk;
+            byte unk;
+            byte unk;
+            byte unk;
+
+            short unk;
+            short unk;
+        }
+    } condition;
+
+    if (version >= 110)
+    {
+        int garage_id;
+        short ride_count;
+        short win_count;
+        byte special_gas_ratio_100;
+        byte special_gas_liter;
+        byte nos_ratio_100;
+        byte nos_duration_sec;
+        short unk;
+        byte pack_small;
+        byte unk;
+        int unk;
+        short unk;
+        byte decken_number;
+        byte decken_type;
+        byte PurchaseBits[0x40];
+    }
+    else
+    {
+        int obtain_date <comment=OutputDateTime>;
+        short win_count;
+        short unk;
+        if (version == 109)
+        {
+            short unk;
+            short unk;
+        }
+    }
+
+    struct CarParts
+    {
+        if (version >= 110)
+        {
+            short partsVersion;
+            short partsSize;
+            int64 unkBits;
+            int64 a;
+            int a;
+            byte color;
+            short unk;
+            short unk;
+            int64 FrTyre;
+            int64 RrTyre;
+        }
+        else
+        {
+            int unk;
+            int partsVersion;
+            short frontWheelEx;
+            short rearWheelEx;
+            int wheelInchupRelated;
+            int wheel_sp;
+            int car_code;
+            int garage_id;
+            int frontTireComp;
+            int fronttire;
+            int rearTireComp;
+            int reartire;
+        }
+
+        int brake;
+        int brakeController;
+        int chassis;
+        int engine;
+        int drivetrain;
+        int gear;
+        int suspension;
+        int lsd;
+        int steer;
+        int lightweight;
+        int racingmodify;
+        int displacement;
+        int computer;
+        int natune;
+        int turbineKit;
+        int flywheel;
+        int clutch;
+        int propellerShaft;
+        int muffler;
+        int intercooler;
+        int ascc;
+        int tcsc;
+        if (version < 106 || version >= 110)
+            int unk;
+        int supercharger;
+        int intake_manifold;
+        int exhaust_manifold;
+        int catalyst;
+        int air_cleaner;
+        int NOS;
+        int windowReduction;
+        int carbonBonnet;
+        int bodyKit;
+        int flat_floors;
+        int aero_other;
+        int wing;
+        int unk12[3];
+    
+        short GearReverse;
+        short Gear1;
+        short Gear2;
+        short Gear3;
+        short Gear4;
+        short Gear5;
+        short Gear6;
+        short Gear7;
+        short Gear8;
+        short Gear9;
+        short Gear10;
+        short Gear11;
+        short FinalGearRatio;
+        byte MaxSpeed_10;
+        short GearLastFinal;
+        byte Param4WDMaybe;
+        byte FrontABSMaybe;
+        byte RearABSMaybe;
+        if (version >= 110)
+        {
+            byte downforceFront;
+            byte downforceRear;
+        }
+        else
+        {
+            short downforceFront;
+            short downforceRear;
+        }
+
+        byte turbo_boost1;
+        byte turbo_peakRpm1;
+        byte turbo_response1;
+        byte turbo_boost2;
+        byte turbo_peakRmp2;
+        byte turbo_response2;
+        byte FrontCamber;
+        byte RearCamber;
+        short FrontRideheight;
+        short RearRideheight;
+        signed byte FrontToe;
+        signed byte RearToe;
+
+        if (version >= 110) // It's questionable GT5 time
+        {
+            byte FrontSpringRate;
+            byte RearSpringRate;
+            byte leverratioF;
+            byte leverratioR;
+        }
+        else
+        {
+            short FrontSpringRate;
+            short RearSpringRate;
+            short leverratioF;
+            short leverratioR;
+        }     
+   
+        byte FrontDamperF1B;
+        byte FrontDamperF2B;
+        byte FrontDamperF1R;
+        byte FrontDamperF2R;
+        byte RearDamperF1B;
+        byte RearDamperF2B;
+        byte RearDamperF1R;
+        byte RearDamperF2R;
+        byte FrontStabilizer;
+        byte RearStabilizer;
+        byte FrontLSDParam;
+        byte RearLSDParam;
+        byte FrontLSDParam2;
+        byte RearLSDParam2;
+        byte FrontLSDParam3;
+        byte RearLSDParam3;
+        byte tcsc_UserValueDF;
+        byte ascc_VSCParamLevel;
+        byte ascc_VSCParam1DF;
+        byte ascc_VUCParamLevel;
+        byte ascc_VUCParam1DF;
+        unsigned byte ballastWeight;
+        byte ballastPosition;
+        byte steerlimit;
+        short unk;
+        short weightModifyRatio;
+        short powerModifyRatio;
+        if (version >= 110)
+        {
+            byte unk;
+            byte unk;
+        }
+
+        byte nosTorqueVolume;
+        byte gripMultiplier;
+        byte FrontBrakeBalanceLevel;
+        byte RearBrakeBalanceLevel;
+        byte ABSCorneringControlLevel;
+
+        if (version >= 110)
+            short unk;
+        else
+            byte unk;
+        short unk;
+
+        if (version >= 110)
+            byte GasCapacity;
+        else
+            short GasCapacity;
+        short PowerLimiter;
+    
+        int horn_sound_id;
+
+        if (version == 109)
+        {
+            byte wheel_color; // ?
+    
+            short bodyPaintID;
+            short wheelPaintID;
+            short brakePaintID;
+            short customRearWingPaintID;
+
+            short front_wheel_width;
+            short front_wheel_diameter;
+            short rear_wheel_width;
+            short rear_wheel_diameter;
+            short unk;
+
+            byte wheel_inchup;
+            byte decken_preface;
+            byte decken_number;
+            byte decken_type; // Flag?
+
+            byte test5[21];
+    
+            byte unkCustomWing1;
+            byte unkCustomWing2;
+            byte unkCustomWing3;
+            byte customWingStays;
+            byte unkCustomWing5;
+            short wingWidthOffset;
+            short wingHeightOffset;
+            short wingAngleOffset;
+
+            byte test50[4];
+
+            /* 
+               Not flags
+                Comfort Hard = 00 00
+               Comfort Medium = 02 20
+               Comfort Soft = 04 40
+               Sports Medium = 08 80
+               Racing Hard = 0E E0
+               Racing Medium = 11 00
+               Racing Soft = 13 20
+               Intermediate = 17 60
+               Heavy Wet = 19 80
+               Dirt = 1B A0
+               Snow = 1D C0
+            */
+
+            byte unk; // 0x60 when racing brake calipers installed
+            byte unk; // 0x02 when sports exhaust installed, 0x08 = Carbon Bonnet installed?
+            byte unk;
+
+            short customMeterData;
+            short customMeterUnk; // -1 when installed? DD FF when two installed?
+            uint customMeter1Color;
+    
+            short unkToeAngle1;
+            short unkToeAngle2;
+            byte test6[2];
+        }
+
+    } Settings;
+    
+    if (version >= 110)
+    {
+        FSeek(mainHeaderSize + 0x40 + Settings.partsSize);
+        short obtain_id;
+        short PowerScratch;
+        short PPScratch;
+        short unk;
+    }
+    else
+        byte purchasedBits[0x20];
+
+} cp;
