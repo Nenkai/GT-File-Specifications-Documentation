@@ -92,7 +92,8 @@ typedef struct
         byte skill_base_line_trace;
         byte skill_base_steer_reaction;
         byte skill_heat_offset;
-        byte unks[3];
+        byte unk;
+        short unk;
         byte bonus_skill_b;
         byte bonus_skill_c;
         byte bonus_skill_s;
@@ -124,10 +125,16 @@ typedef struct
             uint unk;
             uint unk;
             uint unk;
+
+            byte _padding[7]; // it ends here, don't ask why
         }
         else if (MDriverParameterVersion <= 106)
         {
-            
+            byte unk;
+            byte unk;
+            // 4 bits
+            byte unk;
+            byte unk;
         }
     }
 } MDriverParameter;
@@ -240,12 +247,11 @@ struct RPLY
     int frameDataInfoOffset <format=hex, fgcolor=cRed>; // In stride sets of 0x20, if provided
     int unkCount <format=hex, fgcolor=cGreen>;
     int unkOffset <format=hex, fgcolor=cRed>; // In stride sets of 0x08, if provided
-    int test[2];
-
+    int geometry_based;
+    int unk_geometry;
     int geometry_stream_size;
     int geometry_quality_level;
-    int unk;
-    int filesystem_version;
+    int64 filesystem_version;
     int unk;
     int entry_num <fgcolor=cGreen>;
     short unk;
