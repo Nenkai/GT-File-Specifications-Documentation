@@ -1,0 +1,78 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+enum<int> TocEntryType
+{
+    Root,
+    Unk
+};
+
+typedef struct
+{
+    TocEntryType Type;
+    int Flag;
+    int DataStart <fgcolor=cRed, format=hex>;
+    int DataLength <fgcolor=cGreen, format=hex>;
+} TOCEntry;
+
+typedef struct (int mapSize)
+{
+    TOCEntry entries[mapSize];
+} TableOfContents;
+
+BigEndian();
+struct PACB
+{
+    char Magic[4];
+    if (Magic[3] == 'B')
+        BigEndian();
+    else 
+        LittleEndian();
+
+    FSeek(0x3C);
+    int tocEntryCount <fgcolor=cAqua>;
+    TableOfContents toc(tocEntryCount) <bgcolor=cGray>;
+
+    local int cPos = FTell();
+    FSeek(toc.entries[0].DataStart);
+
+    int modelOffsets[7] <fgcolor=cRed, format=hex>;
+    int shb2 <fgcolor=cRed, format=hex>; // GT6
+    FSeek(FTell() + 0x08); // Pad
+    int vls[6] <fgcolor=cRed, format=hex>;
+    int gtsp <fgcolor=cRed, format=hex>;
+    int env0 <fgcolor=cRed, format=hex>;
+    int rnw <fgcolor=cRed, format=hex>;
+    int crss <fgcolor=cRed, format=hex>;
+    FSeek(FTell() + 0x08); // Pad
+    int gtcm_mmap_CourseMap <fgcolor=cRed, format=hex>;
+    int mot1 <fgcolor=cRed, format=hex>;
+    int mdlAgain <fgcolor=cRed, format=hex>;
+    int rep4 <fgcolor=cRed, format=hex>;
+    int rep4_2 <fgcolor=cRed, format=hex>; // GT6
+    int grs1 <fgcolor=cRed, format=hex>; // GT6
+    int txs3_1 <fgcolor=cRed, format=hex>; // GTHD    
+    int rnw_2 <fgcolor=cRed, format=hex>;
+    int unkSceneryMdl <fgcolor=cRed, format=hex>;
+    int unkSceneryEbaf <fgcolor=cRed, format=hex>;
+    int cop0 <fgcolor=cRed, format=hex>; // GT6
+    int txs3_2 <fgcolor=cRed, format=hex>; // GTPSP
+    int cpl0 <fgcolor=cRed, format=hex>;
+    int sdef <fgcolor=cRed, format=hex>;
+    int txs3_3 <fgcolor=cRed, format=hex>;
+    FSeek(FTell() + 0x0C); // Pad
+    int psf0 <fgcolor=cRed, format=hex>;
+    int emtl <fgcolor=cRed, format=hex>;
+    int gsg0 <fgcolor=cRed, format=hex>;
+    int txs3_4 <fgcolor=cRed, format=hex>;
+} pacb;
