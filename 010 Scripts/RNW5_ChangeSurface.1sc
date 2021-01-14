@@ -1,0 +1,32 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Script File
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+//   History: 
+//------------------------------------------------
+int startIndex = InputNumber("Road Surface Start Index", "Input start index", "0");
+if (startIndex == BAD_VALUE)
+    return;
+else if (startIndex < 0)
+    return;
+
+string buffer;
+int endIndex = InputNumber("Road Surface End Index", "Input end index", SPrintf(buffer, "%d", (int)rnw5.RoadFaceCount));
+if (endIndex == BAD_VALUE || endIndex < 0 || endIndex < startIndex)
+    return;
+
+int surfIndex = InputRadioButtonBox("Surface Type", "Select surface:", 0,
+    "TARMAC","GUIDE","GREEN","SAND", "GRAVEL", "DIRT", "WATER", "STONE","WOOD", "PAVE",
+    "GUIDE", "GUIDE2", "GUIDE3", "PEBBLE", "BEACH");
+
+if (surfIndex == -1)
+    return;
+
+local int i = startIndex;
+for (i; i < endIndex; i++)
+    rnw5.roadFaces.face[i].surface = surfIndex;
+Printf("%d->%d (%d) changed", startIndex, endIndex, endIndex - startIndex);

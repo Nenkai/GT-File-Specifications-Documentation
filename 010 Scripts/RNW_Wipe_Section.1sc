@@ -1,0 +1,80 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Script File
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+//   History: 
+//------------------------------------------------
+
+local int i = 0;
+
+if( MessageBox( idYes | idNo, "Script", "Wipe vert one for 'left'? " ) == idYes )
+{
+    for (i; i < rnw5.UnkVertCount; i++)
+    {
+        rnw5.unkVerts.sections[i].left.vert.X = 0;
+        rnw5.unkVerts.sections[i].left.vert.Y = 0;
+        rnw5.unkVerts.sections[i].left.vert.Z = 0;
+    }
+    Printf("Wiped verts for %d sections", rnw5.UnkVertCount);
+    return;
+}
+
+if( MessageBox( idYes | idNo, "Script", "Wipe vert two for 'left'?" ) == idYes )
+{
+    for (i; i < rnw5.UnkVertCount; i++)
+    {
+        rnw5.unkVerts.sections[i].left.vert1.X = 0;
+        rnw5.unkVerts.sections[i].left.vert1.Y = 0;
+        rnw5.unkVerts.sections[i].left.vert1.Z = 0;
+    }
+    Printf("Wiped Unk1 for %d sections", rnw5.UnkVertCount);
+    return;
+}
+
+if( MessageBox( idYes | idNo, "Script", "Wipe vert one for 'right'? " ) == idYes )
+{
+    for (i; i < rnw5.UnkVertCount; i++)
+    {
+        rnw5.unkVerts.sections[i].right.vert.X = 0;
+        rnw5.unkVerts.sections[i].right.vert.Y = 0;
+        rnw5.unkVerts.sections[i].right.vert.Z = 0;
+    }
+    Printf("Wiped verts for %d sections", rnw5.UnkVertCount);
+    return;
+}
+
+if( MessageBox( idYes | idNo, "Script", "Wipe vert two for 'right'?" ) == idYes )
+{
+    for (i; i < rnw5.UnkVertCount; i++)
+    {
+        rnw5.unkVerts.sections[i].right.vert1.X = 0;
+        rnw5.unkVerts.sections[i].right.vert1.Y = 0;
+        rnw5.unkVerts.sections[i].right.vert1.Z = 0;
+    }
+    Printf("Wiped Unk1 for %d sections", rnw5.UnkVertCount);
+    return;
+}
+
+if( MessageBox( idYes | idNo, "Script", "Wipe unk float for 'left'?" ) == idYes )
+{
+    for (i; i < rnw5.UnkVertCount; i++)
+    {
+        rnw5.unkVerts.sections[i].left.Unk4 = 0;
+    }
+    Printf("Wiped float for %d sections", rnw5.UnkVertCount);
+    return;
+}
+
+if( MessageBox( idYes | idNo, "Script", "Wipe unk float for 'right'?" ) == idYes )
+{
+    for (i; i < rnw5.UnkVertCount; i++)
+    {
+        rnw5.unkVerts.sections[i].left.Unk4 = 0;
+    }
+    Printf("Wiped float for %d sections", rnw5.UnkVertCount);
+    return;
+}
