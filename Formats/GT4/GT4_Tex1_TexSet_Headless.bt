@@ -1,0 +1,78 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int a;
+    int b;
+    int c;
+    int d;
+    int e;
+    int f;
+    int g;
+    int h;
+
+    /* Game reads the following bytes like this
+    v14 = (_byteswap_ulong(*v13) + 32);
+    v15 = _byteswap_ulong(*v14) | (_byteswap_ulong(*(v14 + 4)) << 32);
+    v16 = 32 - _cntlzw((v15 >> 14) & 0x3FF);
+    if ( ((v15 >> 14) & 0x3FF) == -1 )
+      v16 = 0;
+    v17 = (((v15 >> 34) & 0x3FF) + 1);
+    v18 = ((((v15 >> 14) & 0x3FF) + 1) / (1 << v16));
+    v19 = 32 - _cntlzw((v15 >> 34) & 0x3FF);
+    if ( !v17 )
+      v19 = 0;
+    result = RaceDisplayUtil::drawQuadrangle(v17, a2, a3, a4, a5, 0.0, 0.0, v18, (v17 / (1 << v19)));
+    */
+    int64 unkBits;
+} unk;
+
+typedef struct
+{
+    int bufferOffset <format=hex, fgcolor=cRed>;
+    short a;
+    short flags;
+    short width;
+    short height;
+} BufferInfo;
+
+// 0x30 Header
+typedef struct
+{
+    local int baseOffset = FTell();
+
+    char Magic[4];
+    int relocPtr;
+    int unkptr;
+    int fileSize <format=hex>;
+
+    FSeek(baseOffset + 0x14);
+    short unkCountFor0x18 <fgcolor=cGreen>;
+    short unkCountFor0x1C <fgcolor=cGreen>;
+    int unkOffset <format=hex, fgcolor=cRed>;
+
+    local int cPos = FTell();
+    FSeek(baseOffset + unkOffset);
+    unk unks[unkCountFor0x18];
+    FSeek(cPos);
+
+    int unkOffset2  <format=hex, fgcolor=cRed>;
+    cPos = FTell();
+    FSeek(baseOffset + unkOffset2);
+    BufferInfo unks2[unkCountFor0x1C];
+    FSeek(cPos);
+    int unkOffset3 <format=hex, fgcolor=cRed>;
+    int clutAnimationOffset <format=hex, fgcolor=cRed>;
+    int unkOffset4 <format=hex, fgcolor=cRed>;
+} Tex1; 

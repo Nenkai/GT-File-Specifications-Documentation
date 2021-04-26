@@ -1,0 +1,178 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct Vec3
+{
+    float X;
+    float Y;
+    float Z;
+} vec3;
+
+typedef struct BoundaryVec3
+{
+    Vec3 vert;
+    short VertCount <comment="Count of verts for the current the submesh, Negative is terminator">;
+    short Unk;
+} boundaryVec3;
+
+typedef struct UnkVec3
+{
+    Vec3 vert;
+    Vec3 vert1;
+    float Unk4;
+} unkVec3;
+
+typedef struct TrackSection
+{
+    unkVec3 left;
+    unkVec3 right;
+} trackSection;
+
+typedef struct (int arrSize)
+{
+    trackSection sections[arrSize] <bgcolor=0xAAAA00>;
+} trackSectionMap;
+
+typedef struct (int arrSize)
+{
+    BoundaryVec3 vec[arrSize] <bgcolor=0xAAAA00>;
+} BoundaryVec3Map;
+
+typedef struct (int arrSize)
+{
+    Vec3 vec[arrSize] <bgcolor=0xAAAA00>;
+} Vec3Map;
+
+typedef struct (int arrSize)
+{
+    ushort face[arrSize] <bgcolor=0x00AAAA>;
+} FaceMap;
+
+
+local int cPos = 0;
+
+// Alignment for most blocks is 0x10
+// Header is a fixed 0x100. (c040.rwy)
+struct RNW5
+{
+    char magic[4];
+    if (magic == "5WNR")
+        BigEndian();
+
+    int fileRuntimePtr;
+    int fileSize;
+
+    ushort VersionHigh; 
+    ushort VersionLow; // or four
+    uint _empty_ <hidden=true>;
+    float trackVLength; // Sometimes an uint?
+    uint _empty_ <hidden=true>;
+    uint _empty_ <hidden=true>;
+    float unk[6];
+    uint unk;
+    uint unk;
+    uint _empty_ <hidden=true>;
+
+    uint UnkCount <fgcolor=0x00FF00>;
+    uint UnkOffset <format=hex, fgcolor=0x0000FF>; // Something about vcoords?
+
+    uint StartingGridCount <fgcolor=0x00FF00>;
+    uint StartingGridVertOffset <format=hex, fgcolor=0x0000FF>;
+    if (StartingGridCount > 0)
+    {
+
+    }
+
+    uint UnkVertCount <fgcolor=0x00FF00>;
+    uint UnkVertOffset <format=hex, fgcolor=0x0000FF>;
+    if (UnkVertCount > 0)
+    {
+        cPos = FTell();
+        FSeek(UnkVertOffset);
+        trackSectionMap unkVerts(UnkVertCount);
+        FSeek(cPos);
+    }
+
+    uint UnkFaceCount <fgcolor=0x00FF00>;
+    uint UnkFaceOffset <format=hex, fgcolor=0x0000FF>;
+    if (UnkFaceCount > 0)
+    {
+        cPos = FTell();
+        FSeek(UnkFaceOffset);
+        FaceMap unkFaces(UnkFaceCount);
+        FSeek(cPos);
+    }
+
+    uint _empty_ <hidden=true>;
+    uint _empty_ <hidden=true>;
+    uint _empty_ <hidden=true>;
+    uint _empty_ <hidden=true>;
+
+    uint unkCount <fgcolor=0x00FF00>;
+    uint unkOffset <format=hex, fgcolor=0x0000FF>;
+
+    uint RoadVertCount <fgcolor=0x00FF00>;
+    uint RoatVertOffset <format=hex, fgcolor=0x0000FF>;
+    if (RoadVertCount > 0)
+    {
+        cPos = FTell();
+        FSeek(RoatVertOffset);
+        Vec3Map roadVerts(RoadVertCount) <bgcolor=0xAAAA00>;
+        FSeek(cPos);
+    }
+
+    uint RoadFaceCount <fgcolor=0x00FF00>;
+    uint RoadFaceOffset <format=hex, fgcolor=0x0000FF>;
+    if (RoadFaceCount > 0)
+    {
+        cPos = FTell();
+        FSeek(RoadFaceOffset);
+        FaceMap roadFaces(RoadFaceCount * 8);
+        FSeek(cPos);
+    }
+
+    uint _empty_;
+    uint _empty_;
+
+    uint UnkVertCount2 <fgcolor=0x00FF00>;
+    uint UnkVertOffset2 <format=hex, fgcolor=0x0000FF>;
+
+    uint TotalBoundaryVertCount <fgcolor=0x00FF00>;
+    uint BoundaryMeshesOffset <format=hex, fgcolor=0x0000FF>;
+    if (TotalBoundaryVertCount > 0)
+    {
+        cPos = FTell();
+        FSeek(BoundaryMeshesOffset);
+        BoundaryVec3Map boundaryMeshes(TotalBoundaryVertCount) <comment="Has submeshes, count for each defined by the short">;
+        FSeek(cPos);
+    }
+
+    uint BoundaryFaceCount <fgcolor=0x00FF00>;
+    uint BoundaryFaceOffset <format=hex, fgcolor=0x0000FF>;
+    if (BoundaryFaceCount > 0)
+    {
+        cPos = FTell();
+        FSeek(BoundaryFaceOffset);
+        FaceMap boundaryFaces(BoundaryFaceCount); // TStrip
+        FSeek(cPos);
+    }
+
+    uint PitStopCount <fgcolor=0x00FF00>;
+    uint PitStopOffset <format=hex, fgcolor=0x0000FF>;
+
+    uint UnkCount <fgcolor=0x00FF00>;
+    uint UnkOffset <format=hex, fgcolor=0x0000FF>;
+    uint unk;
+    uint unkOffsetRelatedToPitStops <format=hex, fgcolor=0x0000FF>;
+    uint unkOffset <format=hex, fgcolor=0x0000FF>;
+} rnw5;

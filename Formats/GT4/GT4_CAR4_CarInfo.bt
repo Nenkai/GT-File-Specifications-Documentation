@@ -1,0 +1,66 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct
+{
+    short unk;
+    byte unkFlags;
+    byte numCrew;
+    FSeek(FTell() + 0x08);
+    int unkOffsets[4];
+    int countMaybe;
+    int unkOffset <format=hex>;
+    int countMaybe2;
+    int unkOffset2 <format=hex>;
+    int countMaybe3;
+    int unkOffset3 <format=hex>;
+    int countMaybe4;
+    int exhaustCount <format=hex>; // Also used for the after fire
+    int exhaustPosOffset <format=hex>; // Strides of 24
+
+    int unkOffset5 <format=hex>;
+    int countMaybe6;
+    int unkOffset6 <format=hex>;
+    int unkOffset7 <format=hex>;
+    int unk; // geometry related - 0x10 is float, 0x14 is float, 0x58 is vec3, 0x6a is a short bool or count
+    int tireLabelsOffset <format=hex>;
+    float tirePosRelated <format=hex>;
+    float tirePosRelated2;
+    int bikeGeometryOffset  <format=hex>;
+    int g;
+    int h;
+} GT4CarInfo <bgcolor=cGreen>;
+
+// 0xB4000
+struct GT4CarData
+{
+    char magic[4];
+    int relocatePtr <format=hex>;
+    int fileSizeForRelocation <format=hex>;
+    int empty;
+    int carInfoOffset <format=hex>;
+    int carCollisionModel <format=hex>;
+    int actualCarModelSet <format=hex>;
+    int colorPatch <format=hex>;
+    int wheelModelSet <format=hex>; // this one gets magic checked
+    int wheelColorPatch;
+    int wingModelSet;
+    int tireModelSets[2];
+    int modelSet4;
+    int texSet;
+
+    FSeek(carInfoOffset);
+    GT4CarInfo carInfo;
+} CAR4;

@@ -68,5 +68,7 @@ struct RT05
     uint categoryCount;
     byte isCompressed;
 	byte unk[7];
+
+    FSeek(0x20);
     RT05Category categoryOffsets[categoryCount];
 } rt05;

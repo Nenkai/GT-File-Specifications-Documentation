@@ -1,0 +1,41 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int NameOffset;
+    byte unk;
+    byte ID;
+    byte loopback;
+    enum<byte> { GTSys, GTRace, GTCount, RoadNoiz, Shutter} jamID;
+
+    FSeek(NameOffset);
+    string name;
+
+    Printf(name + "\n");
+} SEParam;
+
+struct GTSoundEffect
+{
+    char Magic[4];
+    int Version;
+    int relocPtr;
+    int SE_Count;
+    
+    local int i = 0;
+    for (i; i < SE_Count; i++)
+    {
+        FSeek(0x10 + (i * 0x08));
+        SEParam se;
+    }
+} GTSE;

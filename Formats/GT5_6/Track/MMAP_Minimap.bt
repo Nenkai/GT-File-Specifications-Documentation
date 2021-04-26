@@ -32,6 +32,7 @@ typedef struct
 
 struct MMAP
 {
+    FSeek(0x9C180 + 0x180);
     char Magic[4];
     int VersionMaybe;
     byte unk;

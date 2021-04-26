@@ -1,0 +1,131 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct
+{
+    int a;
+    int b;
+    int offset <format=hex>;
+    int padding;
+} Cluster;
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    float direction;
+} Grid;
+
+typedef struct
+{
+    int checkpointCount;
+    int checkpointsOffset <format=hex>;
+    float checkpointVCoords[checkpointCount];
+
+} Checkpoint;
+
+typedef struct 
+{
+    float startVCoord;
+    float goalVCoord;
+    short checkpointCount;
+    short unk;
+    short gadgetsCount;
+    short sectionStopCount;
+    int stopPointsOffset <format=hex, fgcolor=cRed>; // X Y Z Pos
+    int checkpointsOffset <format=hex, fgcolor=cRed>; // stride of 0x08 - count, idk
+    int gridOffsets <format=hex, fgcolor=cRed>;
+    int gadgetsOffset <format=hex, fgcolor=cRed>;
+} Section;
+
+struct GT4Runway
+{
+    char magic[4];
+    int relocatePtr;
+    int relocateFileSize <format=hex>;
+    int flags; // 0x80 = Has Light Set Data?
+
+    FSeek(0x14);
+    float courseLength;
+    float startVCoord;
+    float goalVCoord;
+    float boundsSet1[3];
+    float boundsSet2[3]; 
+    short checkpointCount;
+    short unkCount;
+    short unkCount2;
+
+    short lightingCount; // Can be 0 - "ConcourseLighting::compute"
+
+    FSeek(0x44);
+    short gadgetsCount;
+    short roadVerticesCount;
+    short roadFacesCount;
+    short clusterCount;
+    short unkCount;
+
+    FSeek(0x50);
+    short unkCount; // Max 9?
+    short gridCount;
+    short sectionCount;
+
+    FSeek(0x58);
+    int checkpointsOffset <format=hex, fgcolor=cRed>;
+    int gridsOffset <format=hex, fgcolor=cRed>;
+    int unk <format=hex, fgcolor=cRed>; // Strides of 0x28, determined by the count at 0x3c - elf code suggests quads
+    int unk2; // Faces, strides of 0x02
+
+    // Entering light zone?
+    FSeek(0x68);
+    int lightSetsOffset <format=hex, fgcolor=cRed>;
+    int unkOffset <format=hex, fgcolor=cRed>;
+    int gadgetsOffsets <format=hex, fgcolor=cRed>; // Strides of 0x20
+
+    // Strides of 0x10. 0xc & d of it is an index for 0x6c offset, when multiplied by two
+    int roadVerticesOffset <format=hex, fgcolor=cRed>;
+
+    // Strides of 0x0c. int at 0x8-0x0c is used to index data at 0x8c
+    int roadFacesOffset <format=hex, fgcolor=cRed>;
+    int clusterListOffset <format=hex, fgcolor=cRed>;
+
+    int traversalDataOffset <format=hex, fgcolor=cRed>; // encoded in 6 bit chunks
+    int boundVerticesOffset <format=hex, fgcolor=cRed>; 
+
+    int unkoffset <format=hex, fgcolor=cRed>;
+    int unkOffset2 <format=hex, fgcolor=cRed>; // Indexes which points to verticles
+
+    FSeek(0x90);
+    int pitStopsOffset <format=hex, fgcolor=cRed>; // Depends on grid count
+
+    //if ( ((1 << v3) & (unsigned int)result) != 0 )
+    //    break;
+    int tireSoundRelatedFlagsMaybe;
+
+    FSeek(0x9c);
+    int sectionsOffset <format=hex, fgcolor=cRed>;
+
+    FSeek(gridsOffset);
+    Grid grids[gridCount]; // Note: GT4 doesn't even use the count. be aware.
+
+    FSeek(checkpointsOffset);
+    Checkpoint checkpoints[checkpointCount];
+
+    FSeek(clusterListOffset);
+    Cluster clusters[clusterCount];
+
+    FSeek(sectionsOffset);
+    Section sections[sectionCount];
+
+} RWY4;

@@ -1,7 +1,7 @@
 //------------------------------------------------
 //--- 010 Editor v10.0.2 Binary Template
 //
-//      File: TXS3 Gran Turismo File Header Specifics
+//      File: TXS3 Gran Turismo Image Header Specifics
 //   Authors: Nenkai#9075
 //   Version: 1.0
 //   Purpose: 
@@ -11,29 +11,62 @@
 //   History: 
 //------------------------------------------------
 
+typedef enum <ubyte> 
+{
+    DXT10_MORTON = 0x85,
+    DXT1 = 0x86,
+    DXT1_2 = 0xA6,
+    DXT3 = 0x87,
+    DXT3_2 = 0xA7,
+    DXT5 = 0x88,
+    DXT5_2 = 0xA8,
+    DXT10 = 0xA5,
+} PixelFormat;
+
 typedef struct 
 {
-    uint unk;
-    uint unk2;
-    short unk3;
-    ubyte imageFormat;
-    byte unk34;
+    BitfieldDisablePadding();
+    uint head0;
+    uint offset;
+    byte pad0;
+    byte mipmap;
+    PixelFormat imageFormat;
 
-    byte unkB1;
-    byte unkB2;
-    byte unkB3;
-    byte unkB4;
-    uint unk5;
-    uint unk6;
-    uint unk7;
+    byte dim : 4;
+    byte noborder : 1;
+    byte cubemap : 1;
+    byte location : 2;
+
+    byte zfunc : 5;
+    byte gamma : 8;
+    byte signExt : 4;
+    byte unk : 3;
+    byte wrap_t : 4;
+    byte useAniso : 3;
+    byte wrap_s : 5;
+    
+    byte enable : 1;
+    short lodMin : 12;
+    short lodMax : 12;
+    byte maxAniso : 3;
+    byte pad1 : 4;
+    
+    int remap;
+
+    byte signedARGB : 5;
+    byte mag : 3;
+    byte min : 8;
+    byte convultion : 3;
+    short lodBias : 11;
+
     ushort Width;
     ushort Height;
-    uint what;
-    uint what2;
-    ushort what3;
-    ushort Stride;
-    uint what4;
-    uint what5;
+    uint borderColor;
+    uint head1;
+    uint depth : 12;
+    uint pitch : 20;
+    uint reserved0;
+    uint reserved1;
     uint what6;
     uint imageID;
     uint what7;
@@ -45,7 +78,7 @@ typedef struct ImageData
     uint ImageOffset <format=hex>;
     uint ImageSize <format=hex>;
     byte _two_;
-    ubyte ImageFormat;
+    PixelFormat ImageFormat;
     byte MipmapCount;
     byte _two2_;
     ushort ImageWidth;
@@ -69,6 +102,9 @@ struct TXS3 {
     char Magic[4];
     if (Magic[0] == '3')
         LittleEndian();
+    else
+        BigEndian();
+
     uint FileSize;
     uint FileMemPtr <format=hex>;
     uint RealSize;
@@ -83,4 +119,4 @@ struct TXS3 {
 
     FSeek(unkOffset2);
     ImageDataMap data(FileImageCount);
-} txs2;
+} txs3;

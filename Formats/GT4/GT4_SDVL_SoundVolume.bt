@@ -1,0 +1,42 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    float Ads_Racing;
+    float Midi;
+    float Race_SE;
+    float Menu_SE;
+    float ADS_Other;
+} ChannelFormat;
+
+struct SoundVolume
+{
+    char Magic[4];
+    int Version;
+    int relocPtr;
+    int channelFormatCount;
+    int channelFormatSize <format=hex>;
+
+    local int i = 0;
+    for (i; i < channelFormatCount; i++)
+    {
+       FSeek(0x14 + (i * (channelFormatSize * 4)));
+       if (i == 0)
+          ChannelFormat monaural <comment="Mono">;
+       else if (i == 1)
+          ChannelFormat stereo;
+       else if (i == 2)
+          ChannelFormat prologic2 <comment="Surround">;
+    }
+} SDVL;

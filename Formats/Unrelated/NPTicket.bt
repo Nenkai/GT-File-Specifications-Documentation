@@ -1,0 +1,99 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct (short len)
+{
+    char data[len];
+} BStringStru;
+
+typedef struct (short size)
+{
+    byte data[size];
+} Blob;
+
+string PrintTimeMS(uint64 time)
+{
+    time64_t t = (time64_t)((uint64)time / 1000);
+    string s = TimeTToString(t);
+    return s;
+}
+
+typedef enum <short> 
+{ 
+    Empty = 0, 
+    UInt32 = 1, 
+    UInt64 = 2, 
+    BString = 4, 
+    Time = 7, 
+    Binary = 8,
+    Unk = 0x3010,
+    BirthDate = 0x3011,
+} DataType;
+
+// Signature
+// Login Time
+// Login Expiry
+// user_id
+// online_id
+// region
+// domain
+// service_id
+// status
+// ?
+// Frame Head
+
+struct NPTicket
+{
+    byte verMajor : 4;
+    byte verMinor;
+    int unk;
+    
+    int TicketSize;
+    int FrameHead;
+
+    
+    short unk;
+    while (FTell() < TicketSize)
+    {
+        DataType type;
+        short dataLen <hidden=true>;
+        switch (type)
+        {
+            case Binary:
+                Blob blob(dataLen);
+                break;
+            case BString:
+                BStringStru str(dataLen);
+                break;
+            case UInt32:
+                uint val;
+                break;
+            case UInt64:
+                uint64 val;
+                break;
+            case Time:
+                uint64 timeMS <comment=PrintTimeMS>;
+                break;
+            case BirthDate:
+                short year;
+                byte month;
+                byte day;
+                break;
+        }
+
+    }
+    
+} ticket;
+

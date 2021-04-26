@@ -1,0 +1,159 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+typedef struct (int basePos)
+{
+    int curveOffset <format=hex, fgcolor=cRed>;
+    if (curveOffset == 0)
+        return;
+    local int cPos = FTell();
+    FSeek(basePos + curveOffset);
+
+    int a;
+    int b;
+    float StartX;
+    float StartY; // Doesn't seem to matter?
+    float StartZ;
+    float unk;
+    float DestX;
+    float DestY;
+    float DestZ;
+    int unk;
+
+    FSeek(cPos);
+} CurveGT4 <optimize=false>;
+
+local int basePos;
+
+typedef struct
+{
+    int CameraFlags <format=hex>;
+    float vPosStart;
+    float vPosEnd;
+    int unk;
+    float unk;
+    int unk;
+    int unk;
+    float unk; // had no effect changing it
+    float gamma_brightness;
+    float unks[4]; // unused? changing any of them had no effect
+
+    local int b = FTell();
+    CurveGT4 PositionXY (basePos);
+    CurveGT4 CameraElevation_No_No (basePos);
+    CurveGT4 FocusPosMaybe (basePos);
+    CurveGT4 HRotation_Unk_Unk (basePos);
+    CurveGT4 ElevationAgain (basePos);
+    CurveGT4 Unk_NoEffect (basePos);
+    CurveGT4 FoV_No_No (basePos);
+    CurveGT4 PermRotationMaybe_Left_Right_No (basePos);
+    CurveGT4 NoEffect (basePos);
+    CurveGT4 curve10 (basePos);
+    float unk;
+    float unk2;
+    CurveGT4 NoEffect (basePos) <format=hex, fgcolor=cRed>;
+    CurveGT4 YCameraRot (basePos) <format=hex, fgcolor=cRed>; // Can be random too?
+    int unkOffset2 <format=hex, fgcolor=cRed>;
+    int unkOffset2 <format=hex, fgcolor=cRed>;
+
+    int a;
+    int b;
+    int c;
+    CurveGT4 NextCameraElevation (basePos) <format=hex, fgcolor=cRed>;
+    int pad[20];
+
+    // Stride is 0x7C on GT4
+} CameraGT4 <optimize=false>;
+
+typedef struct
+{   
+    LittleEndian();
+    local int basePos = FTell();
+    char Magic[4];
+    int relocPtr;
+    int unk;
+    int relocSize <format=hex, fgcolor=cRed>;
+
+    FSeek(basePos + 0x14);
+    /* tested on GT5 Autumn Mini (c129.cam)
+    the first general floats determine the total duration of the cameras, why these start values, i don't know
+    then the actual cameras's values determine the "part of time" within the total time
+    so if i set 1340 to 1600, at the beginning the camera will bug out because theres no camera set between 1340 and 1600
+    then at 1600 to 2035 the camera starts, but it'll be much faster than normal
+    */
+    float vStart; // General time start?
+    float vEnd; // General time end?
+
+    FSeek(basePos + 0x20);
+    int camerasCount <fgcolor=cGreen>;
+    int camerasOffset <format=hex, fgcolor=cRed>;
+
+    int a;
+    int distributeCameraCount <format=hex, fgcolor=cGreen>;
+    int distributeCameraOffsets <format=hex, fgcolor=cRed>; // 0x30 strides
+    
+    int unkVCoordsCount <fgcolor=cGreen>;
+    int unkVCoordsOffset <format=hex, fgcolor=cRed>; // Floats
+    
+
+    FSeek(basePos + 0x3C);
+    int sectionLapCount <fgcolor=cGreen>;
+    int sectionLapOffset  <format=hex, fgcolor=cRed>; // int strides
+
+    FSeek(basePos + camerasOffset);
+    CameraGT4 cameras[camerasCount] <bgcolor=cBlue>;
+
+    BigEndian();
+} ReplayGT4 <optimize=false>;
+
+typedef struct
+{
+    int CamType <bgcolor=cGray>;
+    int Rep4Offset <format=hex, bgcolor=cGray, fgcolor=cRed>;
+    int _pad_[6] <bgcolor=cGray, hidden=true>;
+
+    FSeek(Rep4Offset);
+    ReplayGT4 rep4;
+} Rep4Meta <optimize=false>;
+
+
+struct GCam
+{
+    char Magic[4];
+    int relocPtr;
+    FSkip(4);
+    int fileSize;
+
+    int map1Count <bgcolor=cPurple, fgcolor=cGreen>;
+    int map1Offset <bgcolor=cPurple, format=hex, fgcolor=cRed>;
+    int map2Count <bgcolor=cPurple, fgcolor=cGreen>;
+    int map2Offset <format=hex, bgcolor=cPurple, fgcolor=cRed>;
+
+    int _pad_[8] <bgcolor=cPurple>;
+
+    local int i = 0;
+    for (i; i < map1Count; i++)
+    {
+        FSeek(map1Offset + (i * 0x20));
+        Rep4Meta rep; // Second is pre-race cam
+    }
+    
+    i = 0;
+    for (i; i < map2Count; i++)
+    {
+        FSeek(map2Offset + (i * 0x20));
+        Rep4Meta rep;
+    }
+    FSeek(map1Offset);
+} CameraFile;

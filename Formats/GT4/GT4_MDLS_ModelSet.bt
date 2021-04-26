@@ -1,0 +1,300 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo PS2 - Model Set
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BitfieldDisablePadding();
+
+local byte stop = false;
+
+typedef struct
+{
+    byte nextSize;
+
+    /* 800000 = Unk
+     * 800001 = Model Namen or "useOldLOD" for MultiSkinModel
+     * 800002 = Brake Offset as float
+    */
+    int ID : 24 <format=hex>;
+        
+    if (nextSize == 0xFF || ID == 0)
+    {
+        stop = true;
+        return;
+    }   
+
+    local int dataLen = nextSize * 4;
+    byte data[nextSize * sizeof(int)];
+} ExtensionData <optimize=false>;
+
+typedef struct
+{
+    while (true)
+    {
+        ExtensionData ext;
+        if (stop)
+            break;
+    }
+
+} ExtensionMap;
+
+typedef struct
+{
+    short formatSizeMaybe : 9;
+    short pad : 5;
+    short unk2 : 2;
+
+    byte boolFlag;
+    byte unk : 7;
+    byte unk : 1;
+
+    byte unkBits;
+    byte unk;
+    
+} unkStr <optimize=false>;
+
+typedef struct (int pos, int baseMapPos)
+{
+    int offset <format=hex>;
+    short next0x10StridesToNextShape;
+    byte unk;
+    byte unk;
+
+    FSeek(baseMapPos + offset);
+    unkStr u;
+
+} ShapeRaw <optimize=false>;
+
+typedef struct (int shapeCount, int baseShapesPos)
+{
+    local int i = 0;
+    local int cPos = FTell();
+    for (i = 0; i < shapeCount; i++)
+    {
+        FSeek(cPos + (i * 0x08));
+        ShapeRaw shape (cPos, baseShapesPos);
+    }
+} ShapeRawMap <optimize=false>;
+
+typedef struct 
+{
+    int offset <format=hex>;
+    FSeek(offset);
+
+    local int baseShapePos = FTell();
+    int unk;
+    float unk;
+    byte unk : 5; // 2 to 6 are handled specifically
+    byte unk : 3;
+
+    byte unkFlags <format=hex>;
+    short shapeRawCount;
+    short unkCount;
+    short unkCount2;
+    ShapeRawMap raw(shapeRawCount, baseShapePos);
+
+} Shape <optimize=false>;
+
+typedef struct (int shapeCount)
+{
+    local int i = 0;
+    local int cPos = FTell();
+    for (i = 0; i < shapeCount; i++)
+    {
+        FSeek(cPos + (i * 0x04));
+        Shape shape;
+    }
+} ShapeMap <optimize=false>;
+
+typedef struct
+{
+    enum<byte> 
+    {
+        EndTerminator = 0,
+
+        pgluCallShape = 4,
+        Unk = 6,
+        LODData = 7,
+        Seek = 8,
+        Unk9 = 9,
+        pglEnable_4 = 0x1A,
+        pglDisable_4 = 0x1b,
+        pglAlphaFunc1ub = 0x1c,
+        pglEnable_3 = 0x1D,
+        pglDisable_3 = 0x1E,
+        pglDestinationAlphaFunc = 0x1F,
+        pglBlendFunc1ub = 0x20,
+        pglFogColor1ui = 0x21,
+        pgluColor = 0x22,
+        pglFogColor1ui2 = 0x23,
+        pglDepthMask_0Disable = 0x25,
+        pglDepthMask_1Enable = 0x26,
+        pgluCacheTexSetPath3 = 0x2b,
+        externalTexSet = 0x50,
+
+    }type;
+
+    if (type == 0)
+    {
+        stop = true;
+        return;
+    }
+    if (type == 4)
+    {
+        byte shapeIndex <comment="To Shape Map">;
+    }
+    if (type == 6)
+    {
+        short unk;
+        byte unkCount;
+        short unks[unkCount]  <format=hex>;
+    }
+    else if (type == 7)
+    {
+        byte data[0x10];
+        byte lodCount;
+        short unkOffsets[lodCount] <format=hex>;
+    }
+    else if (type == 8)
+    {
+        byte offsetFromHere <format=hex>;
+    }
+    else if (type == 9)
+    {
+        short unkOffset <format=hex>;
+    }
+    else if (type == 0x1c)
+    {
+        byte unk;
+        byte unk2;
+    }
+    else if (type == 0x1f)
+    {
+        byte unk;
+    }
+    else if (type == 0x20)
+    {
+        byte unk;
+        byte unk2;
+    }
+    else if (type == 0x21)
+    {
+        uint color;
+    }
+    else if (type == 0x2b)
+    {
+        byte textureIndex;
+    }
+    else if (type == 0x50)
+    {
+        byte externalTexSetIndex;
+    }
+    
+
+
+} Inst <optimize=false>;
+
+typedef struct
+{
+    while (true)
+    {
+        Inst ext;
+        if (stop)
+            break;
+    }
+
+} InstMap;
+
+typedef struct 
+{
+    byte unk;
+    byte unkAlways8;
+    byte unk;
+    byte unk;
+    int unk <format=hex>;
+    float usedToComputeModelLODWidth;
+    float usedToComputeBounds;
+    int e;
+    int f;
+    int modelData <format=hex>;
+    int h;
+    int j;
+    int k;
+
+    FSeek(modelData);
+    InstMap map;
+    
+
+} Model;
+
+struct GT4_ModelSet
+{   
+    char Magic[4];
+    int a;
+
+    FSeek(0x10);
+    int fileSize <format=hex>;
+
+    FSeek(0x16);
+    short modelsCount;
+    short color;
+
+    FSeek(0x1c);
+    short texSetArrayWidth;
+    short texSetArrayHeight;
+
+
+    FSeek(0x20);
+    short countFor0x4C;
+
+    FSeek(0x24);
+    short hostMethodInfoCount;
+    short registerDataCount;
+    short outRegisterInfoCount;
+
+    FSeek(0x2a);
+    short modelSetSymbols;
+    byte unkColorIndex;
+    byte unkColorIndex2;
+    short bindMatrixCount;
+    
+    FSeek(0x36);
+    short unkCount; // Negative, intentional
+    int modelsOffset; // Strides of 0x28, count at 0x16
+    int shapesOffset <format=hex>; // Strides of 0x4 - offsets
+
+    FSeek(0x40);
+    int matTable <format=hex>;
+    int texSetsOffset <format=hex>;
+    int bindMatrixMapOffset <format=hex>;
+    int hostMethodInfoOffset <format=hex>; // strides of 0x08
+
+    FSeek(0x50);
+    int registerInfoOffset <format=hex>;
+    int outRegisterInfoOffset <format=hex>;
+    int modelSetSymbolsOffset <format=hex>; // 0x08 toc - offset then index?
+    
+    FSeek(0x60);
+    int unkColorsArrayOffset;
+
+    FSeek(0x68);
+    int extensionDataOffset <format=hex>;
+
+    FSeek(shapesOffset);
+    ShapeMap shapes(1);
+
+    FSeek(modelsOffset);
+    Model models[modelsCount];
+
+    FSeek(extensionDataOffset);
+    ExtensionMap extensionMap;
+
+} MDLS <optimize=false>;

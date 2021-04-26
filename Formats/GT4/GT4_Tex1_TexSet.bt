@@ -1,0 +1,175 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: PGLUTexSet
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: Texture Set for PS2 PDI Games
+//  Category: Game Sprites
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Research has been done with IDA on TT Demo
+
+BitfieldDisablePadding();
+
+string PrintBufferSize(int64 val)
+{
+    string s;
+    SPrintf(s, "%d bytes (* 64 - << 6)", val * 64);
+    return s;
+}
+
+typedef enum <byte> 
+{ 
+    PSMCT32 = 0, // RGBA32, uses 32-bit per pixel.
+    PSMCT24 = 1, // RGB24, uses 24-bit per pixel with the upper 8 bit unused.
+    PSMCT16 = 2, // RGBA16 unsigned, pack two pixels in 32-bit in little endian order.
+    PSMCT16S = 10, // RGBA16 signed, pack two pixels in 32-bit in little endian order.
+    PSMT8 = 19, // 8-bit indexed, packing 4 pixels per 32-bit.
+    PSMT4 = 20, // 4-bit indexed, packing 8 pixels per 32-bit.
+    PSMT8H = 27, // 8-bit indexed, but the upper 24-bit are unused.
+    PSMT4HL = 26, // 4-bit indexed, but the upper 24-bit are unused.
+    PSMZ32 = 48,  // 32-bit Z buffer
+    PSMZ24 = 49, // 24-bit Z buffer with the upper 8-bit unused
+    PSMZ16 = 50, // 16-bit unsigned Z buffer, pack two pixels in 32-bit in little endian order.
+    PSMZ16S = 58, // 16-bit signed Z buffer, pack two pixels in 32-bit in little endian order.
+} PS2PixelFormat;
+
+/* Everything about "buffer size related" is explained as such:
+ * 
+ * The game takes the 0x10 value, multiplies it by 64 (or << 6) (GSBuffer::registerTexture at 0x001052D8)
+ * It seems - could be wrong - used to allocate the pixel buffer
+ * It may add 0x7EE to it, or an extra 0xFFE if its still under 0 (?) (at sub_4AADF8)
+ * Then divide the final value by 0x800. Afterwards is unknown.
+ *
+ * Later on the game seemingly goes through the texture bits and updates 
+   the 14 bit values by ((value/size allocated? >> 6) - field at 0x10)
+ */
+
+typedef struct
+{
+    // the "Params", are according to the function in TT Demo Executable:
+    // 0x0049AFE0 void pgluTexParameter(PGLUTexture *this, __int64 paramNumb, __int16 value)
+    
+    int64 field_0x00_BufferWidthRelated  : 14;
+    int64 field_0x00_BufferWidthRelated2 : 6;
+    PS2PixelFormat TexPS2PixelFormat : 6;
+    int64 field_0x00_Unk       : 4;
+    int64 field_0x00_Unk       : 4;
+    int64 field_0x00_UnkParam0 : 1;
+    int64 field_0x00_UnkParam1 : 2;
+    int64 field_0x00_UnkBufferRelated : 14 <comment="Linked to the main texture's field at 0x10, this substracted by the texture's">;
+    int64 field_0x00_Unk       : 4;
+    int64                      : 1; // Always seen that set as 0..
+    int64 field_0x00_Unk       : 5;
+    int64 field_0x00_Unk       : 3;
+
+    int64 field_0x08_UnkParam6 : 1;
+    int64 field_0x08_UnkParam7_Count : 3;
+    int64                      : 1;
+    int64 field_0x08_UnkParam2 : 1;
+    int64 field_0x08_UnkParam3 : 3;
+    int64                      : 10;
+    int64 field_0x08_UnkParam9 : 2;
+    int64                      : 11;
+    int64 field_0x08_UnkParam8 : 12;
+    int64  /* Pad To 64 */     : 20;
+
+    int64 field_0x10_BufferRelated : 14 <comment="Will be set if the count at 0x08 is > 0">;
+    int64 field_0x10_BufferRelated : 6 <comment="Will be set if the count at 0x08 is > 0">;
+    int64 field_0x10_BufferWidthRelated3 : 14 <comment="Will be set if the count at 0x08 is > 0">;
+    int64 field_0x10_BufferWidthRelated4 : 6 <comment="Will be set if the count at 0x08 is > 0">;
+    int64 field_0x10_BufferWidthRelated5 : 14 <comment="Will be set if the count at 0x08 is > 0">;
+    int64 field_0x10_BufferWidthRelated6 : 6 <comment="Will be set if the count at 0x08 is > 0">;
+    int64    /* Pad To 64 */             : 4 <comment="Will be set if the count at 0x08 is > 0">;
+
+    int64 field_0x18_Unk : 14 <comment="Will be set if the count at 0x08 is >= 4">;
+    int64 field_0x18_Unk : 6 <comment="Will be set if the count at 0x08 is >= 4">;
+    int64 field_0x18_BufferWidthRelated3 : 14 <comment="Will be set if the count at 0x08 is >= 4">;
+    int64 field_0x18_BufferWidthRelated4 : 6 <comment="Will be set if the count at 0x08 is >= 4">;
+    int64 field_0x18_BufferWidthRelated5 : 14 <comment="Will be set if the count at 0x08 is >= 4">;
+    int64 field_0x18_BufferWidthRelated6 : 6 <comment="Will be set if the count at 0x08 is >= 4">;
+    int64    /* Pad To 64 */             : 4 <comment="Will be set if the count at 0x08 is >= 4">;
+
+    int64 TexRegionBits_UnkParam4 : 2;
+    int64 TexRegionBits_UnkParam5 : 2;
+    int64 TexRegionBits_Unk : 10;
+    int64 TexRegionBits_AspectWidth : 10 <comment="Add 1">;
+    int64 TexRegionBits_Unk : 10;
+    int64 TexRegionBits_AspectHeight : 10 <comment="Add 1">;
+    int64    /* Pad To 64 */         : 20;
+
+} PGLUTexture <optimize=false>;
+
+typedef struct
+{
+    int bufferOffset <format=hex, fgcolor=cRed>;
+    short bufferSizeRelated; // 20 when palette - offset of some kind maybe? related to texture's 0x10
+    byte isTiled;
+
+    /* Type used as such to determine the tex size:
+    int pixels = (width * height);
+    case PSMCT32:
+      v7 = 4 * pixels;
+      pixels = (v7 + 15) >> 4;
+      break;
+    case PSMCT24:
+      v7 = 3 * pixels;
+      pixels = (v7 + 15) >> 4;
+      break;
+    case PSMCT16:
+    case PSMCT16S:
+      v7 = 2 * pixels;
+      pixels = (v7 + 15) >> 4;
+      break;
+    case PSMT8:
+    case PSMT8H:
+      pixels = ((int)pixels + 15) >> 4;
+      break;
+    case PSMT4:
+    case 36:
+    case 44:
+      pixels = ((int)pixels + 31) >> 5;
+      break;
+    default:
+      break;
+    */
+    PS2PixelFormat PixelFormat;
+    short width;
+    short height;
+} BufferInfo <optimize=false>;
+
+// 0x30 Header
+struct Tex1
+{
+    char Magic[4];
+    int relocPtr;
+    int unkptr;
+    int fileSize <format=hex>;
+
+    short unk; // Filled at runtime?
+    short BufferSizeToAllocate <comment=PrintBufferSize>; // << 6 is applied - seems related to 0x800 blocks? see explanation on top
+
+    FSeek(0x14);
+    short PGLUTextureCount <fgcolor=cGreen>;
+    short BufferInfoCount <fgcolor=cGreen>;
+    int PGLUTextureMapOffset <format=hex, fgcolor=cRed>;
+
+    local int cPos = FTell();
+    FSeek(PGLUTextureMapOffset);
+    PGLUTexture textures[PGLUTextureCount];
+    FSeek(cPos);
+
+    int bufferInfoMapOffset  <format=hex, fgcolor=cRed>;
+    cPos = FTell();
+    FSeek(bufferInfoMapOffset);
+
+    BufferInfo bufferInfos[BufferInfoCount];
+    FSeek(cPos);
+    int unkOffset3 <format=hex, fgcolor=cRed>;
+    int clutAnimationOffset <format=hex, fgcolor=cRed>; // TODO - havent seen any texture that uses that yet
+    int unkOffset4 <format=hex, fgcolor=cRed>;
+} pgluTexSet; 

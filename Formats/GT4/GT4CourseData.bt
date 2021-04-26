@@ -1,0 +1,75 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+struct 
+{
+   // Empty. Intentional.
+   int magic;
+   int courseModelSet <format=hex, fgcolor=cRed>;
+   int visionListOffset1 <format=hex, fgcolor=cRed>;
+   int visionListOffset2 <format=hex, fgcolor=cRed>;
+   int visionListOffset3 <format=hex, fgcolor=cRed>;
+   int modelSet2;
+   int visionListOffset4; // 0x18
+   int visionListOffset5; // 0x1c
+   int visionListOffset6; // 0x20
+   int reflectionModelSet; // 0x24
+   int visionListOffset7; // 0x28
+   byte _skipped_[8]; // intentional
+   int reflectionMaskModelSet; // 0x34
+   int reflectionVisionList;
+   byte _skipped2_[8]; // intentional
+   int afterModelSet;
+   int afterVisionList;
+   int visionList10;
+   int visionList11;
+   int skyModelSet;
+   int fogModelMaybe;
+   int modelSet8;
+   int modelSet9;
+
+   // c8 is modelset
+   int a;
+   int pgluMapTexSet1 <format=hex, fgcolor=cRed>;
+   int _empty_; // uncalled from function
+   int unk; // Intentionally set to 0
+   int flareCourseEffect <format=hex, fgcolor=cRed>;
+   int billboardSet <format=hex, fgcolor=cRed>;
+   int unkOffset <format=hex, fgcolor=cRed>;
+   int fogEnvPtr <format=hex, fgcolor=cRed>;
+   int miniMap <format=hex, fgcolor=cRed>;
+   int texSet2 <format=hex, fgcolor=cRed>;
+   int courseSound <format=hex, fgcolor=cRed>;
+   int empty; // Intentional
+   int pgluMapShape <format=hex, fgcolor=cRed>;
+   int texSet3 <format=hex, fgcolor=cRed>;
+   int texSet4 <format=hex, fgcolor=cRed>;
+   int texSet5 <format=hex, fgcolor=cRed>;
+   int gt4ReplayData <format=hex, fgcolor=cRed>;
+   int texSet6 <format=hex, fgcolor=cRed>;
+   int modelSet10 <format=hex, fgcolor=cRed>;
+   int replayData <format=hex, fgcolor=cRed>;
+   int replayData2 <format=hex, fgcolor=cRed>;
+   int replayData3 <format=hex, fgcolor=cRed>;
+   int gadgetShapeList <format=hex, fgcolor=cRed>;
+   int preRaceCamerasREP4 <format=hex, fgcolor=cRed>;
+   int texSet7 <format=hex, fgcolor=cRed>;
+   int skyReflectionModelSet <format=hex, fgcolor=cRed>;
+   int dPhotoMode <format=hex, fgcolor=cRed>;
+   int startCameraMotionSet <format=hex, fgcolor=cRed>;
+   int motionSet2 <format=hex, fgcolor=cRed>;
+   int fgSkyModelSet <format=hex, fgcolor=cRed>;
+   int rwy <format=hex, fgcolor=cRed>;
+} CourseDataGT4;

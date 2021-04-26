@@ -1,0 +1,51 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    byte strLen;
+    char str[strLen];
+} String1;
+
+typedef struct
+{
+    String1 Name;
+    uint OffsetEnd <format=hex, fgcolor=cRed>;
+    byte unk;
+    ubyte Type;
+
+    if (Type == 139)
+    {
+        String1 str;
+    }
+    else if (Type == 140)
+    {
+        byte ArrayLength;
+        int unk;
+    }
+} Field;
+
+struct MPRJ
+{
+    char Magic[4];
+    byte unk;
+    int fileSize <format=hex>;
+    
+    String1 str;
+    Field root;
+    Field test2;
+    Field test3;
+    Field test4;
+} mprj;

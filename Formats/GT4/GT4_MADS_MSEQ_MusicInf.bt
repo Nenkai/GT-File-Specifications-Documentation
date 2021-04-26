@@ -1,0 +1,72 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct
+{
+    int RawNameOffset <format=hex, fgcolor=cRed>;
+    int FileNameOffset <format=hex, fgcolor=cRed>;
+    int MusicNameOffset <format=hex, fgcolor=cRed>;
+    int ArtistNameOffset <format=hex, fgcolor=cRed>;
+    int GenreNameOffset <format=hex, fgcolor=cRed>;
+
+    int OrderIndex;
+
+    FSeek(RawNameOffset);
+    string RawName;
+
+    FSeek(FileNameOffset);
+    string FileName;
+
+    FSeek(MusicNameOffset);
+    string MusicName;
+
+    FSeek(ArtistNameOffset);
+    string ArtistName;
+
+    FSeek(GenreNameOffset);
+    string GenreName;
+
+} BGMData;
+
+typedef struct
+{
+    int dataOffset <format=hex, fgcolor=cRed>;
+    int dataCount <fgcolor=cGreen>;
+
+    local int i = 0;
+    for (i; i < dataCount; i++)
+    {
+        FSeek(dataOffset + (i * 0x18));
+        BGMData data;
+    }
+
+} BGMList <optimize=false>;
+
+struct 
+{
+    char Magic[4];
+
+    int unk;
+    int relocPtr;
+    int playlistCount;
+    int trackCount <format=hex>;
+
+    local int i = 0;
+    for (i; i < playlistCount; i++)
+    {
+        FSeek(0x14 + (i * 0x08));
+        BGMList bgmList;
+    }
+} MusicInf;

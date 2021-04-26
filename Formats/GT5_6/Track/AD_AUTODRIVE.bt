@@ -106,7 +106,7 @@ typedef struct
 struct TrackAutoDrive
 {
     // Base Header, 0x80
-    uint _empty_;
+    uint relocPtr;
     uint ADNLHeaderOffset <format=hex>;
     uint unkTree1Offset <format=hex>;
     uint unkTree2Offset <format=hex>;

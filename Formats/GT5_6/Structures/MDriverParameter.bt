@@ -1,0 +1,128 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: MDriverParameter structure for GT6
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: Used to transmit driver parameters
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    uint MDriverParameterVersion;
+    uint unk2;
+    // 4 bit type
+    // 4 bit port
+    // 6 bit residence_id
+    // 1 bit unk
+    // 1 bit unk
+    short type4_port4_residence_id6_unk1_unk1;
+
+    char playerName[MDriverParameterVersion >= 110 ? 0x20 : 0x40];
+
+
+    if (MDriverParameterVersion >= 109)
+        char online_id[0x12];
+    char regionName[0x04];
+
+    struct DriverSettings
+    {
+        ubyte gtbehavior_version;
+        byte manual;
+        byte assist_tcs;
+        byte assist_asm;
+        byte steering_assist_type;
+        byte unk;
+        byte active_steering;
+        byte active_brake_level;
+        byte physics_pro;
+        byte competition_flags;
+        byte pad_yaw_gain;
+        byte assist_4was;
+        byte unk;
+        byte RTAUnadjustable;
+    } settings;
+    
+    byte cornering_skill;
+    byte accelerating_skill;
+    byte unk;
+    byte braking_skill;
+    byte special_driver_type;
+    byte starting_skill;
+    byte unk;
+    struct GrowthParameter
+    {
+        byte growable;
+        byte spec_id;
+        byte fatigue;
+        byte lv;
+        int experience;
+        short win_count;
+        short race_count;
+        short days;
+        byte dec_master_rate;
+        byte unk;
+        short stamina;
+        byte mentality;
+        byte condition;
+        byte temper;
+        byte flexibility;
+        byte skill_base_breaking;
+        byte skill_base_cornering;
+        byte skill_base_shift_up;
+        byte skill_base_cornerout;
+        byte skill_base_line_trace;
+        byte skill_base_steer_reaction;
+        byte skill_heat_offset;
+        byte unk;
+        short unk;
+        byte bonus_skill_b;
+        byte bonus_skill_c;
+        byte bonus_skill_s;
+        byte bonus_skill_o;
+    } growth_parameter;
+
+    if (MDriverParameterVersion < 113)
+    {
+        if (MDriverParameterVersion >= 110)
+        {
+            short head_code;
+            short body_code;
+            short head_color_code;
+            short body_color_code;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+
+            short unk;
+            short unk;
+            short unk;
+            short unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+            uint unk;
+
+            byte _padding[7]; // it ends here, don't ask why
+        }
+        else if (MDriverParameterVersion <= 106)
+        {
+            byte unk;
+            byte unk;
+            // 4 bits
+            byte unk;
+            byte unk;
+        }
+    }
+} MDriverParameter;

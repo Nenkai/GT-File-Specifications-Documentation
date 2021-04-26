@@ -38,13 +38,13 @@ string OutputDateTime( uint s )
     return Day_s+"/"+Month_s+"/"+Year_s+" "+Hour_s+":"+Minute_s;
 }
 
-struct MCarParameter
+typedef struct
 {   
     // 110 is GT5
     // 109 is GT6
 
-    int version;
-    if (version >= 110)
+    int cpVersion;
+    if (cpVersion >= 110)
         int mainHeaderSize <format=hex>;
 
     byte unkHeaderBits[4];
@@ -65,7 +65,7 @@ struct MCarParameter
         byte unk;
         int everlasting;
 
-        if (version != 110)
+        if (cpVersion != 110)
         {
             short unk;
             byte wheelDirtFront;
@@ -86,7 +86,7 @@ struct MCarParameter
         }
     } condition;
 
-    if (version >= 110)
+    if (cpVersion >= 110)
     {
         int garage_id;
         short ride_count;
@@ -109,7 +109,7 @@ struct MCarParameter
         int obtain_date <comment=OutputDateTime>;
         short win_count;
         short unk;
-        if (version == 109)
+        if (cpVersion >= 108)
         {
             short unk;
             short unk;
@@ -118,7 +118,7 @@ struct MCarParameter
 
     struct CarParts
     {
-        if (version >= 110)
+        if (cpVersion >= 110)
         {
             short partsVersion;
             short partsSize;
@@ -169,7 +169,7 @@ struct MCarParameter
         int intercooler;
         int ascc;
         int tcsc;
-        if (version < 106 || version >= 110)
+        if (partsVersion < 106)
             int unk;
         int supercharger;
         int intake_manifold;
@@ -203,7 +203,7 @@ struct MCarParameter
         byte Param4WDMaybe;
         byte FrontABSMaybe;
         byte RearABSMaybe;
-        if (version >= 110)
+        if (partsVersion < 110)
         {
             byte downforceFront;
             byte downforceRear;
@@ -214,12 +214,12 @@ struct MCarParameter
             short downforceRear;
         }
 
-        byte turbo_boost1;
-        byte turbo_peakRpm1;
-        byte turbo_response1;
-        byte turbo_boost2;
-        byte turbo_peakRmp2;
-        byte turbo_response2;
+        ubyte turbo_boost1;
+        ubyte turbo_peakRpm1;
+        ubyte turbo_response1;
+        ubyte turbo_boost2;
+        ubyte turbo_peakRmp2;
+        ubyte turbo_response2;
         byte FrontCamber;
         byte RearCamber;
         short FrontRideheight;
@@ -227,7 +227,7 @@ struct MCarParameter
         signed byte FrontToe;
         signed byte RearToe;
 
-        if (version >= 110) // It's questionable GT5 time
+        if (partsVersion < 110) // It's questionable GT5 time
         {
             byte FrontSpringRate;
             byte RearSpringRate;
@@ -269,7 +269,8 @@ struct MCarParameter
         short unk;
         short weightModifyRatio;
         short powerModifyRatio;
-        if (version >= 110)
+        
+        if (partsVersion < 110)
         {
             byte unk;
             byte unk;
@@ -281,84 +282,103 @@ struct MCarParameter
         byte RearBrakeBalanceLevel;
         byte ABSCorneringControlLevel;
 
-        if (version >= 110)
+        if (partsVersion >= 110)
             short unk;
         else
             byte unk;
+
+        
         short unk;
 
-        if (version >= 110)
-            byte GasCapacity;
-        else
+        if (partsVersion < 110)
             short GasCapacity;
+        else
+            byte GasCapacity;
         short PowerLimiter;
     
         int horn_sound_id;
 
-        if (version == 109)
+        if (partsVersion >= 108)
         {
             byte wheel_color; // ?
     
             short bodyPaintID;
             short wheelPaintID;
             short brakePaintID;
-            short customRearWingPaintID;
+
+            if (partsVersion >= 117)
+                short customRearWingPaintID;
 
             short front_wheel_width;
             short front_wheel_diameter;
             short rear_wheel_width;
             short rear_wheel_diameter;
-            short unk;
 
             byte wheel_inchup;
             byte decken_preface;
             byte decken_number;
-            byte decken_type; // Flag?
 
-            byte test5[21];
-    
-            byte unkCustomWing1;
-            byte unkCustomWing2;
-            byte unkCustomWing3;
-            byte customWingStays;
-            byte unkCustomWing5;
+            if (partsVersion < 116)
+            {
+                byte field_0x139;
+                byte decken_custom_type;
+                byte window_sticker_custom_type;
+                int64 unk;
+                int64 decken_custom_id;
+                int64 window_sticker_custom_id;
+                byte wingCustomized;
+            }
+            else 
+            {
+                // 6 bits for the 3 bytes
+                int64 unk;
+                int64 decken_custom_id;
+                int64 window_sticker_custom_id;
+                // byte window_sticker_custom_id; 1 bit
+                byte pad;
+            }
+            
+            byte wingFlapType;
+            byte wingEndPlateType;
+            byte wingStayType;
+            byte wingMountType;
             short wingWidthOffset;
             short wingHeightOffset;
             short wingAngleOffset;
+            short unk;
+            short unk2;
 
-            byte test50[4];
+            byte unkBits[3];
 
-            /* 
-               Not flags
-                Comfort Hard = 00 00
-               Comfort Medium = 02 20
-               Comfort Soft = 04 40
-               Sports Medium = 08 80
-               Racing Hard = 0E E0
-               Racing Medium = 11 00
-               Racing Soft = 13 20
-               Intermediate = 17 60
-               Heavy Wet = 19 80
-               Dirt = 1B A0
-               Snow = 1D C0
-            */
+            if (partsVersion == 115)
+            {
+                byte meterBits[2];
+                short meterBits2[3];
 
-            byte unk; // 0x60 when racing brake calipers installed
-            byte unk; // 0x02 when sports exhaust installed, 0x08 = Carbon Bonnet installed?
-            byte unk;
-
-            short customMeterData;
-            short customMeterUnk; // -1 when installed? DD FF when two installed?
-            uint customMeter1Color;
-    
-            short unkToeAngle1;
-            short unkToeAngle2;
-            byte test6[2];
+                short backlightColorR;
+                short backlightColorG;
+                short backlightColorB;
+                short backlightColorA;
+            }
+            else if (partsVersion >= 116)
+            {
+                int meterBits;
+                byte backlightColorR;
+                byte backlightColorG;
+                byte backlightColorB;
+                byte backlightColorA; 
+            }
+            
+            if (partsVersion >= 118)
+            {
+                short frontToe;
+                short rearToe;
+            }
         }
 
     } Settings;
     
-    if (version >= 110)
+    if (cpVersion >= 110)
     {
         FSeek(mainHeaderSize + 0x40 + Settings.partsSize);
         short obtain_id;
@@ -367,6 +387,8 @@ struct MCarParameter
         short unk;
     }
     else
-        byte purchasedBits[0x20];
+    {
+        byte purchasedBits[cpVersion < 109 ? 0x40 : 0x20];
+    }
 
-} cp;
+} MCarParameter;

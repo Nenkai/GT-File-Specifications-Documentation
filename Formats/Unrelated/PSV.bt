@@ -1,0 +1,66 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct _sceMcStDateTime {
+    ubyte  Resv2;
+    ubyte  Sec;
+    ubyte  Min;
+    ubyte  Hour;
+    ubyte  Day;
+    ubyte  Month;
+    ushort Year;
+} sceMcStDateTime;
+
+local byte test = 0;
+typedef struct 
+{
+    sceMcStDateTime createDate;
+    sceMcStDateTime modified;
+    int fileSize <format=hex, fgcolor=cGreen>;
+    int attribute;
+    char fileName[0x20];
+    int fileOffset <format=hex, fgcolor=cRed>;
+} File;
+
+typedef struct 
+{
+    sceMcStDateTime createDate;
+    sceMcStDateTime modified;
+    int filesInDir <format=hex, fgcolor=cGreen>;
+    int attribute;
+    char fileName[0x20];
+} MainDir;
+
+struct
+{
+    char Magic[8];
+    byte KeySeed[0x14];
+    byte Sha1HMacDigest[0x14];
+    FSkip(8);
+
+    int type;
+    int type2;
+    int usedBytes;
+    int startIconSysOffset <format=hex, fgcolor=cRed>;
+    int iconSysFileSize <format=hex>;
+    int icon1Offset <format=hex, fgcolor=cRed>;
+    int icon1Size <format=hex, fgcolor=cGreen>;
+    int icon2Offset <format=hex, fgcolor=cRed>;
+    int icon2Size <format=hex, fgcolor=cGreen>;
+    int icon3Offset <format=hex, fgcolor=cRed>;
+    int icon3Size <format=hex, fgcolor=cGreen>;
+    int fileCount;
+    MainDir mainDir;
+    File files[fileCount];
+
+} PSV;
