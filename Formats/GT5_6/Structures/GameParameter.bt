@@ -15,7 +15,7 @@
 #include <MDriverParameter.bt>
 
 BigEndian();
-
+BitfieldDisablePadding();
 
 /* Define General Types */
 typedef struct
@@ -180,7 +180,7 @@ typedef struct
 
 typedef struct
 {
-    BitfieldDisablePadding();
+    
     // Bitstream starts
     SessionType session_type : 3;
     RaceType race_type : 13;
@@ -205,12 +205,16 @@ typedef struct
 
     if (RaceParameterVersion < 117) 
     {
-        int unkPad : 17;
+        int unkPad : 23;
     }
     else
     {
         byte unk : 2;
         if (RaceParameterVersion < 119)
+        {
+            int unkPad : 21;
+        }
+        else
         {
             byte force_pitcrew_off : 1;
             int unkPad : 20;
@@ -804,7 +808,7 @@ typedef struct
     int player_no;
     CarThin car;
     MCarParameter car_parameter;
-    FSeek(FTell() + 2);
+    FSeek(FTell());
 
     AlignedString4 driver_name;
     AlignedString4 driver_region;
@@ -1248,27 +1252,29 @@ typedef struct
     byte room_max;
     byte racer_max;
     short race_countdown;
+    
+    uint online_flags_padding;
+    byte unused : 1;
+    byte use_custom_countdown : 1;
+    byte use_custom_grid : 1;
+    byte show_hidden_config : 1;
+    byte overwrite_user_region : 1;
+    byte overwrite_user_name : 1;
+    byte fill_vacancy : 1;
+    byte is_automated : 1;
+    byte is_saved_course : 1;
+    byte is_only_rental_car : 1;
+    byte is_only_garage_car : 1;
+    byte is_autocratic : 1;
+    short pad : 13;
+    byte is_lan : 1;
+    byte unk : 1;
+    byte voice_chat : 1;
+    byte exclude_blocklist : 1;
+    byte unk : 1;
+    byte nat_restriction : 1;
+    byte autogrant_ownership : 1;
 
-    /*   
-    param_1->is_only_rental_car = (byte)(val >> 0x16) & 0x1;
-    param_1->is_saved_course = (bool)((byte)(val >> 0x17) & 0x1);
-    param_1->nat_restriction = (byte)(val >> 0x1) & 0x1;
-    param_1->exclude_blocklist = (bool)((byte)(val >> 0x3) & 0x1);
-    param_1->voice_chat = (bool)((byte)(val >> 0x4) & 0x1);
-    param_1->is_lan = (bool)((byte)(val >> 0x6) & 0x1);
-    param_1->is_autocratic = (bool)((byte)(val >> 0x14) & 0x1);
-    param_1->is_only_garage_car = (bool)((byte)(val >> 0x15) & 0x1);
-    param_1->use_custom_grid = (bool)((byte)(val >> 0x1d) & 0x1);
-    param_1->autogrant_ownership = (bool)((byte)val & 0x1);
-    param_1->is_automated = (bool)((byte)(val >> 0x18) & 0x1);
-    param_1->fill_vacancy = (bool)((byte)(val >> 0x19) & 0x1);
-    param_1->overwrite_user_name = (bool)((byte)(val >> 0x1a) & 0x1);
-    param_1->overwrite_user_region = (bool)((byte)(val >> 0x1b) & 0x1);
-    param_1->show_hidden_config = (bool)((byte)(val >> 0x1c) & 0x1);
-    param_1->use_custom_countdown = (bool)((byte)(val >> 0x1e) & 0x1);
-    */
-    int64 online_flags;
-   
     byte unk_field0x84;
     byte unk_field0x88;
     byte freerun_penalty;
@@ -1377,7 +1383,7 @@ typedef struct
 struct FGP
 {
     //FSeek(0x12);
-    FSeek(0x1590);
+    FSeek(0x16B0);
     // xx xx 4F 17 - Game Parameter File Main Magic. E5 means GT5, E6 means GT6
     uint Magic <format=hex, fgcolor=cPurple>;
     int GameParameterVersion <fgcolor=cGreen>;
@@ -1405,7 +1411,7 @@ struct FGP
     }
 
     int MagicTerminator <format=hex, fgcolor=cPurple>; // E6 E6 4F 18
-    if (MagicTerminator != 0xE6E64F18)
+    if (MagicTerminator != 0xE6E64F18) // May be notted? GT6 1.22 EU at 0x34bb9c - xoris
         Printf("Magic terminator did not finish with 0xE6E64F18, file may be invalid\n");
     else
     {

@@ -11,6 +11,7 @@
 //   History: 
 //------------------------------------------------
 BigEndian();
+BitfieldDisablePadding();
 
 // Credits Razerman; Logic originally found used in ghidra, seen used in the custom tracks bts
 string OutputDateTime( uint s )
@@ -43,11 +44,19 @@ typedef struct
     // 110 is GT5
     // 109 is GT6
 
+    local int cpBaseOffset = FTell();
+
     int cpVersion;
     if (cpVersion >= 110)
         int mainHeaderSize <format=hex>;
 
-    byte unkHeaderBits[4];
+    byte unkCondBits1 : 1;
+    byte unkCondBits2 : 6;
+    byte unkCondBits3 : 6;
+    short unkCondBits4Skipped : 12;
+    byte unkCondBits5 : 1;
+    byte unkCondBits6 : 5;
+    byte unkCondBits7 : 1;
 
     struct CarCondition
     {
@@ -63,7 +72,10 @@ typedef struct
         byte rainX; // Goes away when custom one is set
         byte body_coating;
         byte unk;
-        int everlasting;
+
+        byte everlasting : 1;
+        byte unkk2 : 1;
+        int unkk3 : 30;
 
         if (cpVersion != 110)
         {
@@ -74,7 +86,7 @@ typedef struct
             int unk;
             int unk;
             int scratch;
-            int unk;
+            int scratchBits32;
 
             byte unk;
             byte unk;
@@ -296,64 +308,78 @@ typedef struct
             byte GasCapacity;
         short PowerLimiter;
     
-        int horn_sound_id;
+        int horn_sound_id : 32;
 
         if (partsVersion >= 108)
         {
-            byte wheel_color; // ?
+            byte wheel_color : 8; // ?
     
-            short bodyPaintID;
-            short wheelPaintID;
-            short brakePaintID;
+            short bodyPaintID : 16;
+            short wheelPaintID : 16;
+            short brakePaintID : 16;
 
             if (partsVersion >= 117)
-                short customRearWingPaintID;
+                short customRearWingPaintID : 16;
 
-            short front_wheel_width;
-            short front_wheel_diameter;
-            short rear_wheel_width;
-            short rear_wheel_diameter;
+            short front_wheel_width : 16;
+            short front_wheel_diameter : 16;
+            short rear_wheel_width : 16;
+            short rear_wheel_diameter : 16;
 
-            byte wheel_inchup;
-            byte decken_preface;
-            byte decken_number;
+            byte wheel_inchup : 8;
+            byte decken_preface : 8;
+            byte decken_number : 8;
 
             if (partsVersion < 116)
             {
-                byte field_0x139;
-                byte decken_custom_type;
-                byte window_sticker_custom_type;
-                int64 unk;
-                int64 decken_custom_id;
-                int64 window_sticker_custom_id;
-                byte wingCustomized;
+                byte field_0x139 : 8;
+                byte decken_custom_type : 8;
+                byte window_sticker_custom_type : 8;
+                int64 unk : 64;
+                int64 decken_custom_id : 64;
+                int64 window_sticker_custom_id : 64;
+                byte wingCustomized : 8;
             }
             else 
             {
-                // 6 bits for the 3 bytes
+                byte unk : 2;
+                byte decken_custom_type : 2;
+                byte window_sticker_custom_type : 2;
+
                 int64 unk;
                 int64 decken_custom_id;
                 int64 window_sticker_custom_id;
-                // byte window_sticker_custom_id; 1 bit
-                byte pad;
+                byte wingCustomized : 1;
             }
             
-            byte wingFlapType;
-            byte wingEndPlateType;
-            byte wingStayType;
-            byte wingMountType;
-            short wingWidthOffset;
-            short wingHeightOffset;
-            short wingAngleOffset;
-            short unk;
-            short unk2;
+            byte wingFlapType : 8;
+            byte wingEndPlateType : 8;
+            byte wingStayType : 8;
+            byte wingMountType : 8;
+            short wingWidthOffset : 16;
+            short wingHeightOffset : 16;
+            short wingAngleOffset : 16;
+            short unk : 16;
+            short unk2 : 16;
 
-            byte unkBits[3];
-
+            byte unkWingBits : 3;
+            byte unkWingBits2 : 1;
+            byte unkWingBits3 : 4;
+            byte unkWingBits4 : 4;
+            byte unkWingBits5 : 2;
+            byte unkWingBits6 : 2;
+            byte unkWingBits7 : 3;
+            byte unkWingBits8 : 2;
+            byte unkWingBits9 : 1;
+            byte unkWingBits10 : 2;
             if (partsVersion == 115)
             {
-                byte meterBits[2];
-                short meterBits2[3];
+                byte meterBits1 : 8;
+                byte meterBits2 : 8;
+                
+                short meterBits3 : 16;
+                short meterBits4 : 16;
+                short meterBits5 : 16;
 
                 short backlightColorR;
                 short backlightColorG;
@@ -362,17 +388,22 @@ typedef struct
             }
             else if (partsVersion >= 116)
             {
-                int meterBits;
-                byte backlightColorR;
-                byte backlightColorG;
-                byte backlightColorB;
-                byte backlightColorA; 
-            }
+                byte meterBits1 : 2;
+                byte meterBits2 : 2;
+                short meterBits3 : 10;
+                short meterBits4 : 10;
+                short meterBits5 : 10;
+                
+                byte backlightColorR : 8;
+                byte backlightColorG : 8;
+                byte backlightColorB : 8;
+                byte backlightColorA : 8;
+            }        
             
             if (partsVersion >= 118)
             {
-                short frontToe;
-                short rearToe;
+                short frontToe : 16;
+                short rearToe : 16;
             }
         }
 
@@ -390,5 +421,8 @@ typedef struct
     {
         byte purchasedBits[cpVersion < 109 ? 0x40 : 0x20];
     }
+
+    local int alignedBlobSize = (FTell() + (0xf - cpBaseOffset)) & 0xFFFFFFF0; // 0x10 Align
+    FSeek(cpBaseOffset + alignedBlobSize);
 
 } MCarParameter;

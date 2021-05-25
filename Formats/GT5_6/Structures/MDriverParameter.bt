@@ -12,17 +12,22 @@
 //------------------------------------------------
 
 BigEndian();
+BitfieldDisablePadding();
+
+typedef enum <byte> { NONE = -1, PLAYER, AI, GPS = 3 } DriverType;
+typedef enum <byte> { NORMAL, LEADING, OVAL, OVALNASCAR } SpecialAIType;
 
 typedef struct
 {
+    local int basePos = FTell();
+
     uint MDriverParameterVersion;
-    uint unk2;
-    // 4 bit type
-    // 4 bit port
-    // 6 bit residence_id
-    // 1 bit unk
-    // 1 bit unk
-    short type4_port4_residence_id6_unk1_unk1;
+    uint MDriverParameterSize <format=hex>;
+    byte port : 4;
+    DriverType type : 4;
+    byte residence_id : 6;
+    byte isGhost : 1;
+    byte display_driving_line : 1;
 
     char playerName[MDriverParameterVersion >= 110 ? 0x20 : 0x40];
 
@@ -51,11 +56,16 @@ typedef struct
     
     byte cornering_skill;
     byte accelerating_skill;
-    byte unk;
+    // these two are assumptions
+    byte ai_pit_decision_10_vitality_before_race : 4;
+    byte ai_pit_decision_10_tire_before_race : 4;
     byte braking_skill;
-    byte special_driver_type;
+    SpecialAIType special_ai_type;
     byte starting_skill;
-    byte unk;
+    byte ai_reaction_level : 3;
+    byte unk6 : 4;
+    byte disable_bspec_skill : 1;
+
     struct GrowthParameter
     {
         byte growable;
@@ -96,33 +106,45 @@ typedef struct
             short body_code;
             short head_color_code;
             short body_color_code;
-            uint unk;
+            byte unk8 : 2;
+            byte unk9 : 1;
+            byte unk10 : 5;
+            byte unk;
+            short unk;
+
             uint unk;
             uint unk;
             uint unk;
             uint unk;
             uint unk;
 
-            short unk;
-            short unk;
-            short unk;
-            short unk;
-            uint unk;
-            uint unk;
-            uint unk;
-            uint unk;
-            uint unk;
-            uint unk;
+            short head_code2;
+            short body_code2;
+            short head_color_code2;
+            short body_color_code2;
+            byte unk8_2 : 2;
+            byte unk9_2 : 1;
+            byte unk10_2 : 5;
+            byte unk_2;
+            short unk_2;
 
-            byte _padding[7]; // it ends here, don't ask why
+            uint unk_2;
+            uint unk_2;
+            uint unk_2;
+            uint unk_2;
+            uint unk_2;
         }
         else if (MDriverParameterVersion <= 106)
         {
-            byte unk;
-            byte unk;
-            // 4 bits
-            byte unk;
-            byte unk;
+            byte unk : 6;
+            byte unk : 6;
+            byte unk : 6;
+            byte unk : 6;
+            byte unk : 1;
+            byte unk : 1;
+            byte unk : 6;
         }
     }
+
+    FSeek(basePos + MDriverParameterSize);
 } MDriverParameter;
