@@ -150,6 +150,11 @@ typedef enum <byte> { Sort_NONE, Sort_RANDOM, POINT_UP, POINT_DOWN, FASTEST_UP, 
                   PREV_RANK, PREV_RANK_REVERSE } GridSortType;
 typedef enum <byte> { FLAGSET_NONE, FLAGSET_NORMAL, FLAGSET_F1, FLAGSET_NASCAR, FLAGSET_LOW, FLAGSET_RALLY } Flagset;
 typedef enum <byte> { Light_AUTO, Light_OFF, POSIITON, LOW_BEAM, HIGH_BEAM } LightingMode;
+typedef enum <byte> { NORMAL_sst, BLACK_OUT, GREEN_LIGHT } StartSignalType;
+typedef enum <byte> { MODERATE_lmt, STRONG_lmt , REAL_lmt } LowMuType;
+typedef enum <byte> { WEAK_bd, MIDDLE_bd, STRONG_bd } BehaviorDamageType;
+typedef enum <byte> { GAME, SIMULATION, REAL } BehaviorSlipStreamType;
+typedef enum <byte> { DISABLE, ALONE, ALONE_SEQUENCE, TWIN, TWIN_SEQUENCE, /* ALL_MEMBERS = 0 */} AttackSeperateType;
 
 typedef struct
 {
@@ -239,24 +244,24 @@ typedef struct
     byte unk : 3;
     byte auto_standing_delay : 8;
     byte unk : 3;
-    byte start_signal_type : 2;
+    StartSignalType start_signal_type : 2;
     byte skipped : 2;
     byte unk : 1;
     byte bench_test : 1;
     byte mu_ratio_100 : 8;
     byte unk : 1;
     byte enable_damage : 1;
-    byte low_mu_type : 2;
-    byte behavior_damage : 2;
+    LowMuType low_mu_type : 2;
+    BehaviorDamageType behavior_damage : 2; 
     byte gps : 1;
     byte penalty_no_reset : 1;
-    byte behavior_slipstream_type : 2;
+    BehaviorSlipStreamType behavior_slipstream_type : 2;
     byte pit_constraint : 4;
     byte need_tire_change : 1;
     byte after_race_penalty_sec5 : 4;
     byte is_speedtest_milemode : 1;
     LineGhostRecordType line_ghost_record_type : 2;
-    byte attack_seperate_type : 2;
+    AttackSeperateType attack_seperate_type : 2;
     byte penalty_level : 8;
     byte auto_start_with_session : 8;
     byte auto_end_session_with_finish : 8;
@@ -309,7 +314,7 @@ typedef struct
     
     byte fixed_retention : 1;
     byte initial_retention10 : 4;
-    byte decisive_weather : 3;
+    enum <byte> { NONE_dw, SUNNY, RAINY, SNOWY } decisive_weather : 3;
     short weather_total_sec : 16;
     WeatherData weather;
 
@@ -353,23 +358,23 @@ typedef struct
     byte unk : 3;
     byte auto_standing_delay : 8;
     byte unk : 3;
-    byte start_signal_type : 2;
+    StartSignalType start_signal_type : 2;
     byte unk : 1;
     byte bench_test : 1;
     ubyte mu_ratio_100 : 8;
     byte unk : 1;
     byte enable_damage : 1;
-    byte low_mu_type : 2;
-    byte behavior_damage : 2;
+    LowMuType low_mu_type : 2;
+    BehaviorDamageType behavior_damage : 2;
     byte gps : 1;
     byte penalty_no_reset : 1;
-    byte behavior_slipstream_type : 2;
+    BehaviorSlipStreamType behavior_slipstream_type : 2;
     byte pit_constraint : 4;
     byte need_tire_change : 1;
     byte after_race_penalty_sec5 : 4;
     byte is_speedtest_milemode : 1;
     LineGhostRecordType line_ghost_record_type : 2;
-    byte attack_seperate_type : 2;
+    AttackSeperateType attack_seperate_type : 2;
     byte penalty_level : 8;
     byte auto_start_with_session : 1;
     byte auto_end_session_with_finish : 1;
@@ -574,7 +579,7 @@ typedef struct
     byte boost_flag : 8;
     byte boost_type : 8;
     byte disable_recording_replay : 8;
-    byte ghost_presence_type : 8;
+    enum <byte> { NORMAL_gpt, REAL_gpt } ghost_presence_type : 8; // GhostPresenceType
     
     struct EventVList
     {
@@ -627,8 +632,8 @@ typedef struct
     int PlayStyleVersion <fgcolor=cGreen>;
     if (PlayStyleVersion < 102)
     {
-        int bspec_style;
-        int play_style;
+        enum <int> { BOTH_A_AND_B, ONLY_A, ONLY_B } bspec_style; // BSpecStyle
+        enum <int> { RACE_ps, DEMO_ps, GAMBLE } play_type; // PlayType
         byte no_quickmenu;
         byte no_instant_replay;
         byte replay_record_enable;
@@ -859,8 +864,9 @@ typedef struct
 
         int entry_num;
         int player_num;
-        int generate_type;
-        int enemy_list_type;
+        enum <int> { NONE_gt, SHUFFLE_gt, ONE_MAKE_gt, ENEMY_LIST, SPEC_DB, ORDER_gt, ENTRY_BASE_SHUFFLE,
+            ENTRY_BASE_ORDER_gt } generate_type;
+        enum <int> { SAME_elt, MIX, ONLY_PREMIUM, ONLY_STANDARD } enemy_list_type; // EnemyListType
         uint64 race_code;
         int ai_skill;
         int ai_skill_braking;
@@ -885,7 +891,7 @@ typedef struct
         short gap_for_start_rolling_distance;
         short rolling_start_v;
         byte rolling_start_param;
-        byte enemy_sort_type;
+        enum <byte> { NONE_est, PP_ASCEND, PP_DESCEND } enemy_sort_type;
     } entry_generate;
 
     int entry_count;
@@ -897,7 +903,7 @@ typedef struct
 {
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 A1 00
     int EvalConditionVersion <fgcolor=cGreen>;
-    int type;
+    enum <int> { NONE_et, TIME_et, ORDER_et, PYLON_et, DRIFT_et, VS_GHOST_et, DIST_et, FUEL_et, OVER_TAKE } type; // EvalType
     int gold;
     int silver;
     int bronze;
@@ -908,7 +914,8 @@ typedef struct
 {
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 A1 00
     int EvalConditionVersion <fgcolor=cGreen>;
-    int type;
+    enum <int> { NONE_at, STOP_at, GOAL_V_at, TIME_at, ORDER_at, PYLON_at, SLIP_ANGLE, MORE_SPEED,
+        MAX_GFORCE, OVERTAKE_NUM } type; // AchieveType
     int num;
 } AchieveCondition;
 
@@ -925,10 +932,12 @@ typedef struct
 {
     int Magic <format=hex, fgcolor=cPurple>;
     int LicenseConditionDataVersion <fgcolor=cGreen>;
-    byte check_type;
-    byte condition;
-    byte connection;
-    byte result_type;
+    enum <byte> { RANK_ct, OTHER_SUBMODE, TOTAL_TIME, LAP_TIME, BEST_LAP_TIME, LAP_COUNT, VELOCITY, V_POSITION,
+        GADGET_COUNT, COURSE_OUT, HIT_COUNT, HIT_POWER, HIT_WALL, FUEL_AMOUNT, COMPLETE_FLAG, WRONG_WAY_COUNT,
+        ROAD_DISTANCE, STANDING_TIME, COURSE_OUT_TIME, FUEL_CONSUMPTION, FLOATING_TIME, ILLEGAL_ct } check_type; // LicenseCheckMode
+    enum <byte> { EQUAL, NOTEQUAL, GREATER, LESS, GREATER_EQUAL, LESS_EQUAL } condition; // LicenseConditionType
+    enum <byte> { OR, AND, XOR } connection; // LicenseConnectionType
+    enum <byte> { EMPTY_rt, FAILURE_rt, CLEAR_rt, BRONZE_rt, SILVER_rt, GOLD_rt } result_type; // LicenseResultType
     float float_value;
     uint uint_value;
     int int_value;
@@ -940,7 +949,7 @@ typedef struct
     int LicenseConditionVersion <fgcolor=cGreen>;
     byte use_basic_finish;
     byte stop_on_finish;
-    byte display_mode;
+    enum <byte> { NONE_dm, PYLON_TIME, PYLON_NUM, FUEL_DIST, FUEL_TIME, DRIFT_SCORE_dm } display_mode; // LicenseConditionDisplayMode
     
     int gadget_name_count;
     if (gadget_name_count > 0)
@@ -969,7 +978,7 @@ typedef struct
 {
     int Magic <format=hex, fgcolor=cPurple>; // E6 E8 DC CF
     int DriftConditionVersion <fgcolor=cGreen>;
-    byte drift_mode_type;
+    enum <byte> { NONE_dmt, FREELAP, FREESECTION, ONELAP_dmt, SECTION_dmt, USER_V_dmt } drift_mode_type; // DriftModeType
     if (DriftConditionVersion >= 101)
     {
         byte launch_speed;
@@ -1021,7 +1030,7 @@ typedef struct
         int entry_present_size;
         if (entry_present_size > 0)
             GameItem entry_present[entry_present_size];
-        byte entry_present_type;
+        enum <byte> { FINISH_ept, ALL_ept, LAP_ept } entry_present_type; // EntryPresentType
     }
 
     if (RewardVersion >= 103)
@@ -1032,7 +1041,7 @@ typedef struct
 {
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 6D E9
     int RankingVersion <fgcolor=cGreen>;
-    short type;
+    enum <short> { TIME_rt, DRIFT_rt } type; // RankingType
     short is_local;
     short replay_rank_limit;
     short display_rank_limit;
@@ -1057,7 +1066,7 @@ typedef struct
     byte upload_video;
     byte export_video;
     byte data_logger;
-    byte replay_recording_quality;
+    enum <byte> { EXTRA_HIGH_rrq, HIGH_rrq, LOW_rrq, EXTRA_LOW_rrq, FULL_rrq } replay_recording_quality; // ReplayRecordingQuality
     byte auto_save;
     int video_format;
     int audio_format;
@@ -1117,27 +1126,35 @@ typedef struct
     float vcoord;
 } StageResetData <optimize=false>;
 
+typedef enum <byte>
+{
+    DEFAULT_slt,
+    RANK_slt,
+    SLOT,
+    FRONT_2GRID,
+} StateLayoutType;
+
 typedef struct 
 {
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 04 DD
     int StageDataVersion <fgcolor=cGreen>;
 
-    byte layout_type_at_quick;
+    StateLayoutType layout_type_at_quick;
     int at_quick_count;
     if (at_quick_count > 0)
         StageResetData at_quick[at_quick_count];
     
-    byte layout_type_before_start;
+    StateLayoutType layout_type_before_start;
     int before_start_count;
     if (before_start_count > 0)
         StageResetData before_start[before_start_count];
     
-    byte layout_type_countdown;
+    StateLayoutType layout_type_countdown;
     int countdown_count;
     if (countdown_count > 0)
         StageResetData countdown[countdown_count];
     
-    byte layout_type_race_end;
+    StateLayoutType layout_type_race_end;
     int race_end_count;
     if (race_end_count > 0)
         StageResetData race_end[race_end_count];
@@ -1186,10 +1203,15 @@ typedef struct
     int Magic <format=hex, fgcolor=cPurple>; // E6 E8 DC CF
     int EventVersion <fgcolor=cGreen>;
     int64 event_id <fgcolor=cRed>;
-    int game_mode;
+    enum <int> { SINGLE_RACE, TIME_ATTACK, DRIFT_ATTACK, FREE_RUN, EVENT_RACE, EVENT_RALLY,
+        SPLIT_BATTLE, SPLIT_ONLINE_BATTLE, ONLINE_ROOM, ONLINE_BATTLE, ONLINE_TIME_ATTACK, LICENSE,
+        ADHOC_BATTLE_PRO, ADHOC_BATTLE_AMA, ADHOC_BATTLE_SHUFFLE, MULTIMONITOR_CLIENT, BEHAVIOR,
+        RACE_EDIT, RANKING_VIEW, COURSE_EDIT, SCHOOL, ARENA, TOUR, SPEED_TEST, COURSE_MAKER,
+        DRAG_RACE, TUTORIAL, MISSION, COFFEE_BREAK, ONLINE_DRIFT_ATTACK, GPS_REPLAY, ONLINE_SINGLE_RACE,
+        ARCADE_STYLE_RACE, PRACTICE_gm } game_mode;
     
     PlayStyle play_style;
-    int event_type;
+    enum <int> { RACE, RACE_WITH_QUALIFY, TRACKDAY } event_type;
     byte inheritance;
     byte is_seasonal_event;
     short unk;
@@ -1244,11 +1266,12 @@ typedef struct
     int OnlineRoomVersion <fgcolor=cGreen>;
     AlignedString4 comment;
     AlignedString4 password;
-    byte room_type;
-    byte chat_type;
-    byte voice_quality;
-    byte voice_chat_mode;
-    byte topology;
+    enum <byte> { NONE_rt, OPEN_MATCH, QUICK_MATCH, PRIVATE_LOUNGE, 
+        SPORTS_MODE, RACE_EVENT, SIMPLE_QUICK_MATCH, CLUB_LOBBY, CLUB_EVENT } room_type; // RoomType
+    enum <byte> { VALID_ct, MODERATE_ct, NONE_ct } chat_type; // ChatType
+    enum <byte> { NONE_vq, EX_LOW_vq, VERY_LOW_vq, LOW_vq, NORMAL_vq, HIGH_vq, VERY_HIGH_vq } voice_quality; // VoiceChatQuality
+    enum <byte> { NONE_vcm, ALWAYS_OFF, ALWAYS_ON, ONLY_SPECTATOR, ONLY_RACER } voice_chat_mode; // VoiceChatMode
+    enum <byte> { Mesh, Star, Hybrid, None, Max} topology; // Toplogy
     byte room_max;
     byte racer_max;
     short race_countdown;
@@ -1275,27 +1298,34 @@ typedef struct
     byte nat_restriction : 1;
     byte autogrant_ownership : 1;
 
-    byte unk_field0x84;
-    byte unk_field0x88;
+    enum <byte> { NONE_tm, RACE_tm, ONLY_RACE, ONLY_FREERUN, DRIFT_tm, SHUFFLE_RACE, DRAG_RACE_tm } trackday_mode; //TrackDayMode
+    enum <byte> { NONE_bm, SINGLE_RACE_bm } battle_mode; // BattleMode
     byte freerun_penalty;
     byte freerun_collision;
     
     int quality_control_parameter_size;
     byte quality_control_parameter[quality_control_parameter_size];
 
-    short shuffle_params[4];
+    short shuffle_params[4]; // Shuffle Base, Shuffle Ratio
     int shuffle_params2[2];
-    int weather;
-    int game_region_code;
+
+    enum <int> { NONE_w, SUNNY_w, CLOUDY_w, RAINY_W, HEAVY_RAIN_w, SNOWY_w, HEAVY_SNOW, SUNNY_CLOUDY, SUNNY_RAINY,
+        CLOUDY_SUNNY, CLOUDY_RAINY, RAINY_SUNNY, RAINY_CLOUDY, SUNNY_CLOUDY_RAINY, SUNNY_RAINY_CLOUDY,
+        CLOUDY_SUNNY_RAINY, CLOUDY_RAINY_SUNNY, RAINY_SUNNY_CLOUDY, RAINY_CLOUDY_SUNNY, RANDOM_w, RANDOM_NO_SNOW,
+        RANDOM_NO_RAIN, RANDOM_NO_SNOW_NO_RAIN, SUNNY_DYNAMIC, CLOUDY_DYNAMIC, RAINY_DYNAMIC, HEAVY_RAIN_DYNAMIC,
+        SNOWY_DYNAMIC, HEAVY_SNOW_DYNAMIC } weather; // TrackDayWeather
+
+    enum <int> { NONE_grc, JP, US, EUROPE, ASIA, BRITISH } game_region_code;
     AlignedString4 lounge_owner_id;
 
     if (OnlineRoomVersion >= 108)
-        byte scope;
+        enum <byte> { PUBLIC, PRIVATE, FRIEND, CLUB } scope;
     else
         FSeek(FTell() + 1);
 
     short alarm_time;
-    byte room_policy;
+    enum <byte> { NONE_rp, ENJOY_RACE, FREE_RUN_rp, DRIFT, SERIOUS_RACE, 
+        LEISURELY_DRIVE, RECRUIT, SHOWING_OFF, SHARING_INFORMATION, CAFE } room_policy; // RoomPolicy
     uint generated_course_hash;
     short alarm_time_value;
     byte theme_color_index;
@@ -1307,16 +1337,17 @@ typedef struct
 
     if (OnlineRoomVersion >= 101)
     {
-        short unk_field0x8c;
-        short unk_field0x90;
-        short unk_field0x92;
+        RaceType qualifier_race_type;
+        short qualifier_begin;
+        short qualifier_period;
     }
 
     if (OnlineRoomVersion >= 102)
-        byte course_select_method;
+        enum <byte> { NONE_csm, OWNER, VOTE, RANDOM } course_select_method; // CourseSelectMethod
     
     if (OnlineRoomVersion >= 103)
-        byte unk_0x80;
+        enum <byte> { NONE_rgt, FREERUN_rgt, RACE_rgt, RACE_WITH_QUALIFIER, TIME_TRIAL, DRIFT_TRIAL,
+            RALLY_rgt, ENDURANCE, ENDURANCE_WITH_QUALIFIER } room_game_type; // RoomGameType
 
     if (OnlineRoomVersion >= 104)
     {
@@ -1327,23 +1358,29 @@ typedef struct
     
     if (OnlineRoomVersion >= 105)
     {
-        byte car_shuffle_method;
-        byte car_select_method;
-        byte car_filter_type;
-        FSeek(FTell() + 0x0F); // Intentional apparently
+        enum <byte> { NONE_csm_, PP, CATEGORY } car_shuffle_method; // CarShuffleMethod
+        enum <byte> { NONE_csm__, GARAGE, SHUFFLE, ONE_MAKE } car_select_method; // CarSelectMethod
+        enum <byte> { NONE_cft, MANUFACTURER, TAG, SPEC } car_filter_type; // CarFilterType
+        // Intentional apparently
+        FSkip(1);
+        FSkip(1);
+        FSkip(1);
+        FSkip(4);
+        FSkip(4);
+        FSkip(4);
     }
 
     if (OnlineRoomVersion >= 106)
     {
-        byte unk_field0xA8;
-        byte unkSize;
-        byte unk_array[unkSize];
+        enum <byte> { NONE_spt, CUSTOMIZED, A, B, C } series_point_type;
+        byte series_point_table_size;
+        byte series_point_table[series_point_table_size];
 
         byte booby_point;
     }
 
     if (OnlineRoomVersion >= 108)
-       byte unk_field0x94;
+       StartType trial_start_type : 8;
     
     if (OnlineRoomVersion >= 109)
         int64 club_id;
@@ -1352,7 +1389,7 @@ typedef struct
         byte matching_world_offset;
 
     if (OnlineRoomVersion >= 111)
-        byte matching_space;
+        enum <byte> { NONE_ms, GLOBAL, REGIONAL } matching_space; // MatchingSpace
 
     if (OnlineRoomVersion >= 112)
         uint matching_event_id32;
