@@ -1347,7 +1347,7 @@ typedef struct
     
     if (OnlineRoomVersion >= 103)
         enum <byte> { NONE_rgt, FREERUN_rgt, RACE_rgt, RACE_WITH_QUALIFIER, TIME_TRIAL, DRIFT_TRIAL,
-            RALLY_rgt, ENDURANCE, ENDURANCE_WITH_QUALIFIER } room_game_type; // RoomGameType
+            RALLY_rgt, ENDURANCE, ENDURANCE_WITH_QUALIFIER } room_game_mode; // RoomGameMode
 
     if (OnlineRoomVersion >= 104)
     {
@@ -1419,8 +1419,9 @@ typedef struct
 } EditorInfo;
 struct FGP
 {
-    //FSeek(0x12);
-    FSeek(0x16B0);
+    FSeek(0x12); // For FGP
+    //FSeek(0x16B0); Debug testing of a quickmatch replay
+
     // xx xx 4F 17 - Game Parameter File Main Magic. E5 means GT5, E6 means GT6
     uint Magic <format=hex, fgcolor=cPurple>;
     int GameParameterVersion <fgcolor=cGreen>;
