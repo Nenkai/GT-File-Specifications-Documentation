@@ -57,7 +57,7 @@ typedef struct
     byte mag : 3;
     byte min : 8;
     byte convultion : 3;
-    short lodBias : 11;
+    short lodBias : 12;
 
     ushort Width;
     ushort Height;
@@ -75,9 +75,9 @@ typedef struct
 
 typedef struct ImageData
 {
-    uint ImageOffset <format=hex>;
+    uint ImageOffset <format=hex, fgcolor=cRed>;
     uint ImageSize <format=hex>;
-    byte _two_;
+    byte _two_; // 0x20 flag when running
     PixelFormat ImageFormat;
     byte MipmapCount;
     byte _two2_;
@@ -86,6 +86,7 @@ typedef struct ImageData
     ushort Unk;
     ushort Unk2;
 
+    byte pad[0x0C];
 } ImageData;
 
 typedef struct (int arrSize)
@@ -98,6 +99,7 @@ typedef struct (int arrSize)
     ImageData images[arrSize];
 } ImageDataMap;
 
+// Main header is 0x40
 struct TXS3 {
     char Magic[4];
     if (Magic[0] == '3')
@@ -105,18 +107,21 @@ struct TXS3 {
     else
         BigEndian();
 
-    uint FileSize;
-    uint FileMemPtr <format=hex>;
-    uint RealSize;
+    uint FileSize <format=hex>;
+    uint BaseFilePos <format=hex>;
+    uint Unk1;
     uint Unk2;
-    ushort FileImageCount;
-    ushort FileStreamImageCount;
-    uint ImageMapHeaderOffset <format=hex>;
-    uint unkOffset2;
+    ushort TextureRenderParamCount;
+    ushort TexturemageInfoCount;
+    uint TextureRenderParamOffset <format=hex, fgcolor=cRed>;
+    uint TextureInfoOffset <format=hex, fgcolor=cRed>;
 
-    FSeek(ImageMapHeaderOffset);
-    ImageMetadataMap imageMetas(FileImageCount);
+    // Some extra offsets may appear beyond 0x20
+    // Unsupported for now (are they even used?)
 
-    FSeek(unkOffset2);
-    ImageDataMap data(FileImageCount);
+    FSeek(TextureRenderParamOffset);
+    ImageMetadataMap imageMetas(TextureRenderParamCount);
+
+    FSeek(TextureInfoOffset);
+    ImageDataMap data(TexturemageInfoCount);
 } txs3;

@@ -1,0 +1,111 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    char Magic[4];
+    int unk;
+    int OffsetReverse <format=hex>;
+    int Size <format=hex, fgcolor=cRed>;
+
+    float ElevationRelated1;
+    float angle2;
+    float angle3;
+    float ElevationRelated2;
+    int unk5;
+    float unk6;
+    float unk7;
+    float unk8;
+    uint64 RailID <format=hex>;
+    short RailIndex;
+    FSkip(6);
+    float a;
+    float b <comment="Does weird stuff with the road">;
+    float c <comment="No changes">;
+    int _pad_[3] <comment="Changes did nothing">;
+    int one;
+    float MainRoad_GroundVisualElevation;
+    float VisualElevationRelated;
+    float a;
+    float a;
+    float b;
+    float b;
+    float RightSide_Road_LengthMaybe;
+    float LeftSide_Road_LengthMaybe;
+    float unk <comment="Doesn't do anything">;
+
+
+} Rail;
+
+typedef struct (int size)
+{
+    local int i = 0;
+    local int basePos = FTell();
+    for (i; i < size; i++)
+    {
+        FSeek(basePos + (i * 4));
+        int railOffset <format=hex, fgcolor=cRed>;
+
+        FSeek(railOffset + 0x100);
+        Rail rail;
+    }
+    
+
+} RailMap;
+
+typedef struct (int size)
+{
+    local int i = 0;
+    for (i; i < size; i++)
+    {
+        struct 
+        {
+            uint64 ID <format=hex>;
+            short Index;
+            FSkip(6);
+        } RailID;
+    }
+} RailIDMap;
+
+BigEndian();
+struct RDEF
+{
+    char Magic[4];
+    int HeaderSize <format=hex>;
+    short VersionMajor;
+    short VersionMinor;
+    int FileSize <format=hex, fgcolor=cYellow>;
+
+    FSeek(0x3C);
+    int global_railIDCount <fgcolor=cGreen>;
+
+    FSeek(0x5E);
+    short railDataCount <fgcolor=cGreen>;
+    int railDataOffset <format=hex, fgcolor=cRed>;
+
+    short RailIDOffset <format=hex, fgcolor=cRed>;
+    short RailIDCount <fgcolor=cGreen>;
+    
+    int unk;
+    int SDEFOffset <format=hex, fgcolor=cRed>;
+
+    int unks[2];
+    int TextureSetOffset <format=hex>;
+
+    FSeek(RailIDOffset);
+    RailIDMap railIDs(RailIDCount);
+
+    FSeek(railDataOffset + 0x100);
+    RailMap rail(railDataCount);
+
+} RailDefinition;

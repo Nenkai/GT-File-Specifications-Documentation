@@ -1,0 +1,92 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int unk[10]; // To figure
+} PlaceObject;
+
+typedef struct (int offset, int length)
+{
+    local int j = 0;
+    for (j; j < length ; j++)
+    {
+        FSeek(offset + (j * 0x28));
+        PlaceObject placeObject;
+    }
+} PlaceObjectMap;
+
+typedef struct
+{
+    int unk;
+    int labelOffset <format=hex, fgcolor=cRed>;
+    int labelLength;
+} FrameLabel;
+
+typedef struct (int offset, int length)
+{
+    local int j = 0;
+    for (j; j < length ; j++)
+    {
+        FSeek(offset + (j * 0x14));
+        FrameLabel frameLabel;
+    }
+} FrameLabelMap;
+
+typedef struct
+{
+    int unkOffset <format=hex, fgcolor=cRed>;
+    int unk;
+} Frame;
+
+typedef struct (int offset, int length)
+{
+    local int j = 0;
+    for (j; j < length ; j++)
+    {
+        FSeek(offset + (j * sizeof(Frame)));
+        Frame frame;
+    }
+} FrameMap;
+
+typedef struct
+{
+    int PlaceObjectOffset <format=hex, fgcolor=cRed>;
+    int PlaceObjectCount <fgcolor=cGreen>;
+    int UnkOffset <format=hex, fgcolor=cRed>;
+    int _empty_;
+    int FrameLabelOffset <format=hex, fgcolor=cRed>;
+    int FrameLabelCount <fgcolor=cGreen>;
+    int FrameOffset <format=hex, fgcolor=cRed>;
+    int FrameCount <fgcolor=cGreen>;
+    int FrameCount2 <fgcolor=cGreen>;
+
+    if (PlaceObjectCount > 0)
+        PlaceObjectMap objectMap(PlaceObjectOffset, PlaceObjectCount);
+    if (FrameLabelCount > 0)
+        FrameLabelMap frameLabelMap(FrameLabelOffset, FrameLabelCount);
+    if (FrameCount > 0)
+        FrameMap frameMap(FrameOffset, FrameCount);
+
+} StrobeTexture <optimize=false>;
+
+typedef struct (int offset, int length)
+{
+    local int i = 0;
+    for (i; i < length ; i++)
+    {
+        FSeek(offset + (i * 0x24));
+        StrobeTexture texture;
+    }
+    
+} StrobeTextureMap;

@@ -1,0 +1,86 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+BitfieldDisablePadding();
+
+typedef struct (int size)
+{
+    local int i = 0;
+    for (i; i < size; i++)
+        int KeyOffset : 12 <format=hex, fgcolor=cYellow>;
+
+} BTreeKeyOffsets <optimize=false>;
+
+typedef struct (int size)
+{
+    local int i = 0;
+
+    local int baseSegPos;
+    for (i; i < size; i++)
+    {
+        baseSegPos = FTell();
+        struct 
+        {
+            byte hasKey : 1;
+            int keyCount : 11 <fgcolor=0x00AA00>;
+            BTreeKeyOffsets offsets(keyCount);
+            int nextBlock : 12 <format=hex, fgcolor=0x00AAFF>;
+        
+            FSeek(baseSegPos + nextBlock);
+        } BTreeSegment;
+        
+    }
+
+} BTreeSegments;
+
+typedef struct
+{
+    byte hasEntries;
+    int IndexBlockOffset : 24 <format=hex, fgcolor=cRed>;
+    short SegmentCount <fgcolor=cGreen>;
+
+    BTreeSegments segments(SegmentCount);
+} BTree;
+
+struct TOC
+{
+    char Magic[4];
+    int FileNameTreeOffset <format=hex, fgcolor=cRed>;
+    int ExtTreeOffset <format=hex>;
+    int FileInfoTreeOffset <format=hex, fgcolor=cRed>;
+
+    FSeek(FileNameTreeOffset);
+    BTree fileNames;
+
+    FSeek(ExtTreeOffset);
+    BTree Extensions;
+
+    FSeek(FileInfoTreeOffset);
+    BTree FileInfos;
+
+    FSeek(0x10);
+    int FileEntryTreeCount <fgcolor=cGreen>;
+    local int i = 0;
+    struct
+    {
+        for (i; i < FileEntryTreeCount; i++)
+        {
+            FSeek(0x14 + (i * 4));
+            uint fileEntryTreeOffset <format=hex, fgcolor=cRed>;
+            
+            FSeek(fileEntryTreeOffset);
+            BTree FileEntries;
+        }
+    } FileEntryBTrees;
+} toc;

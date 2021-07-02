@@ -1,0 +1,116 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+BitfieldDisablePadding();
+
+typedef struct (int count)
+{
+    float VCoord[count];
+} Checkpoints;
+
+typedef struct
+{
+    float a;
+    float b;
+    float c;
+    float d;
+} Unk;
+
+typedef struct
+{
+    uint64 RailID <format=hex>; // Needs to match in rdef - changing this to another one will change the road.
+    float VCoordStart;
+    float VCoordEnd;
+    int unk <comment="No visible changes">;
+    int unk2 <comment="No visible changes">;
+} Rail;
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    byte d1;
+    byte d2;
+    byte d3;    
+    byte d4;
+
+    // None of these seem to do anything
+    short a;
+    short b;
+    short a2;
+    short b2;
+} DrivingLinePoint <optimize=false>;
+
+typedef struct 
+{
+    int count;
+    DrivingLinePoint points[count];
+} DrivingLineMap;
+
+typedef struct
+{
+    short a;
+    short a2;
+
+    float b;
+    float c;
+} UnkMap;
+
+typedef struct 
+{
+    int railCount;
+    Rail rail[railCount];
+} RailMap;
+
+typedef struct 
+{
+    int checkpointCount;
+    float checkpointVCoord[checkpointCount];
+} CheckpointMap;
+
+struct PWY5
+{
+    char Magic[4];
+    short VersionMajor;
+    short VersionMinor;
+    int unk : 2;
+    int test : 30;  // & 2
+    short RailCode;
+    short SceneryCode;
+    short unk;
+    short RoadRenderDistance; // Translated as float later on
+    float length;
+    int unkStrLen;
+    string unkStr;
+    int unkStrLen2;
+    string unkStr2;
+
+    int a;
+    int b;
+    short unkVersionMaybe; // If under 100 its set to 0x257
+
+    FSeek(0x34);
+    DrivingLineMap drivingLine <bgcolor=cRed>;
+    
+    int unksCount2;
+    UnkMap unkMap[unksCount2] <bgcolor=cGreen, comment="Changing any of this = no visible change">;
+
+    int unkCount;
+    Unk unks[unkCount];
+
+    CheckpointMap checkpoints <bgcolor=cBlue>;
+
+    RoadMap roads <bgcolor=cPurple>;
+} pathway5;

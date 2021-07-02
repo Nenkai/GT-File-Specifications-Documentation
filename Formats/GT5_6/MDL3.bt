@@ -985,8 +985,8 @@ struct MDL3
     ushort fvfEntryCount <fgcolor=0x00FF00>;
     ushort boneEntryCount <fgcolor=0x00FF00>;
     ushort unkCount3 <fgcolor=0x00FF00>;
-    ushort unkCount4 <fgcolor=0x00FF00>;
-    ushort unkCount5 <fgcolor=0x00FF00>;
+    ushort unkCount4 <fgcolor=0x00FF00, comment="Wiping this causes some parts to flicker">;
+    ushort unkCount5 <fgcolor=0x00FF00, comment="Wiping this removed some car parts like exhaust">;
     ushort unkCount6 <fgcolor=0x00FF00>;
 
     FSeek(0x28);
@@ -1082,7 +1082,7 @@ struct MDL3
     FSeek(96);
     SetBackColor(0x0000FF);
     
-    uint unk_data_6_len <format=hex>;
+    uint unk_data_6_len <format=hex, comment="Crashes if wiped">;
     uint unkOffset6  <format=hex, fgcolor=0x0000FF, hidden=true>;
     if (unk_data_6_len != 0)
     {
@@ -1110,7 +1110,7 @@ struct MDL3
         Printf("unkOffset9 was not empty");
 
     uint unkOffset10 <format=hex, fgcolor=0x0000FF>;
-    uint unkOffset11 <format=hex, fgcolor=0x0000FF>;
+    uint unkOffset11 <format=hex, fgcolor=0x0000FF, comment="Clear = crash">;
 
     uint unkOffset12 <hidden=true>;
     if (unkOffset12 != 0)
@@ -1118,10 +1118,10 @@ struct MDL3
     uint unkOffset13 <hidden=true>;
     if (unkOffset13 != 0)
         Printf("_empty_offset_4_ was not empty");
-    uint unkOffset14 <format=hex, fgcolor=0x0000FF>;
+    uint unkOffset14 <format=hex, fgcolor=0x0000FF, comment="Clear = crash">;
 
     ushort what; // sometimes -1
-    ushort samplerMapEntryCount <fgcolor=0x00FF00>;
+    ushort samplerMapEntryCount <fgcolor=0x00FF00, comment="Clearing this messes up the car texture">;
     uint samplerMapOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
     if (samplerMapEntryCount != 0)
     {
@@ -1138,8 +1138,8 @@ struct MDL3
     }
     
     FSeek(0x98);
-    ushort unk_count_1 <fgcolor=0x00FF00>;
-    ushort unk_count_2 <fgcolor=0x00FF00>;
+    ushort unk_count_1 <fgcolor=0x00FF00, comment="Wiped = crashes">;
+    ushort unk_count_2 <fgcolor=0x00FF00, comment="Wiped = crashes">;
     
     uint unkOffset16  <format=hex, fgcolor=0x0000FF, hidden=true>;
     if (unk_count_1 != 0)
@@ -1172,7 +1172,7 @@ struct MDL3
     if (unkOffset20 != 0)
         Printf("unkOffset20 was not empty");
     
-    uint unkOffset21 <format=hex, fgcolor=0x0000FF>;
+    uint unkOffset21 <format=hex, fgcolor=0x0000FF, comment="Crashes if wiped">;
     FSeek(unkOffset21);
     UnkMap21 unkMap21(4);
     FSeek(0xB4);
@@ -1193,19 +1193,19 @@ struct MDL3
     uint unk28 <format=hex, fgcolor=0x0000FF>;
 
     // Presumably PMSH Header offset
-    uint pmshHeaderOffset;
+    uint pmshHeaderOffset <comment="Clearing this messes up the car and makes it reflect everything">;
 
     uint unk30;
     uint unk31;
-    uint unk32;
+    uint unk32 <comment="Clearing this wipes the car's body (but not interior)">;
 
     // Presumably ZLib Header Offset
     uint zlibHeaderOffset;
 
-    ushort unkCount34;
-    ushort unkCount35;
-    ushort unkCount36;
-    ushort unkCount37;
+    ushort unkCount34 <comment="Clearing messes the car's textures">;
+    ushort unkCount35 <comment="Clearing = crash">;
+    ushort unkCount36 <comment="Clearing = no visible changes">;
+    ushort unkCount37 <comment="Clearing = messes up car textures (reflections?)">;
 
     uint unkOffset38 <format=hex, fgcolor=0x0000FF, hidden=true>;
     if (unkCount34 > 0)

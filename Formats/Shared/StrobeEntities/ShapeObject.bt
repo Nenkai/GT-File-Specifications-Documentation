@@ -1,0 +1,96 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int unk;
+    float unk;
+    float unk;
+    int unkOffset <format=hex, fgcolor=cRed>;
+    int unk;
+} Stroke;
+
+typedef struct (int offset, int length)
+{
+    local int m = 0;
+    for (m; m < length ; m++)
+    {
+        FSeek(offset + (m * 0x14));
+        Stroke group;
+    }
+} StrokeMap;
+
+typedef struct
+{
+    int a;
+    int StrokesOffset <format=hex, fgcolor=cRed>;
+    int StrokeCount <fgcolor=cGreen>;
+    int a;
+    float unk;
+
+    if (StrokeCount > 0)
+        StrokeMap strokeMap(StrokesOffset, StrokeCount);
+} Shape;
+
+typedef struct (int offset, int length)
+{
+    local int l = 0;
+    for (l; l < length ; l++)
+    {
+        FSeek(offset + (l * 0x0C));
+        Shape group;
+    }
+} ShapeMap;
+
+typedef struct
+{
+    int ShapeOffset <format=hex, fgcolor=cRed>;
+    int ShapeCount <fgcolor=cGreen>;
+
+    if (ShapeCount > 0)
+        ShapeMap shapes(ShapeOffset, ShapeCount);
+} ShapeGroup;
+
+typedef struct (int offset, int length)
+{
+    local int k = 0;
+    for (k; k < length ; k++)
+    {
+        FSeek(offset + (k * 0x08));
+        ShapeGroup group;
+    }
+} ShapeGroupMap;
+
+typedef struct
+{
+    float Left;
+    float Top;
+    float Right;
+    float Bottom;
+    int ShapeGroupOffset <format=hex, fgcolor=cRed>;
+    int ShapeGroupCount <fgcolor=cGreen>;
+
+    if (ShapeGroupOffset > 0)
+        ShapeGroupMap shapeGroup(ShapeGroupOffset, ShapeGroupCount);
+
+} ShapeObject;
+
+typedef struct (int offset, int length)
+{
+    local int j = 0;
+    for (j; j < length ; j++)
+    {
+        FSeek(offset + (j * 0x18));
+        ShapeObject shapeObject;
+    }
+} ShapeObjectMap;

@@ -19,27 +19,32 @@ typedef struct
     ubyte G;
     ubyte B;
     ubyte A;
-} Pixel;
+} Rgba32;
 
 typedef struct 
 {
-    int paintIndex;
-    int specDBID;
-    int _empty_[2];
-    float unkRatio1; // 0.01->0.1
-    ubyte unk;
-    ubyte unk2;
-    ubyte unk3;
-    ubyte unk4;
-    float unkRatio2;
-    int _empty2_[3];
-    float unkRatio3;
-    float unkRatio4;
-    float unkRatio5;
-    float unkRatio6;
-    Pixel pixel[0x820];
+    int AllPaintID; // AllPaintID in VARIATION, CCBinID in PAINT_COLOR_INFO
+    int unkID; // Not Unique!
+    
+    int _unused_[2];
+    float chrome; // 0.01 <-> 0.1
+    ubyte unk_1; // Either 4 or 200
+    ubyte unk_2;
+    ubyte unk_3;
+    ubyte unk_4;
+
+    float reflection; // 0 would be matte
+    int _unused2_[3];
+    float reflectPowerR;
+    float reflectPowerG;
+    float reflectPowerB;
+    float unused;
+
+    Rgba32 pixel[64 * 32];
+    Rgba32 pixels[32];
+
     byte padding[0x28];
-} Paint;
+} Paint <optimize=false>;
 
 struct ALLPaint
 {

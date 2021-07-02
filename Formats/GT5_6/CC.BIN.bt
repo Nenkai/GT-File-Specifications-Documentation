@@ -1,0 +1,54 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    byte R;
+    byte G;
+    byte A;
+} Rgb24;
+
+typedef struct
+{
+    int CCBinID;
+    int unk;
+    int a;
+    int b;
+    float c;
+    float d;
+    float e;
+    float f; // Always within 256
+    float h;
+
+    Rgb24 pixels[8 * 8];
+    float j;
+    ubyte unk1;
+    ubyte unk2;
+    ubyte unk3;
+    ubyte unk4;
+
+    float k;
+    float l;
+    float m;
+    float n;
+    float reflectPowerR;
+    float reflectPowerG;
+    float reflectPowerB;
+    
+    FSkip(0x78);
+} Color <optimize=false>;
+
+struct CarColor
+{
+    Color colors[FileSize() / 0x180];  
+} cc <optimize=false>;

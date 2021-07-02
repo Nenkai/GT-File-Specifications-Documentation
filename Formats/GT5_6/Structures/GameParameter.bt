@@ -17,6 +17,16 @@
 BigEndian();
 BitfieldDisablePadding();
 
+typedef struct
+{
+    short year : 6;
+    byte month : 4;
+    byte day : 5;
+    byte hour : 5;
+    byte min : 6;
+    byte sec : 6;
+} PDIDATETIME32;
+
 /* Define General Types */
 typedef struct
 {
@@ -205,7 +215,7 @@ typedef struct
     byte race_initial_laps : 8;
     byte keep_load_ghost : 8;
     int course_code : 32;
-    byte race_class_id : 8;
+    byte line_ghost_play_max : 8;
     byte goal_time_use_lap_total : 1;
 
     if (RaceParameterVersion < 117) 
@@ -286,7 +296,7 @@ typedef struct
     byte temperature_engine : 8;
     byte unk : 8;
     LightingMode lighting_mode : 8;
-    uint datetime : 32;
+    PDIDATETIME32 datetime;
     byte time_progress_speed : 8;
     byte allow_codriver : 8;
     byte pace_note : 8;
@@ -313,7 +323,7 @@ typedef struct
     byte event_goal_width : 8;
     
     byte fixed_retention : 1;
-    byte initial_retention10 : 4;
+    ubyte initial_retention10 : 4;
     enum <byte> { NONE_dw, SUNNY, RAINY, SNOWY } decisive_weather : 3;
     short weather_total_sec : 16;
     WeatherData weather;
@@ -399,7 +409,7 @@ typedef struct
     byte temperature_engine : 8;
     byte unk : 8;
     LightingMode lighting_mode : 8;
-    uint datetime : 32;
+    PDIDATETIME32 datetime;
     byte time_progress_speed : 8;
     byte allow_codriver : 8;
     byte pace_note : 8;
@@ -790,7 +800,7 @@ typedef struct
     if (EntryBaseVersion >= 104)
     {
         byte ai_reaction;
-        byte ballast_weight;
+        ubyte ballast_weight;
         byte ballast_position;
     }
 
@@ -1417,10 +1427,11 @@ typedef struct
     int OnlineRoomVersion <fgcolor=cGreen>;
     int psp_mode;
 } EditorInfo;
+
 struct FGP
 {
-    FSeek(0x12); // For FGP
-    //FSeek(0x16B0); Debug testing of a quickmatch replay
+    //FSeek(0x12); // For FGP
+    FSeek(0); // Debug testing of a quickmatch replay
 
     // xx xx 4F 17 - Game Parameter File Main Magic. E5 means GT5, E6 means GT6
     uint Magic <format=hex, fgcolor=cPurple>;

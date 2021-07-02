@@ -46,33 +46,39 @@ struct PACB
     local int cPos = FTell();
     FSeek(toc.entries[0].DataStart);
 
-    int modelOffsets[7] <fgcolor=cRed, format=hex>;
+    int unk;
+    int mainModelOffset  <fgcolor=cRed, format=hex, comment="Clear = crash">;
+    int unkModelOffset <fgcolor=cRed, format=hex, comment="Missing = no crash but no load/stuck on pre-race">;
+    int unkModelOffset2 <fgcolor=cRed, format=hex, comment="No visible changes when cleared">;
+    int unkEmpty;
+    int mirrorsSkyboxModelOffset <fgcolor=cRed, format=hex, comment="No skyboxes on mirror when cleared">;
+    int barriersPropsModelsOffset <fgcolor=cRed, format=hex, comment="Clearing = no barriers or props">;
     int shb2 <fgcolor=cRed, format=hex>; // GT6
     FSeek(FTell() + 0x08); // Pad
     int vls[6] <fgcolor=cRed, format=hex>;
     int gtsp <fgcolor=cRed, format=hex>;
     int env0 <fgcolor=cRed, format=hex>;
     int rnw <fgcolor=cRed, format=hex>;
-    int crss <fgcolor=cRed, format=hex>;
+    int crss <fgcolor=cRed, format=hex, comment="Will crash if cleared">;
     FSeek(FTell() + 0x08); // Pad
-    int gtcm_mmap_CourseMap <fgcolor=cRed, format=hex>;
+    int CourseMap_GTCM_MMAP <fgcolor=cRed, format=hex, comment="Clearing means no minimap">; // GT6
     int mot1 <fgcolor=cRed, format=hex>;
     int mdlAgain <fgcolor=cRed, format=hex>;
-    int rep4 <fgcolor=cRed, format=hex>;
-    int rep4_2 <fgcolor=cRed, format=hex>; // GT6
+    int rep4 <fgcolor=cRed, format=hex, comment="Unk, clearing is fine but no visible changes">; // GT6
+    int rep4_2 <fgcolor=cRed, format=hex, comment="Unk, clearing is fine but no visible changes">; // GT6
     int grs1 <fgcolor=cRed, format=hex>; // GT6
-    int txs3_1 <fgcolor=cRed, format=hex>; // GTHD    
+    int txs3_1 <fgcolor=cRed, format=hex, comment="Unk, clearing is fine but no visible changes">; // GT6
     int rnw_2 <fgcolor=cRed, format=hex>;
     int unkSceneryMdl <fgcolor=cRed, format=hex>;
     int unkSceneryEbaf <fgcolor=cRed, format=hex>;
-    int cop0 <fgcolor=cRed, format=hex>; // GT6
+    int cop0 <fgcolor=cRed, format=hex, comment="Unk, clearing is fine but no visible changes">; // GT6
     int txs3_2 <fgcolor=cRed, format=hex>; // GTPSP
-    int cpl0 <fgcolor=cRed, format=hex>;
-    int sdef <fgcolor=cRed, format=hex>;
-    int txs3_3 <fgcolor=cRed, format=hex>;
+    int cpl0 <fgcolor=cRed, format=hex, comment="Unk, clearing is fine but no visible changes">;
+    int surfaceConfig_SDEF <fgcolor=cRed, format=hex, comment="Ground surface sounds, clearing it just defaults out surfaces">;
+    int groundSurfaceParticlesTextures_TXS3 <fgcolor=cRed, format=hex, comment="Ground particle textures, clearing it just dummies particles to a solid color">;
     FSeek(FTell() + 0x0C); // Pad
     int psf0 <fgcolor=cRed, format=hex>;
-    int emtl <fgcolor=cRed, format=hex>;
-    int gsg0 <fgcolor=cRed, format=hex>;
-    int txs3_4 <fgcolor=cRed, format=hex>;
+    int emtl <fgcolor=cRed, format=hex, comment="Purpose unknown, clearing it had no obvious visible changes">;
+    int gsg0 <fgcolor=cRed, format=hex, comment="Purpose unknown, clearing it had no obvious visible changes">;
+    int txs3_4 <fgcolor=cRed, format=hex, comment="Purpose unknown, clearing it had no obvious visible changes">;
 } pacb;

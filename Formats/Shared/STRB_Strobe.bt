@@ -1,0 +1,42 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+#include "StrobeEntities/StrobeTexture.bt";
+#include "StrobeEntities/ShapeObject.bt";
+
+struct STRB
+{
+    char Magic[4];
+    int _empty_;
+    int RelocPtrFileSize <format=hex>;
+    int RuntimePtr;
+
+    FSeek(0x1C);
+    float Frames;
+    short UnkRelatedToTime;
+
+    FSeek(0x30);
+    int SpritesOffset <format=hex, fgcolor=cRed>;
+    int SpritesCount <fgcolor=cGreen>;
+
+    int ShapeObjectOffset <format=hex, fgcolor=cRed>;
+    int ShapeObjectCount <fgcolor=cGreen>;
+
+    if (SpritesCount > 0)
+        StrobeTextureMap textureMap(SpritesOffset, SpritesCount);
+    if (ShapeObjectCount)
+        ShapeObjectMap sObjectMap(ShapeObjectOffset, ShapeObjectCount);
+
+} StrobeAnimation;

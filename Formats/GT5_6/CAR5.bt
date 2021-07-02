@@ -1,0 +1,317 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    byte unkCount1 <comment="Halving this will only show rain on half of the windshield but bugged - crashes if more">;
+    byte unkCount2 <comment="Halving this will only show rain on half of the windshield - crashes if more">;
+    byte unk3;
+    byte unk4;
+    int unkOffset <format=hex, fgcolor=cRed>;
+    float SplashHorizontalBounciness;
+    float SplashVerticalBounciness;
+    float unk <comment="Changing didn't do much">;
+    float i;
+    float j;
+    int unkFlags <format=hex>;
+    int _pad_[4];
+} RainSplashData;
+
+typedef struct (int length)
+{
+    RainSplashData rainSplashData[length];
+} RainSplashDataMap <bgcolor=cBlue>;
+
+typedef struct
+{
+    float test[0x20];
+} LightSetting;
+
+typedef struct 
+{
+    LightSetting unk;
+    LightSetting unk;
+    LightSetting frontLeftLight;
+    LightSetting frontRightLight;
+} LightMap <bgcolor=cYellow>;
+
+typedef struct
+{
+    float ArmsYaw;
+    float ArmsPitch <comment="Lesser is higher">;
+    float ArmsDistance <comment="Lesser is further">;
+
+    float unk;
+    float unk <comment="No visible changes">;
+    float unk <comment="Arms get fucked when set to under 0, otherwise no changes seemingly (FGT)">;
+    float a <comment="No visible changes">;
+    float LeftLegYaw;
+    float LeftLegPitch;
+    float LeftLegUnk <comment="Visible changes but unable to describe">;
+    float RightLegYaw;
+    float RightLegPitch;
+    float RightLegUnk;
+
+    float DriverX;
+    float DriverHeight <comment="More is higher">;
+    float BothArmsPitch;
+    float TorsoToKneeAngle;
+    float c;
+    float unk_maybe_unused <comment="No visible changes">;
+    float unk <comment="No visible changes">;
+    float unk <comment="No visible changes">;
+    float unks[5] <comment="No visible changes">;
+
+    float test[10];
+} DriverSettings <bgcolor=cGray>;
+
+typedef struct
+{
+    float X <comment="0 is center of the car, >0 is left, <0 is right">;
+    float Y <comment="Height, less is higher">;
+    float Z <comment="Distance, Less is further away">;
+    float Yaw; // Used for roof views
+    float Pitch; // Used for roof views
+    float Roll;
+    float FieldOfView <comment="Depends on camera">;
+    int Unk; // Changing didn't do much
+} CameraSetting;
+
+typedef struct
+{
+    CameraSetting DRIVER <comment="Bumper">;
+    CameraSetting CHASE;
+    CameraSetting unkCam2;
+    CameraSetting MIRROR_L;
+    CameraSetting MIRROR_R;
+    CameraSetting NOSE;
+    CameraSetting BONNET;
+    CameraSetting ROOF;
+    CameraSetting BACK <comment="Roof Back">;
+    CameraSetting TAIL;
+    CameraSetting SIDE_L;
+    CameraSetting SIDE_R;
+    CameraSetting FENDER_L;
+    CameraSetting FENDER_R;
+    CameraSetting WHEEL_FL;
+    CameraSetting WHEEL_FR;
+    CameraSetting WHEEL_RL;
+    CameraSetting WHEEL_RR;
+    CameraSetting OPTION_1;
+    CameraSetting OPTION_2;
+    CameraSetting METER;
+    CameraSetting CHAR1;
+    CameraSetting CHAR2;
+    CameraSetting CHAR3;
+    CameraSetting CHAR4;
+    CameraSetting DRIVER2;
+    CameraSetting INCAR <comment="Interior Ingame Camera">;
+    CameraSetting INCAR_BACK;
+    CameraSetting INCAR1;
+    CameraSetting INCAR2;
+} CamMap;
+
+typedef struct
+{
+    float a;
+    float b;
+    float c;
+    float d;
+    float e;
+    float FireLength;
+    float g;
+    int index;
+} ExhaustData;
+
+typedef struct (int length)
+{
+    ExhaustData exhaustData[length];
+} ExhaustDataMap <bgcolor=cRed>;
+
+typedef struct
+{
+    float SpoilerPosX;
+    float SpoilerPosHeight <comment="More is higher">;
+    float SpoilerDistance;
+    float SpoilerLength;
+    float Unk <comment="No visible effect">;
+    float Unk2 <comment="No visible effect">;
+    float SpoilerHeight;
+    float Unk4 <comment="May be height related - prevents custom height ingame">;
+    float Unk5;
+    float Unk <comment="No visible effect">;
+    float unk4[4];
+    float WingStaysDistance;
+    float unk6[45];
+} CustomSpoilerData <bgcolor=cBlack>;
+
+typedef struct
+{
+    enum <int> TireTextureType { Studded = 3, Road = 4, Sport = 5, Slick = 6 } tire_type;
+    int unk2 <comment="Changing this blanks out all wheels?">;
+    int unk3 <comment="Changing this blanks out all wheels?">;
+    short unk;
+    short TreadLineSpacing;
+    float TreadTopLength;
+    float unk <comment="Changing didn't do anything visible">; // Unused?
+
+    float _pad_unused_[3] <comment="Nothing changed">;
+} TireTypeTextureSetting;
+
+typedef struct
+{
+    int unk;
+    float FrontTireTreadWidth;
+    float FrontTyreDistOffset;
+    float FrontTyreShoulderGroovesLength;
+    float FrontTyreWidth;
+    float unused_pad[11];
+
+    TireTypeTextureSetting textureSetting[7];
+    FSkip(0x1C);
+} TireSetting <bgcolor=cGreen>;
+
+typedef struct TireSettings
+{
+    TireSetting front;
+    TireSetting rear;
+} TireSettings;
+
+struct CAR5
+{
+    struct CAR5Header
+    {
+        // Main Header: 0x18
+        char Magic[4] <comment="Doesn't have to be CAR5 - Unchecked">;
+        int RuntimePtr;
+        int RelocPtrFileSize <format=hex>;
+        int VersionMajor;
+        int infoDataMainOffset <format=hex, fgcolor=cRed, comment="If this is set, a whole bunch of data is read">;
+        int unkMainOffset2 <format=hex, fgcolor=cRed>;
+    } header <bgcolor=cPurple>;
+
+    if (header.infoDataMainOffset != 0)
+    {
+        // All offsets & counts can safely be wiped - game runs fine without
+        FSeek(header.infoDataMainOffset);
+        struct CAR5Data
+        {
+            uint unkFlags <format=hex>;
+            int unk;
+            int _empty_[4];
+                
+            
+            int lightRelatedCount <fgcolor=cGreen>;
+            int lightRelatedOffset <format=hex, fgcolor=cRed>;
+    
+            int unkCount <fgcolor=cGreen, comment="Empty for FGT">;
+            int unkOffset <format=hex, fgcolor=cRed, comment="Empty for FGT">;
+
+            int unkCount2 <fgcolor=cGreen, comment="Empty for FGT">;
+            int unkOffset2 <format=hex, fgcolor=cRed, comment="Empty for FGT">;
+
+            int unkCount3 <fgcolor=cGreen>;
+            int unkOffset3 <format=hex, fgcolor=cRed>;
+
+            int unkCount4 <fgcolor=cGreen>;
+            int unkOffset4 <format=hex, fgcolor=cRed>;
+
+            int camCount <fgcolor=cGreen>;
+            int camOffset <format=hex, fgcolor=cRed>;
+
+            int unkCount5 <fgcolor=cGreen>;
+            int unkOffset5 <format=hex, fgcolor=cRed>;
+
+            int DriverPosOffset <format=hex, fgcolor=cRed>;
+
+            int unkOffset6 <format=hex, fgcolor=cRed>;
+
+            float unkFloats[2];
+            int unkOffset7 <format=hex, fgcolor=cRed>;
+
+            int pad;
+            char DriverModel[4] <fgcolor=cLtYellow>;
+            char LeftBeltModel[4] <fgcolor=cGray>;
+            char RightBeltModel[4] <fgcolor=cGray>;
+            char HelmetModel[4] <fgcolor=cWhite>;
+
+            char UnkChar1[8] <fgcolor=cGray>;
+            char UnkChar2[8] <fgcolor=cGray>;
+            char UnkChar3[8] <fgcolor=cGray>;
+            char UnkChar4[8] <fgcolor=cGray>;
+
+            int unkCount8 <fgcolor=cGreen>;
+            int unkOffset8 <format=hex, fgcolor=cRed>;
+    
+            int unkOffset9 <format=hex, fgcolor=cRed>;
+
+            int rainSplashDataCount <fgcolor=cGreen>;
+            int rainSplashDataOffset <format=hex, fgcolor=cRed>;
+
+            int exhaustFireCount <fgcolor=cGreen>;
+            int exhaustFireOffset <format=hex, fgcolor=cRed>;
+
+            int unkCount12 <fgcolor=cGreen>;
+            int unkOffset12 <format=hex, fgcolor=cRed>;
+
+            int unkOffset13 <format=hex, fgcolor=cRed>;
+            int customSpoilerDataOffset <format=hex, fgcolor=cRed>;
+
+            int tireDataOffset <format=hex, fgcolor=cRed>;
+
+            if (rainSplashDataCount > 0 && rainSplashDataOffset != 0)
+            {
+                FSeek(rainSplashDataOffset);
+                RainSplashDataMap rainSplashMap(rainSplashDataCount);
+            }
+
+            if (exhaustFireCount > 0 && exhaustFireOffset != 0)
+            {
+                FSeek(exhaustFireOffset);
+                ExhaustDataMap exhaustFires(exhaustFireCount);
+            }
+
+            if (lightRelatedCount != 0)
+            {
+                FSeek(lightRelatedOffset);
+                LightMap unkLight;
+            }
+    
+            if (camOffset > 0)
+            {
+                FSeek(camOffset);
+                CamMap cameras <bgcolor=0xEEEE00>;
+            }
+            
+            if (DriverPosOffset > 0)
+            {
+                FSeek(DriverPosOffset);
+                DriverSettings driver;
+            }
+            
+            if (customSpoilerDataOffset > 0)
+            {
+                FSeek(customSpoilerDataOffset);
+                CustomSpoilerData spoilerData;
+            }
+            if (tireDataOffset > 0)
+            {
+                FSeek(tireDataOffset);
+                TireSettings tires;
+            }
+
+        } car5Data;
+    }
+} car5;
