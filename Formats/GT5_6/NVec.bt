@@ -1,0 +1,80 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+BitfieldDisablePadding();
+typedef struct (int charCount)
+{
+   wchar_t fontChar[charCount];
+} CharDefMap <bgcolor=cYellow>;
+
+typedef struct
+{
+    wchar_t fontChar <fgcolor=cYellow>;
+    short flags;
+    int unka : 21;
+    int unkb : 11;
+
+    int DataLen <format=hex, fgcolor=cGreen>;
+    int unkc: 12 <format=hex>;
+    int unkd : 20 <format=hex>;
+
+    int OffsetWithinData <format=hex, fgcolor=cRed>;
+
+} CharInfos <bgcolor=cPurple>;
+
+typedef struct 
+{
+    
+} test <optimize=false>;
+typedef struct 
+{
+    byte a;
+} CharData;
+
+typedef struct (int dataOffset, int size)
+{
+    local int i = 0;
+    local int charDataOffset;
+    for (i; i < charCount; i++)
+    {
+        charDataOffset = dataOffset + charInfos[i].OffsetWithinData;
+        FSeek(charDataOffset);
+        CharData data;
+    }
+} CharDataMap;
+
+struct 
+{
+    char Magic[4];
+    byte u1;
+    byte u2;
+    byte u3;
+    byte u4;
+
+    short charCount <fgcolor=cGreen>;
+
+    FSeek(0x10);
+    int CharDefMapOffset <format=hex, fgcolor=cRed>;
+    int unkOffset <format=hex, fgcolor=cRed>;
+    int dataOffset <format=hex, fgcolor=cRed>;
+
+    FSeek(CharDefMapOffset);
+    CharDefMap charTable (charCount);
+
+    FSeek(unkOffset);
+    CharInfos charInfos[charCount];
+    
+    CharDataMap map(dataOffset, charCount);
+    
+} FontSet;

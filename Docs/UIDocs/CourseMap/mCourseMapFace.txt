@@ -1,0 +1,11 @@
+[mCourseMapFace] inherits from: mWidget
+
+map_mode
+map_data_path
+map_fovy
+map_dolly
+map_depression
+marker_scale
+limit_per_pixel
+window_id
+item_list (List of either: CourseMapLine, CourseMapSpan, CourseMapMarker)

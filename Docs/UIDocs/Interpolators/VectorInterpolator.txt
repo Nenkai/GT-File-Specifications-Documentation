@@ -1,0 +1,6 @@
+[VectorInterpolator] inherits from mInterpolator
+== Applies an interpolator on a target vector attribute. ==
+
+start_value (vector) - Value the interpolator starts from.
+end_value (vector) - Value the interpolator starts from.
+section[] (MVectorection array) - Sections.

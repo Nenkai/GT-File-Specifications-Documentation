@@ -1,0 +1,6 @@
+[FaceColorInterpolator] inherits from mInterpolator
+== Applies an interpolator on a target RGBA attribute. ==
+
+start_value (RGBA[]) - Value the interpolator starts from.
+end_value (RGBA[]) - Value the interpolator starts from.
+section[] (MFaceColorSection array) - Sections.

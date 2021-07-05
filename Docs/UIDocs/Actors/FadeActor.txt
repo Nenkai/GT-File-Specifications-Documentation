@@ -1,0 +1,11 @@
+[FadeActor] inherits from mNode
+== Applies a fade actor to the current element. ==
+
+source (float) - How low the opacity can go.
+destination (float) - How high the opacity can go.
+velocity (float) - Speed of the fading.
+slope
+srcOver
+destOver
+out
+repeat (digit bool) - Whether to loop or not.

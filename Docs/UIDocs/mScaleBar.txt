@@ -1,0 +1,10 @@
+[mScaleBar] inherits from: mSBox
+
+horizontal
+adjust_popup_size
+scale_direction
+value
+min
+max
+step
+step_factor

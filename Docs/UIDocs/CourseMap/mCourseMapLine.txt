@@ -1,0 +1,18 @@
+[mCourseMapLine] inherits from: mNode
+
+line_type
+main_visible
+main_size_0
+main_size_1
+main_color
+main_image_path
+pit_visible
+pit_size_0
+pit_size_1
+pit_color
+pit_image_path
+sector_visible
+sector_size_0
+sector_size_1
+sector_color
+sector_image_path

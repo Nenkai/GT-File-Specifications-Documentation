@@ -1,0 +1,10 @@
+[mComposite] inherits from: mWidget
+
+clip
+navigate_clip
+navigate_group
+mask_path
+mask_cache
+mask_block
+mask_from_disk
+children

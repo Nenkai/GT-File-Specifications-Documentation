@@ -1,0 +1,12 @@
+[mNode]
+name (string) - Sets the name for node.
+has_script (digit bool) - Whether the node is linked to a script.
+is_enable (digit bool) - Whether it is activated.
+is_alias_root
+is_component_root
+has_alias
+is_component
+me_component
+alias_name
+user_attribute
+comment (string) - Sets a comment for the node.

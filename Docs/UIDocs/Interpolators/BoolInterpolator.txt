@@ -1,0 +1,6 @@
+[BoolInterpolator] inherits from mInterpolator
+== Applies an interpolator on a target bool attribute. ==
+
+start_value (digit bool) - Value the interpolator starts from.
+end_value (digit bool) - Value the interpolator starts from.
+section[] (MBoolSection array) - Sections.

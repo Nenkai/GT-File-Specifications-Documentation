@@ -1,0 +1,5 @@
+[MFaceColorSection] inherits from: mInterpolatorSection
+== Section for a FaceColorInterpolator. ==
+
+start_value (RGBA[]) - Value of which the section starts.
+end_value (RGBA[]) - Value of which the section ends.

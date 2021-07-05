@@ -1,0 +1,4 @@
+[ParallelActor] inherits from mNode
+== Applies a parralel actor to the current element to have multiple interpolators running in parallel. ==
+
+<No specific elements, name & children should be used>

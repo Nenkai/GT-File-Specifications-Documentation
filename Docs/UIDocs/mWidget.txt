@@ -1,0 +1,103 @@
+[mWidget] herits from: mNode
+- can_default (bool)
+- can_focus (bool)
+- can_navigate (bool)
+- cursor_align
+- cursor_align_x (float)
+- cursor_align_y (float)
+- cursor_angle
+- adaptive_cursor_align_x
+- adaptive_cursor_align_y
+- cursor_target (bool)
+- detach_parent
+- geometry (rectangle) - Sets the location of the widget as a rectangle
+- x
+- y
+- width
+- height
+- has_depth
+- is_face (bool)
+- is_mask (bool)
+- wrap_text_target
+- wrap_text_margin
+- minimum_height
+- minimum_width
+- navigate_box
+- follow_navigate_source
+- navigate_source (region)
+- follow_navigate_target
+- opacity (float)
+- blend
+- blend_func_name (string)
+- post_render (bool)
+- packing
+- packable (bool)
+- pack_children (bool)
+- pack_pad_left (int)
+- pack_pad_right (int)
+- pack_pad_top (int)
+- pack_pad_bottom (int)
+- pack_allocate_x (bool)
+- pack_allocate_y (bool)
+- pack_allocate_w (bool)
+- pack_allocate_h (bool)
+- pack_end
+- pack_type_x
+- pack_type_y
+- pack_expand_x (bool)
+- pack_expand_y (bool)
+- pack_fill_x (bool)
+- pack_fill_y (bool)
+- pack_shrink_x (bool)
+- pack_shrink_y (bool)
+- pack_alignment_x
+- pack_alignment_y
+- pack_reverse
+- pack_side (bool)
+- pack_side_name
+- center
+- skew (vector)
+- scale (vector)
+- translate (vector)
+- rotate (float) - Rotates the element.
+- tooltip
+- has_tooltip (bool)
+- tooltip_key (string)
+- visible (bool)
+- active
+- insensitive
+- active_state
+- focus_state
+- prelight_state
+- insensitive_state (bool)
+- active0_state
+- active1_state
+- active2_state
+- active3_state
+- active_condition (bool)
+- focus_condition (bool)
+- prelight_condition
+- insensitive_condition (bool)
+- active0_condition
+- active1_condition
+- active2_condition
+- active3_condition
+- active_compare
+- focus_compare
+- prelight_compare
+- insensitive_compare (bool)
+- active0_compare
+- active1_compare
+- active2_compare
+- active3_compare
+- visible_compare
+- visible_condition
+- x_expand
+- x_fill
+- y_expand
+- y_fill
+- need_update (bool)
+- actor_list (actor[]
+- effect_list (effect[])
+- me_h_grid
+- me_v_grid

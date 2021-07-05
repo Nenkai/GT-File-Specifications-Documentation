@@ -1,0 +1,14 @@
+[mFrameImageFace] inherits from: mWidget
+
+c_image_path
+t_image_path
+b_image_path
+l_image_path
+r_image_path
+tl_image_path
+tr_image_path
+bl_image_path
+br_image_path
+frame_width
+frame_height
+image_path

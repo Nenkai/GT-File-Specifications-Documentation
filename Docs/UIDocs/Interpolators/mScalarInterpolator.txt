@@ -1,0 +1,6 @@
+[MScalarInterpolator] inherits from mInterpolator
+== Applies an interpolator on a target float attribute. ==
+
+start_value (float) - Value the interpolator starts from.
+end_value (float) - Value the interpolator starts from.
+section[] (MScalarSection array) - Sections.

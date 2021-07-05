@@ -1,0 +1,33 @@
+[mColorFace] : mWidget
+- outline_enable (bool) - Whether to enable an outline.
+- outline_only
+- emission_enable
+- shadow_enable (bool)
+- is_divide_color
+- outline_width
+- outline_color (RGBA)
+- round (float)
+- surface_roughness (float)
+- glow_width
+- emission_width
+- emission_color
+- emission_gain
+- shadow_delta (vector)
+- penumbra_width
+- umbra_color (RGBA)
+- penumbra_color
+- MColorFace_glow_width
+- MColorFace_emission_color
+- color_shadow
+- MColorFace_shadow_dx
+- MColorFace_shadow_dy
+- penumbra_width (float)
+- umbra_color (RGBA)
+- MColorFace_penumbra_color
+  From MRichColor
+    - color_type_name (string) - face_color/divide_color/linear_gradation/circle_gradation/gradation_color
+	- color_divide (RGBA[][]) - 
+    - x_divide (RGBA[]) 
+	- color (RGBA)
+	- gradation_start (vector)
+	

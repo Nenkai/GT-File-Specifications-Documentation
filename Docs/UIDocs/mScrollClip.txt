@@ -1,0 +1,9 @@
+[mScrollClip] inherits from: mComposite
+
+scroll_mode
+scroll_mode_name
+interpolate_ratio
+interpolate_unit
+scroll_pitch
+edge_scroll_x
+edge_scroll_y

@@ -1,0 +1,25 @@
+[mRootWindow] inherits from: mSBox
+
+context_number
+cursor_type
+cursor_type_name
+navigate_clip_angle
+navigate_sound
+display_priority
+bgm
+preload
+take_lower_memory
+noload
+use_language_gpb
+navigate_start_front
+navigate_wraparound
+navigate_wraparound_x
+navigate_wraparound_y
+navigate_slant_move
+navigate_insensitive
+navigate_recovery_x
+navigate_recovery_y
+free_cursor_mode
+react_event
+manual_close
+display_layer_name

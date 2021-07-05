@@ -1,0 +1,5 @@
+[MScalarSection] inherits from: mInterpolatorSection
+== Section for a ScalarInterpolator. ==
+
+start_value (float) - Value of which the section starts.
+end_value (float) - Value of which the section ends.

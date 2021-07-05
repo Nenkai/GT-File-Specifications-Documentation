@@ -1,0 +1,34 @@
+[mImageFace] Inherits from: mWidget
+== Represents an image. ==
+
+- image_path (string) - Path to load the image from (GPB).
+- emission_path
+- shadow_path
+- cache
+- block (bool)
+- from_disk
+- has_emission
+- has_shadow
+- tex_coord_type_name (string) - Texture coord enum. (uv/palette/tile)
+- tex_func_name
+- wrap_type_name_x
+- wrap_type_name_y
+- tex_wrap_name_x (string) - How to wrap the texture if tiled on the x axis. (clamp/repeat)
+- tex_wrap_name_y (string) - How to wrap the texture if tiled on the y axis. (clamp/repeat)
+- tex_env_color
+- tex_blur_x
+- tex_blur_y
+- tex_keep_size
+- tex_keep_aspect
+- tex_palette_x 
+- tex_palette_y
+- tex_palette_index
+- tex_tile_w (uint) - Tile width if tiled.
+- tex_tile_h (uint) - Tile height if tiled.
+- blur_x
+- blur_y
+- image_emission
+- image_shadow
+- texcoord (vector[]) - Coordinates for the texture.
+- pattern_size
+- pattern_index

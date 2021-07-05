@@ -1,0 +1,51 @@
+[mTextFace] Inherits from: mWidget
+== Represents text. ==
+
+- key (string)
+- text (string) - Default text.
+- localized_text_page (string)
+- max_text_width (int) - Sets the max possible width of the text.
+- adjust_scale (bool)
+- imaging_color (?)
+- text_color (RGBA)
+- shadow_distance
+
+- color (RGBA[]) - Sets the color if the text.
+- top_color (RGBA) - Sets the top color.
+- bottom_color (RGBA) - Sets the bottom color.
+- alpha
+- top_alpha
+- bottom_alpha
+- font (string) - Sets the font (Can be: GTfont_3, IwataSet_2/3/4)
+- proportional
+- alpha_proportional (bool)
+- num_proportional (bool)
+- multiline (bool) - Whether the element allows multiple lines.
+- auto_line_break
+- equalized
+- abbreviate (bool)
+- aligned (bool)
+- align (int)
+- clut
+- original_scale_x
+- original_scale_y
+- current_scale_x
+- current_scale_y
+- scale_x (float) - Sets the size horizontally
+- scale_y (float) - Sets the size vertically
+- shadow_value
+- shadow_color (RGBA) - Sets the color of the text's shadow
+- shadow_alpha
+- outline_value
+- outline_color
+- nextline_offset (float) - Sets the offset to the next wrapped line.
+- type_spacing
+- line_height
+- parse_enable
+- wordwrap (bool) - Whether to allow wrapping.
+- resetScale
+  [From MTextSetting]
+  - type_spacing (float) - Sets the spacing between letters horizontally
+  - shadow2_color
+  - shadow2_value_y (float) - Sets the vertical position of the shadow
+  - all_caps (bool) - Sets the text to full caps.

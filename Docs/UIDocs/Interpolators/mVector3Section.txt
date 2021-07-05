@@ -1,0 +1,5 @@
+[MVector3Section] inherits from: mInterpolatorSection
+== Section for a Vector3Interpolator. ==
+
+start_value (vector3) - Value of which the section starts.
+end_value (vector3) - Value of which the section ends.

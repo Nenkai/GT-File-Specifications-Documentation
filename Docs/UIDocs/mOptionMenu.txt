@@ -1,0 +1,9 @@
+[mOptionMenu] inherits from: mSBox
+
+repeat
+copy_selected_item
+popup_margin_left
+popup_margin_right
+popup_margin_top
+popup_margin_bottom
+shadow_margin

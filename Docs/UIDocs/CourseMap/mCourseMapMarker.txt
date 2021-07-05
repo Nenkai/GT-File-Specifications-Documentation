@@ -1,0 +1,18 @@
+[mCourseMapMarker] inherits from: mNode
+
+pointer_type
+player_visible
+player_size_0
+player_size_1
+player_color
+player_image_path
+enemy_visible
+enemy_size_0
+enemy_size_1
+enemy_color
+enemy_image_path
+ghost_visible
+ghost_size_0
+ghost_size_1
+ghost_color
+ghost_image_path

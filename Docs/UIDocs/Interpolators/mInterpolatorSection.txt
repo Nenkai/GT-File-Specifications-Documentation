@@ -1,0 +1,19 @@
+[MInterpolatorSection]
+ease_type_name (string enum)
+  In will slow down the text at the start. Out will slow it down at the end. InOut/OutIn will do both.
+  "easeInSine" - Starts slowly, speed gradually increases to end of value.
+  "easeInBack" - Starts, goes backwards, then increases to end of value.
+  "easeInBounce" - Value bounces to its end of value.
+  "easeInCirc" - ?
+  "easeInElastic" - Similar to easeInBounce, but can go backwards.
+  "easeInExpo" - Exponential
+  "easeInQuad" - 
+  "easeInQuart" - 
+  
+increase_mode_name (string) - How to manipulate the value. can be "increase/decrease".
+interpolation_mode
+start_duration
+end_duration
+interpolation_period (float) - Duration in seconds of the section.
+tension
+slope

@@ -210,7 +210,7 @@ struct TXS3 {
     uint FileSize <format=hex>;
     uint BaseFilePos <format=hex>;
     uint Unk1;
-    uint Unk2;
+    uint Unk2 <comment="Related to UnkOffset">;
     ushort TextureRenderParamCount;
     ushort TexturemageInfoCount;
     uint TextureRenderParamOffset <format=hex, fgcolor=cRed>;

@@ -1,0 +1,5 @@
+[MBoolSection] inherits from: mInterpolatorSection
+== Section for a BoolInterpolator. ==
+
+start_value (bool digit) - Value of which the section starts.
+end_value (bool digit) - Value of which the section ends.
