@@ -219,13 +219,13 @@ struct RPLY
     int score;
 
     FSeek(0x80);
-    short finishOrders[32];
+    short finishOrders[32] <bgcolor=cDkRed>;
 
     FSeek(0xC0);
-    int totalTimes[32] <comment=OutputDateTime>;
+    int totalTimes[32] <comment=OutputDateTime, bgcolor=cRed>;
 
     FSeek(0x140);
-    int bestTimes[32] <comment=OutputDateTime>;
+    int bestTimes[32] <comment=OutputDateTime, bgcolor=cLtRed>;
 
     FSeek(0x208);
     int raceParameterOffset <format=hex, fgcolor=cRed>;
@@ -249,7 +249,7 @@ struct RPLY
     int unkCount <format=hex, fgcolor=cGreen>;
     int unkOffset <format=hex, fgcolor=cRed>; // In stride sets of 0x08, if provided
     int geometry_based;
-    int unk_geometry;
+    int geometry_data_offset <format=hex, fgcolor=cRed>;
     int geometry_stream_size;
     int geometry_quality_level;
     int64 filesystem_version;
@@ -265,13 +265,13 @@ struct RPLY
     int unkOffset <format=hex, fgcolor=cRed>;
 
     FSeek(0x300);
-    //int Times[60] <comment=OutputDateTime>;
+    int Times[60] <comment=OutputDateTime>;
 
     FSeek(entry00Offset);
-    Entry00 entry00[entry_max];
+    Entry00 entry00[entry_max] <bgcolor=cGray>;
 
     FSeek(driverParametersOffset);
-    MDriverParameter drivers[entry_max * 2];
+    MDriverParameter drivers[entry_num * 4] <bgcolor=cGreen>;
 
 } replay;
 

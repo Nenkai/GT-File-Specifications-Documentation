@@ -45,19 +45,19 @@ typedef struct
     float unk;
     int unk;
     int unk;
-    float unk; // had no effect changing it
+    float unk <comment="No effect changing it">;
     float gamma_brightness;
     float unks[4]; // unused? changing any of them had no effect
 
     local int b = FTell();
-    CurveGT4 PositionXY (basePos);
-    CurveGT4 CameraElevation_No_No (basePos);
-    CurveGT4 FocusPosMaybe (basePos);
-    CurveGT4 HRotation_Unk_Unk (basePos);
-    CurveGT4 ElevationAgain (basePos);
-    CurveGT4 Unk_NoEffect (basePos);
-    CurveGT4 FoV_No_No (basePos);
-    CurveGT4 PermRotationMaybe_Left_Right_No (basePos);
+    CurveGT4 Curve1_a (basePos) <comment="SrcX/SrcZ/x/DestX/DestZ/x">;
+    CurveGT4 Curve1_b (basePos) <comment="SrcY/x/x/DestY/x/x">;
+    CurveGT4 Curve1_c (basePos) <comment="SrcPosAngle/x/x/DestPosAngle/x/x">;
+    CurveGT4 Curve1_d (basePos) <comment="SrcPitch/x/x/DestPitch/x/x">;
+    CurveGT4 Curve1_e (basePos) <comment="SrcPitch2/x/x/DestPitch2/x/x">;
+    CurveGT4 Curve1_f (basePos) <comment="SrcYaw/x/x/DestYaw/x/x">;
+    CurveGT4 Curve1_g (basePos) <comment="SrcFOV/x/x/DestFOV/x/x">;
+    CurveGT4 PermRotationMaybe_Left_Right_No (basePos) <comment="SrcPermanentYaw/x/x/DestPermanentYaw/x/x">;
     CurveGT4 NoEffect (basePos);
     CurveGT4 curve10 (basePos);
     float unk;
