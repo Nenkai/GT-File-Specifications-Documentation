@@ -1,0 +1,159 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: VisionList 1
+//   Authors: ddm & Nenkai
+//   Version: 1
+//   Purpose: Voronoi Definitions for displaying track regions depending on camera position
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+BigEndian();
+BitfieldDisablePadding();
+
+local int cPos <hidden=true> = 0;
+local int cPos2 <hidden=true> = 0;
+local int cPos3 <hidden=true> = 0;
+
+typedef struct
+{
+    float X;
+    float Y;
+} vec3;
+
+typedef struct
+{
+    float X;
+    float Y;
+    ushort ModelIndexesListCount <fgcolor=0x00FF00>;
+    ushort NearbyVoronoiIndexesCount <fgcolor=0x00FF00, hidden=true>;
+    uint null <hidden=true>;
+    uint ModelIndexesListOffset <format=hex, fgcolor=0x0000FF>;
+    uint NearbyVoronoiIndexesOffset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    uint pad[2] <hidden=true>;
+
+    cPos2 = FTell();
+    FSeek(ModelIndexesListOffset);
+    ushort ModelIndexesToRender[ModelIndexesListCount] <bgcolor=0x880000>;
+    FSeek(NearbyVoronoiIndexesOffset);
+    ushort NearbyVoronoiIndexes[NearbyVoronoiIndexesCount] <bgcolor=0xCC4444>;
+    FSeek(cPos2);
+} VoronoiEntry <optimize=false>;
+
+typedef struct (int size)
+{
+  VoronoiEntry vEntries[size];
+} VoronoiList;
+
+
+typedef struct
+{
+    ushort count <fgcolor=0x00FF00, hidden=true>;
+    ushort null <hidden=true>;
+    uint offset <format=hex, fgcolor=0x0000FF, hidden=true>;
+
+    cPos2 = FTell();
+    FSeek(offset);
+    vec3 list[count] <bgcolor=0x008800>;
+    FSeek(cPos2);
+} VoronoiBlock <optimize=false>;
+
+typedef struct (int size)
+{
+  VoronoiBlock vBlocks[size];
+} VoronoiBlockMap;
+
+typedef struct
+{
+    ushort count <fgcolor=0x00FF00>;
+    ushort null <hidden=true>;
+    uint offset <format=hex, fgcolor=0x0000FF, hidden=true>;
+
+    cPos3 = FTell();
+    FSeek(offset);
+    local uint i <hidden=true>;
+    for (i=0; i<count; i++)
+    {
+        ushort vIndex <bgcolor=0x448800>;
+    }
+    FSeek(cPos3);
+} VoronoiIndexBlock <optimize=false>;
+
+typedef struct (int height)
+{
+  VoronoiIndexBlock vIndexBlock[height];
+} VoronoiIndexRow <optimize=false>;
+
+typedef struct (int width, int height)
+{
+  VoronoiIndexRow vIndexRow(width)[height];
+} VoronoiIndex2D;
+
+typedef struct
+{
+    float minX;
+    float minY;
+    uint width;
+    uint height;
+    float maxX;
+    float maxY;
+    float unk5;
+    float unk6;
+    uint offset <format=hex, fgcolor=0x0000FF, hidden=true>;
+    
+    cPos2 = FTell();
+    FSeek(offset);
+    VoronoiIndex2D vIndex2D(width, height) <bgcolor=0x88AA00>;
+    FSeek(cPos2);
+} VoronoiIndexMap;
+
+typedef struct
+{
+    uint offset <format=hex, fgcolor=0x0000FF,  hidden=true>;
+    cPos2 = FTell();
+    FSeek(offset);
+    ushort count <bgcolor=0x88AACC, fgcolor=0x00FF00, hidden=true>;
+    ushort vBlockId <bgcolor=0x88AACC>;
+    ushort list[count] <bgcolor=0x8888AA>;
+    FSeek(cPos2);
+} UnkList <optimize=false>;
+
+typedef struct (int size)
+{
+    UnkList unkList[size];
+} UnkListMap;
+
+struct Vls1
+{
+    char magic[4];
+    uint unkInt;
+    uint unkInt;
+    uint fileSize <format=hex, fgcolor=0xFF8888>;
+    uint voronoiIndexOffset <format=hex, fgcolor=0x0000FF>;
+    uint unkIndexMapOffset <format=hex, fgcolor=0x0000FF>;
+    uint _empty4_ <hidden=true>;
+    uint _empty4_ <hidden=true>;
+    uint voronoiListOffset <format=hex, fgcolor=0x0000FF>;
+    uint unkListOffset <format=hex, fgcolor=0x0000FF>;
+    uint voronoiBlockOffset <format=hex, fgcolor=0x0000FF>;
+    uint voronoiBlockDataOffset <format=hex, fgcolor=0x0000FF>;
+    uint voronoiListCount <fgcolor=0x00FF00>;
+    uint unkListCount <fgcolor=0x00FF00>;
+    uint voronoiBlockCount <fgcolor=0x00FF00>;
+
+    cPos = FTell();
+    FSeek(voronoiListOffset);
+    VoronoiList vList(voronoiListCount) <bgcolor=0x0000AA>;
+    FSeek(voronoiBlockOffset);
+    VoronoiBlockMap vBlockMap(voronoiBlockCount) <bgcolor=0x00AA00>;
+    FSeek(voronoiIndexOffset);
+    VoronoiIndexMap vIndexMap <bgcolor=0xAA0000, comment="has indexes for vList">;
+    FSeek(unkListOffset);
+    UnkListMap unkListMap(unkListCount) <bgcolor=0x00AAAA, comment="">;
+    FSeek(unkIndexMapOffset);
+    VoronoiIndexMap unkIndexMap <bgcolor=0xAAAA00, comment="has indexes for unkListMap">;
+    FSeek(cPos);
+
+} VisionList <bgcolor=0x000000>;
