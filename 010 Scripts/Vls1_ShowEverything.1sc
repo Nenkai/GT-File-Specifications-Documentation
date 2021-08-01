@@ -1,0 +1,28 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Script File
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+local int i = 0;
+local int count = 56;
+local int offset = VisionList.vList.vEntries[0].ModelIndexesListOffset;
+
+for (i = 0; i < count; i++)
+{
+    WriteShort(offset + (i * sizeof(ushort)), i);
+}
+
+
+for (i = 0; i < VisionList.voronoiListCount; i++)
+{
+    VisionList.vList.vEntries[i].ModelIndexesListCount = count;
+    VisionList.vList.vEntries[i].ModelIndexesListOffset = offset;
+}
