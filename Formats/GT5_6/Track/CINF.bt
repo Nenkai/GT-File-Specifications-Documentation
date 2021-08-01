@@ -1,10 +1,10 @@
 //------------------------------------------------
 //--- 010 Editor v10.0.2 Binary Template
 //
-//      File: Course Information (drift sector, gps data, some other sectors I don't know about)
+//      File: Course Information
 //   Authors: Nenkai#9075
 //   Version: 
-//   Purpose: 
+//   Purpose: Drift sectors, gps data, some other stuff
 //  Category: 
 // File Mask: 
 //  ID Bytes: 

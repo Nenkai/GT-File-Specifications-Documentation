@@ -1,10 +1,10 @@
 //------------------------------------------------
 //--- 010 Editor v10.0.2 Binary Template
 //
-//      File: 
-//   Authors: 
+//      File: Runway
+//   Authors: Nenkai#9075
 //   Version: 
-//   Purpose: 
+//   Purpose: Holds the collision/boundary model, road model, checkpoints, pit stops, grid starts and more
 //  Category: 
 // File Mask: 
 //  ID Bytes: 

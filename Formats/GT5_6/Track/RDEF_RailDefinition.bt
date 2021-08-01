@@ -1,10 +1,10 @@
 //------------------------------------------------
 //--- 010 Editor v11.0.1 Binary Template
 //
-//      File: 
-//   Authors: 
+//      File: Rail Definition (RDEF)
+//   Authors: Nenkai#9075
 //   Version: 
-//   Purpose: 
+//   Purpose: Responsible for defining chunks of a generated course (Also called "Rail")
 //  Category: 
 // File Mask: 
 //  ID Bytes: 
