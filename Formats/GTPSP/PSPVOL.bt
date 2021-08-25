@@ -1,0 +1,152 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: GT PSP Volume Header & TOC (Needs decrypted header)
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+BitfieldDisablePadding();
+
+typedef struct
+{    
+    ubyte stringLength;
+    local int stringLengthLocal = stringLength;
+    if (stringLength > 127)
+    {
+      ubyte stringLength2;
+      if (stringLength2 > 127)
+      {
+         ubyte stringLength3;
+         if (stringLength3 > 127)
+         {
+           ubyte stringLength4;
+         }
+       }
+     }
+} _7BitInt;
+
+uint Align(uint x, uint alignment)
+{
+     local uint mask = ~(alignment - 1);
+     return (x + (alignment - 1)) & mask;
+}
+
+const int BlockSize = 0x800;
+
+typedef struct
+{
+    int offset : 12 <format=hex, fgcolor=cRed>;
+} EntryOffset;
+
+typedef enum <byte>
+{
+  	File,
+    Directory,
+} EntryType;
+
+typedef enum <byte>
+{
+  	Uncompressed,
+    Compressed,
+} CompressionType;
+
+typedef struct (byte isIndexBlock)
+{
+    if (isIndexBlock)
+    {
+        byte subFolderIndexMajor;
+    }
+    else
+    {   
+        EntryType Type : 1 <fgcolor=cYellow>;
+        CompressionType CompressionBit : 1;
+
+        byte subFolderIndexMajor : 6;
+    }
+    
+    byte strLen <fgcolor=cGreen>;
+    char Name[strLen] <bgcolor=cGray>;
+
+
+    if (isIndexBlock)
+        byte subFolderIndexMinor <comment="Ignore if last entry" ,fgcolor=cLtBlue>;
+    else
+    {
+        if (Type == File)
+        {
+            _7BitInt FileOffset;
+            if (CompressionBit == Compressed)
+                _7BitInt CompressedSize;
+            _7BitInt UncompressedSize;
+        }
+        else
+           ubyte SubDirIndexMinor;
+    }
+} EntryData;
+
+typedef struct 
+{
+    local int basePos = FTell();
+
+    byte isIndexBlock : 1;
+    short entryCount : 11 <fgcolor=cGreen>;
+    
+    local int i = 0;
+    for (i; i < entryCount - 1; i++)
+        EntryOffset offset <format=hex, fgcolor=cRed>;
+
+    FSeek(FTell()); // Align
+    EntryData firstEntry (isIndexBlock);
+    
+    for (i = 0; i < entryCount - 1; i++)
+    {
+        FSeek(basePos + offset[i].offset);
+        EntryData data (isIndexBlock);
+    }
+
+    local int newPos = Align(FTell(), 0x40);
+    byte garbage[newPos - FTell()] <hidden=true, fgcolor=cDkGray, bgcolor=cDkGray>;
+    
+} SegmentEntryMap;
+struct PSPVol
+{
+    struct Header
+    {
+        int Magic <format=hex>;
+        int DEADBEEF <format=hex>;
+        int64 Date;
+        int ToCBlockOffset <fgcolor=cYellow>;
+        int FileDataBlockOffset <fgcolor=cYellow>;
+        int ToCSegmentCount <fgcolor=cGreen>;
+        int ToCLength <format=hex, fgcolor=cRed>;
+        int UnkSize;
+    } header <bgcolor=cPurple>;
+
+    struct TOC
+    {
+        local int actualToCOffset = (1 + header.ToCBlockOffset) * BlockSize;
+        FSeek(actualToCOffset);
+        ushort SegmentOffsets[header.ToCSegmentCount] <bgcolor=cRed>;
+
+        local int i = 0;
+        for (i; i < header.ToCSegmentCount - 1; i++)
+        {
+            FSeek(actualToCOffset + SegmentOffsets[i] * 0x40);
+            SegmentEntryMap seg;
+            if (seg.isIndexBlock != 0)
+            {
+                Printf("index block %d \n", i);
+            }
+        }
+
+    } toc;
+
+
+} volume;
