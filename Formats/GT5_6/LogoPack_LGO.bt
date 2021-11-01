@@ -1,0 +1,39 @@
+//------------------------------------------------
+//--- 010 Editor v12.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct LogoMapping
+{
+    short x1;
+    short y1;
+    short x2;
+    short y2;
+    byte Scale1;
+    byte Scale2;
+};
+
+struct LGO
+{
+    struct LogoPackHeader
+    {
+        uint Magic <format=hex>;
+        short Version;
+        short LogoCount <fgcolor=cGreen>;
+        int LogoTextureOffset <format=hex, fgcolor=cRed, comment="Should be DXT5 for GT6, 442x512 at 0x200">;
+        int LogoSpritesMappingsOffset <format=hex, fgcolor=cRed>;
+    } Header <bgcolor=cPurple, comment="0x20 Alignment">;
+
+    FSeek(Header.LogoSpritesMappingsOffset);
+    LogoMapping Mappings[Header.LogoCount] <bgcolor=cGray, comment="Defines logos within the texture sprite sheet">;
+} LogoPack;
