@@ -13,110 +13,87 @@
 
 LittleEndian();
 
-
 typedef struct
 {
-    short unkSwitch; // -1 or 1
-    short a2;
-    float unkPos;
-    float unkPos2;
-    uint d;
-    short unkSwitch2; // -1 or 1
-    short e2;
-    uint f;
-    float unkPos3;
-    uint h;
-    uint j;
-    float unkFloat; // -5 to 5?
-    byte _reserved_[24];
-} TrackPoint;
+    int AttackInfoCount <fgcolor=cGreen>;
+    byte _empty_[0x3C] <fgcolor=cDkGray>;
 
-typedef struct
-{
-    byte unk1; // 100?
-    byte unk2; // 95-100?
-    byte unk3; // 100?
-    byte unk4; // 28-40?
-    short unk5; // 100?
-    byte unk6; // 60-100?
-    byte unk7; // 2-5?
-    byte unk8; // 25-30?
-    ubyte unk9; // 150-250?
-    byte unk10; // 0-20?
-    short _empty_;
-    byte unk11; // 0-30?
-    byte unk12; // 100?
-    byte _empty2_;
-    short unk13; // 9?
-    byte unk14; // 80?
-    byte unk15; // 85?
-    ubyte unk16; // 70-200?
-    ubyte unk17; // 150-160-250?
-    byte unk18; // 0-2-3?
-    ubyte unk19; // 150-190?
-    ubyte unk20; // 0-50-100?
-    ubyte unk21; // 55-68-19?
-    ubyte unk22; // 6? 3? maybe ushort flag?
-    ubyte unk23; // 32
-    byte unk24; // 10?
-    byte unk25; // 15-20-50?
-    byte unk26; // 0-1?
-    byte _empty3_[2];
-
-} ADUnk;
-
-typedef struct (int basePos)
-{
-    uint offset <format=hex>;
-    FSeek(basePos + offset);
-    uint mapCount;
-    byte _reserved_[60] <hidden=true>;
-    TrackPoint trackPoints[mapCount];
-} ADLNMapEntry <optimize=false>;
-
-typedef struct (int arrSize, int basePos)
-{
-    local int i;
-
-    // 0 empty, 1 aswell? 2 aswell? 3 actual, 4 was some weird curve
-    for (i = 0; i < arrSize; i++)
+    if (AttackInfoCount > 0)
     {
-        FSeek(basePos + 0x30 + (i * 4));
-        ADLNMapEntry entries(basePos);
+        struct
+        {
+            int unkBool;
+            float X;
+            float Z;
+            float Y;
+            short UnkIndex1;
+            short UnkIndex2;
+            float PitInKeyV;
+            float DistanceToCorner;
+
+            float X2;
+            float Y2;
+            float Angle;
+            byte _pad_[0x18];
+        } AttackInfo[AttackInfoCount] <bgcolor=cDkYellow, optimize=false>;
     }
 
-} ADLNMap;
+} AutoDriveInfo;
 
 typedef struct
 {
     local int baseADLNPos = FTell();
 
-    char magic[4];
-    byte _empty_[8];
-    uint ADLNDataSize <format=hex>; // Does not include padding
-    uint unkCount;
-    uint entryCount;
-    uint dataOffset;
-    byte _reserved_[20];
+    struct
+    {
+        char magic[4] <fgcolor=cPurple>;
+        int RelocPtr <format=hex, fgcolor=cGray>;
+        int _empty_;
+        uint ADLNDataSize <format=hex, fgcolor=cYellow>; // Does not include padding
+        uint unkCount;
+        uint EntryCount <format=hex, fgcolor=cGreen, comment="Max 8">;
+        uint DataOffset <format=hex, fgcolor=cRed>;
+        byte _reserved_[20] <fgcolor=cDkGray>;
+    } EnemyLineHeader <bgcolor=cDkPurple>;
     
-    ADLNMap adln (entryCount, baseADLNPos);
+    FSeek(baseADLNPos + EnemyLineHeader.DataOffset);
+    uint EntriesOffset[EnemyLineHeader.EntryCount] <format=hex, fgcolor=cRed>;
 
-} ADLN;
+    local int i = 0;
+    for (i = 0; i < EnemyLineHeader.EntryCount; i++)
+    {
+        FSeek(baseADLNPos + EntriesOffset[i]);
+
+        if (i == 1)
+            AutoDriveInfo info <comment="Left Lane">;
+        else if (i == 2)
+            AutoDriveInfo info <comment="Right Lane">;
+        else if (i == 4)
+            AutoDriveInfo info <comment="Restricted Area/Pit?">;
+        else if (i == 5)
+            AutoDriveInfo info <comment="Learning Section">;
+        else if (i == 6)
+            AutoDriveInfo info <comment="Default Lane?">;
+        else
+            AutoDriveInfo info;
+    }
+} EnemyLine;
 
 struct TrackAutoDrive
 {
     // Base Header, 0x80
-    uint relocPtr;
-    uint ADNLHeaderOffset <format=hex>;
-    uint unkTree1Offset <format=hex>;
-    uint unkTree2Offset <format=hex>;
-    uint unkTree3Offset <format=hex>;
-    uint unkTree4Offset <format=hex>;
+    struct
+    {
+        uint RelocPtr <format=hex, fgcolor=cGray>;
+        uint ADNLHeaderOffset <format=hex, fgcolor=cRed>;
+        uint unkTree1Offset <format=hex, fgcolor=cRed>;
+        uint unkTree2Offset <format=hex, fgcolor=cRed>;
+        uint unkTree3Offset <format=hex, fgcolor=cRed>;
+        uint unkTree4Offset <format=hex, fgcolor=cRed>;
+        byte _pad_[ADNLHeaderOffset - FTell()] <fgcolor=cDkGray>;
+    } Header <bgcolor=cPurple>;
 
-    FSeek(ADNLHeaderOffset);
-    ADLN adln; 
-    
-    FSeek(unkTree1Offset);
-    ADUnk unk;
+    FSeek(Header.ADNLHeaderOffset);
+    EnemyLine EnemyLineData; 
 
 } trackAutoDrive;
