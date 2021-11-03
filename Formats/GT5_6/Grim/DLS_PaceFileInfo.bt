@@ -1,0 +1,30 @@
+//------------------------------------------------
+//--- 010 Editor v12.0 Binary Template
+//
+//      File: PaceFileInfo_DLS.bt
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: Describes a download information for a pace movie file (GT5 GTTV)
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Incomplete
+int64 DLSSize;
+
+struct DLS
+{
+    short VersionMajor;
+    short VersionMinor;
+    int64 MovieFileSize <fgcolor=cGreen>;
+    short unk1;
+    short idLen;
+    char fileId[idLen];
+    byte unk3;
+    short unk4;
+
+    byte strLen;
+    char str[strLen];
+} dls;
