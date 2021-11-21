@@ -10,7 +10,9 @@
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
-// Notes: Found in Course Data files (c0**x)
+// Notes: Also found in Course Data files (c0**x)
+
+BitfieldDisablePadding();
 
 typedef struct
 {
@@ -19,55 +21,88 @@ typedef struct
     short Z;
     short pad; // Always 00 FF
 
-} Vertex;
+} Vertex <optimize=false>;
 
+typedef struct
+{
+    short X1;
+    short Y1;
+    short X2;
+    short Y2;
+} Box;
 
 typedef struct 
 {
     signed byte ZIndexMaybe;
     byte unkFlag;
-    short vertexCount;
-    Vertex verts[vertexCount];
-} VertexMap <optimize=false>;
+    short vertexCount : 16 <fgcolor=cGreen>;
 
-struct MMAP
+    if (vertexCount > 0)
+        Vertex verts[vertexCount];
+
+} VertexMap <optimize=false, comment="Cast values to float, divide by 0.25f">;
+
+struct MCourseMapFace
 {
-    FSeek(0x9C180 + 0x180);
-    char Magic[4];
-    int VersionMaybe;
-    byte unk;
-    byte unk2;
-    byte unk3;
-    byte unk4;
-    int fileSize;
+    struct Header
+    {
+        char Magic[4];
+        int VersionMaybe;
+        byte a;
+        byte b;
+        byte c;
+        byte d;
+        int fileSize;
+        
+        byte OffCourseMapCount <fgcolor=cGreen>;
+        int OffCourseMapOffset : 24 <format=hex, fgcolor=cRed>;
     
-    short OffcourseMapFlag <format=hex>;
-    short OffcourseMapOffset <format=hex, fgcolor=0x0000FF>;
-
-    short RoadMapFlag <format=hex>;
-    short RoadMapOffset <format=hex, fgcolor=0x0000FF>;
+        byte RoadMapCount <fgcolor=cGreen>;
+        int RoadMapOffset : 24 <format=hex, fgcolor=cRed>;
+        
+        byte PitlaneMapCount <fgcolor=cGreen>;
+        int PitlaneMapOffset : 24 <format=hex, fgcolor=cRed>;
+        
+        byte SectionMapOffsetVertices <fgcolor=cGreen>;
+        int SectionMapOffset : 24 <format=hex, fgcolor=cRed>;
     
-    short PitlaneMapFlag <format=hex>;
-    short PitlaneMapOffset <format=hex, fgcolor=0x0000FF>;
+        Box Bounds;
     
-    short SectionMapFlag <format=hex>;
-    short SectionMapOffset <format=hex, fgcolor=0x0000FF>;
-
-    signed short fullMapScaleX1;
-    signed short fullMapScaleX1;
-    signed short fullMapScaleY1;
-    signed short fullMapScaleY2;
-    FSeek(0x30);
-
-    FSeek(OffcourseMapOffset);
-    VertexMap offcourseVerts[2];
+        byte RoadGT6FacesCount <fgcolor=cGreen>;
+        int RoadGT6FacesOffset : 24 <format=hex, fgcolor=cRed>;
     
-    FSeek(RoadMapOffset);
-    VertexMap roadVerts[2];
+        float runtimeFloat1;
+        float road_length; // According to adhoc function MCourseMapFace::road_length
+        float runtimeFloat3;
+    } header <bgcolor=cPurple>;
 
-    FSeek(PitlaneMapOffset);
-    VertexMap pitlaneVerts;
+    if (header.OffCourseMapCount > 0)
+    {
+        FSeek(header.OffCourseMapOffset);
+        VertexMap OffCourseVerts[header.OffcourseMapCount] <bgcolor=cDkGray>;
+    }
 
-    FSeek(SectionMapOffset);
-    VertexMap sectionVerts;
+    if (header.RoadMapCount > 0)
+    {
+        FSeek(header.RoadMapOffset);
+        VertexMap RoadVerts[header.RoadMapCount] <bgcolor=cWhite>;
+    }
+    
+    if (header.PitlaneMapCount > 0)
+    {
+        FSeek(header.PitlaneMapOffset);
+        VertexMap PitlaneVerts[header.PitlaneMapCount] <bgcolor=cYellow>;
+    }
+
+    if (header.SectionMapOffset != 0)
+    {
+        FSeek(header.SectionMapOffset);
+        VertexMap SectionVerts[1] <bgcolor=cBlack>;
+    }
+
+    if (header.RoadGT6FacesCount > 0)
+    {   
+        FSeek(header.RoadGT6FacesOffset);
+        VertexMap RoadFacesGT6[header.RoadGT6FacesCount];
+    }
 } mmap <optimize=false>;
