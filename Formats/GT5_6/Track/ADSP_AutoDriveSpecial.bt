@@ -1,0 +1,72 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: AutoDrive Special
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: Extension of the AutoDrive file for GT6
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vec3;
+typedef struct
+{
+    int unkIndex;
+    Vec3 Position <comment="Not sure">;
+    byte unk[0x48] <comment="Needs figuring">;
+} AttackInfoSp;
+
+typedef struct
+{
+    int count;
+    int empty;
+
+    AttackInfoSp entry[count];
+} AttackInfoSpMap;
+
+LittleEndian();
+struct 
+{
+    struct Header
+    {
+        char Magic[4];
+        uint RuntimePtr;
+        uint FileSize <format=hex>;
+        int _empty_;
+    
+        int Count;
+        int Offset;
+
+        int unk;
+        int _pad_ <hidden=true>;
+    } header <bgcolor=cPurple, size=0x20>;
+
+    int offsets[header.Count] <format=hex, fgcolor=cRed>;
+
+    local int i = 0;
+    for (i = 0; i < header.Count; i++)
+    {
+        FSeek(offsets[i]);
+        if (i == 1)
+            AttackInfoSpMap info <comment="Left Lane">;
+        else if (i == 2)
+            AttackInfoSpMap info <comment="Right Lane">;
+        else if (i == 4)
+            AttackInfoSpMap info <comment="Restricted Area/Pit?">;
+        else if (i == 5)
+            AttackInfoSpMap info <comment="Learning Section">;
+        else if (i == 6)
+            AttackInfoSpMap info <comment="Default Lane?">;
+        else
+            AttackInfoSpMap info;
+    }
+    
+} ADSP;
