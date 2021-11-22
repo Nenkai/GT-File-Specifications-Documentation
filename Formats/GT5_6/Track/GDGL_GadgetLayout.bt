@@ -1,0 +1,75 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vec3;
+
+typedef struct
+{
+    Vec3 Position;
+    int unk;
+    float X1;
+    float Y1;
+    float X2;
+    float Y2;
+    int unk_pad[4];
+} GadgetPlacement <optimize=false>;
+typedef struct
+{
+    struct 
+    {
+        int GadgetId <comment="ID in GADGETS table in SpecDB">;
+        int KeyNameOffset <fgcolor=cRed, format=hex>;
+        int GadgetCount <fgcolor=cGreen>;
+        int GadgetPlacementsOffset <fgcolor=cRed, format=hex>;
+        byte _pad_[0x10];
+    } GadgetSet <bgcolor=cYellow>;
+    
+    FSeek(GadgetSet.KeyNameOffset);
+    string Name <comment="NAME in GADGETS table in SpecDB", bgcolor=cGray>;
+
+    Printf(" %s: %d gadget(s)\n", Name, GadgetSet.GadgetCount);
+    FSeek(GadgetSet.GadgetPlacementsOffset);
+    GadgetPlacement gadget[GadgetSet.GadgetCount];
+
+} Entry;
+
+struct GADL
+{
+    struct
+    {
+        char Magic[4];
+        uint RuntimePtr;
+        int _empty_;
+        int RelocSize <format=hex, fgcolor=cGreen>;
+        int EntryCount <fgcolor=cGreen>;
+        Printf("%d different gadgets used\n", EntryCount);
+        int DataOffset <fgcolor=cRed, format=hex>;
+    } Header <bgcolor=cPurple, size=0x30>;
+
+    Printf("\n");
+    FSeek(Header.DataOffset);
+    local int i = 0;
+    for (i = 0; i < Header.EntryCount; i++)
+    {
+        FSeek(Header.DataOffset + (i * 0x20));
+        Entry entry;
+    }
+   
+} GadgetLayout;
