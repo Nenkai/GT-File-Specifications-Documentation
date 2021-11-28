@@ -1,0 +1,40 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct SHDS
+{
+    struct SHDSHeader
+    {
+        char Magic[4];
+        int _empty_;
+        int RelocPtr;
+        int _empty;
+        int Offset0x10;
+        short Empty;
+        short Count0x1C <fgcolor=cGreen>;
+        short Count0x20 <fgcolor=cGreen>;
+        short Count0x24_2c <fgcolor=cGreen>;
+        uint Offset0x1C <format=hex, fgcolor=cRed, comment="0x0C Stride, also used in MDL3 itself">;
+        uint Offset0x20 <format=hex, fgcolor=cRed, comment="0x28 Stride">;
+        uint Offset0x24 <format=hex, fgcolor=cRed, comment="0x28 Stride">;
+        int RuntimeOffset;
+        int Offset0x2C <format=hex, fgcolor=cRed, comment="0x48 Stride">;
+        short Count0x38 <fgcolor=cGreen>;
+        short Count0x3C <fgcolor=cGreen>;
+        short Count0x40 <fgcolor=cGreen>;
+        short pad;
+        uint Offset0x38 <format=hex, fgcolor=cRed, comment="0x10 Stride">;
+        uint Offset0x3C <format=hex, fgcolor=cRed, comment="0x4 Stride">;
+        uint Offset0x40 <format=hex, fgcolor=cRed, comment="0x20 Stride">;
+    } ShaderHeader <bgcolor=cPurple>;
+} Shaders;

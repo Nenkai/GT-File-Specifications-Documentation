@@ -1,0 +1,248 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: TXS3 Gran Turismo Image Header Specifics
+//   Authors: Nenkai#9075
+//   Version: 1.0
+//   Purpose: Texture Files
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+local int BasePos;
+
+typedef enum <ubyte> 
+{
+    DXT10_MORTON = 0x85,
+    DXT1 = 0x86,
+    DXT1_2 = 0xA6,
+    DXT3 = 0x87,
+    DXT3_2 = 0xA7,
+    DXT5 = 0x88,
+    DXT5_2 = 0xA8,
+    DXT10 = 0xA5,
+} PixelFormat;
+
+typedef enum <byte>
+{
+  CELL_GCM_TEXTURE_CONVOLUTION_NONE,
+  CELL_GCM_TEXTURE_CONVOLUTION_QUINCUNX,
+  CELL_GCM_TEXTURE_CONVOLUTION_GAUSSIAN,
+  CELL_GCM_TEXTURE_CONVOLUTION_QUINCUNX_ALT,
+
+} CELL_GCM_TEXTURE_CONVOLUTION;
+
+typedef enum <byte>
+{
+  CELL_GCM_TEXTURE_MIN_NONE,
+  CELL_GCM_TEXTURE_NEAREST,
+  CELL_GCM_TEXTURE_LINEAR,
+  CELL_GCM_TEXTURE_NEAREST_NEAREST,
+  CELL_GCM_TEXTURE_LINEAR_NEAREST,
+  CELL_GCM_TEXTURE_NEAREST_LINEAR,
+  CELL_GCM_TEXTURE_LINEAR_LINEAR,
+  CELL_GCM_TEXTURE_CONVOLUTION_MIN ,
+} CELL_GCM_TEXTURE_MIN;
+
+typedef enum <byte>
+{
+  CELL_GCM_TEXTURE_MAG_NONE,
+  CELL_GCM_TEXTURE_NEAREST_MAG,
+  CELL_GCM_TEXTURE_LINEAR_MAG,
+  CELL_GCM_TEXTURE_CONVOLUTION_MAG,
+} CELL_GCM_TEXTURE_MAG;
+
+typedef enum <byte>
+{
+   CELL_GCM_TEXTURE_WRAP_NONE,
+   CELL_GCM_TEXTURE_WRAP,
+   CELL_GCM_TEXTURE_MIRROR,
+   CELL_GCM_TEXTURE_CLAMP_TO_EDGE,
+   CELL_GCM_TEXTURE_BORDER,
+   CELL_GCM_TEXTURE_CLAMP,
+   CELL_GCM_TEXTURE_MIRROR_ONCE_CLAMP_TO_EDGE,
+   CELL_GCM_TEXTURE_MIRROR_ONCE_BORDER,
+   CELL_GCM_TEXTURE_MIRROR_ONCE_CLAMP,
+} CELL_GCM_TEXTURE_WRAP;
+
+typedef enum <byte>
+{
+  	CELL_GCM_TEXTURE_MAX_ANISO_1	= (0),
+	CELL_GCM_TEXTURE_MAX_ANISO_2	= (1),
+	CELL_GCM_TEXTURE_MAX_ANISO_4	= (2),
+	CELL_GCM_TEXTURE_MAX_ANISO_6	= (3),
+	CELL_GCM_TEXTURE_MAX_ANISO_8	= (4),
+	CELL_GCM_TEXTURE_MAX_ANISO_10	= (5),
+	CELL_GCM_TEXTURE_MAX_ANISO_12	= (6),
+	CELL_GCM_TEXTURE_MAX_ANISO_16	= (7),
+} CELL_GCM_TEXTURE_MAX_ANISO;
+
+typedef struct 
+{
+    BitfieldDisablePadding();
+    uint head0;
+    uint offset;
+    byte pad0;
+    byte mipmap;
+    PixelFormat imageFormat;
+
+    byte dim : 4;
+    byte noborder : 1;
+    byte cubemap : 1 <comment="whether cube map is enabled">;
+    byte location : 2 <comment="fragment program location, 1 = local memory, 2 = main memory">;
+
+    byte zfunc : 5;
+    byte gamma : 8;
+    byte signExt : 4;
+    byte unk : 3;
+    CELL_GCM_TEXTURE_WRAP wrap_t : 4 <comment="adjustment when the T coordinate exceeds the texture size">;
+    byte useAniso : 3;
+    CELL_GCM_TEXTURE_WRAP wrap_s : 5 <comment="adjustment when the S coordinate exceeds the texture size">;
+    
+    byte enable : 1 <comment="stipple polygon rendering">;
+    short lodMin : 12;
+    short lodMax : 12;
+    CELL_GCM_TEXTURE_MAX_ANISO maxAniso : 3;
+    byte pad1 : 4;
+    
+    int remap;
+
+    byte signedARGB : 5;
+    CELL_GCM_TEXTURE_MAG mag : 3 <comment="filter type for texture reduction">;
+    CELL_GCM_TEXTURE_MIN min : 8 <comment="filter type for texture enlargement">;
+    CELL_GCM_TEXTURE_CONVOLUTION convultion : 3 <comment="convolution filter formula">;
+    short lodBias : 12 <comment="bias value for mipmap level in texture reductions">;
+
+    ushort Width;
+    ushort Height;
+    uint borderColor;
+    uint head1;
+    uint depth : 12;
+    uint pitch : 20;
+    short unk;
+    short unk;
+    uint reserved1;
+    short Unk;
+    short UnkIndex;
+    uint imageID;
+    uint what7;
+    uint ImageNameOffset <format=hex, fgcolor=cRed>;
+
+    local int cPos = FTell();
+    if (ImageNameOffset != 0)
+    {
+        FSeek(BasePos + ImageNameOffset);
+        string ImageName <bgcolor=cGray>;
+    }
+    FSeek(cPos);
+
+} ImageMetadata <bgcolor=cYellow, optimize=false>;
+
+typedef struct 
+{
+    int unk <format=hex, comment="Always 0">;
+    int StreamOffset <format=hex, fgcolor=cRed>;
+    int CompressedSize <format=hex, fgcolor=cDkGreen>;
+    int UncompressedSize <format=hex, fgcolor=cGreen>;
+} StreamTextureMapInfo <optimize=false, bgcolor=cDkPurple>;
+
+typedef struct StreamTextureMapSet
+{
+   int StreamTextureMapOffset <format=hex>;
+   int ImageInfoCount <fgcolor=cGreen>;
+   int unk;
+   int TotalUncompressedSetSize <format=hex>;
+   short unk;
+   short Width;
+   short Width2;
+   short unk2;
+   int _pad_[2];
+   
+   local int cPos = FTell();
+   FSeek(BasePos + StreamTextureMapOffset);
+   StreamTextureMapInfo streamFileInfo[ImageInfoCount];
+   FSeek(cPos);
+} StreamMap <bgcolor=cLtBlue, bgcolor=cPurple>;
+
+typedef struct
+{
+    uint ImageOffset <format=hex, fgcolor=cRed>;
+    uint ImageSize <format=hex>;
+    byte _two_; // 0x20 flag when running
+    PixelFormat ImageFormat;
+    byte MipmapCount;
+    byte _two2_;
+    ushort ImageWidth;
+    ushort ImageHeight;
+    ushort Unk;
+    ushort Unk2;
+
+    int pad;
+    int StreamTextureMapSetOffset <format=hex, fgcolor=cRed>;
+    int pad;
+
+    local int cPos = FTell();
+    if (StreamTextureMapSetOffset != 0)
+    {
+        FSeek(BasePos + StreamTextureMapSetOffset);
+        StreamMap map;
+    }
+
+    FSeek(BasePos + ImageOffset);
+    byte a;
+    FSeek(cPos);
+} ImageData <optimize=false>;
+
+typedef struct (int arrSize)
+{
+    ImageMetadata images[arrSize];
+} ImageMetadataMap;
+
+typedef struct (int arrSize)
+{
+    ImageData images[arrSize];
+} ImageDataMap <bgcolor=cDkGreen>;
+
+// Main header is 0x40
+typedef struct (local int BasePos)
+{
+    struct
+    {
+        char TxsMagic[4];
+        if (TxsMagic[0] == '3')
+            LittleEndian();
+        else
+            BigEndian();
+
+        uint FileSize <format=hex>;
+        uint BaseFilePos <format=hex>;
+        uint UnkOffset;
+        uint HasRuntimePtr;
+        ushort TextureRenderParamCount <fgcolor=cGreen>;
+        ushort TextureImageInfoCount <fgcolor=cGreen>;
+        uint TextureRenderParamOffset <format=hex, fgcolor=cRed>;
+        uint TextureInfoOffset <format=hex, fgcolor=cRed>;
+        int BaseDdsPointer <format=hex>;
+        ushort UnkCount0x28 <fgcolor=cGreen, comment="0x08 Stride">;
+        ushort UnkCount0x2C <fgcolor=cGreen, comment="0x0C Stride">;
+        uint Offset0x28 <format=hex, fgcolor=cRed>;
+        uint Offset0x2C <format=hex, fgcolor=cRed>;
+        uint Offset0x30 <format=hex, fgcolor=cRed>;
+        ushort Count0x38 <fgcolor=cGreen, comment="0x1C Stride">;
+        ushort Reserved;
+        uint Offset0x38 <format=hex, fgcolor=cRed>;
+    } Header <size=0x40, bgcolor=cPurple>;
+
+    if (Header.TextureRenderParamCount > 0)
+    {
+        FSeek(BasePos + Header.TextureRenderParamOffset);
+        ImageMetadataMap imageMetas(Header.TextureRenderParamCount);
+    }
+
+    FSeek(BasePos + Header.TextureInfoOffset);
+    ImageDataMap data(Header.TextureImageInfoCount);
+    
+    
+} TXS3;
