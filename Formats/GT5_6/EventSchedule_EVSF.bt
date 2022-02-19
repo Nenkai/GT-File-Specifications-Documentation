@@ -1,0 +1,102 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+struct ObjectEntry;
+
+typedef struct
+{
+    local int basePos = FTell();
+    short DataOffset <fgcolor=cRed>;
+    short AttributeCount <fgcolor=cGreen>;
+    short LastOffset <format=hex, fgcolor=cRed>;
+
+    local int j = 0;
+
+    FSeek(basePos + DataOffset);
+
+    local int dBasePos;
+    for (j = 0; j < AttributeCount; j++)
+    {
+        dBasePos = FTell();
+        struct ObjectEntry
+        {
+            char Name[4] <fgcolor=cPurple>;
+            short Unk;
+            byte NextObjectOffset <format=hex, fgcolor=cRed>;
+            byte MemberCount <fgcolor=cGreen>; // For TRGT
+
+            if (Name != "EBC" && Name != "CAM" && Name != "GNE" && Name != "EOCM")
+            {
+                byte entryIndex;
+                byte OffsetToData <format=hex, fgcolor=cLtRed>;
+                byte OffsetToNext <format=hex, fgcolor=cRed>;
+                FSkip(1);
+            }
+
+            switch (Name)
+            {
+                case "NAME":
+                case "EBC":
+                case "CAM":
+                case "GNE":
+                    string name <fgcolor=cGray>;
+                    break;
+
+                case "EBA":
+                    string w;
+                case "EOCM":
+                    break; // End of Component?
+            }
+        
+            FSeek(FTell() + (FTell() % 4));
+            if (Name == "RESF" || Name == "TRGT")
+            {
+                local int k = 0;
+                for (k = 0; k < MemberCount; k++)
+                   ObjectEntry objectEntry;
+            }
+    
+        } Entries;
+
+        FSeek(dBasePos + Entries[j].NextObjectOffset);
+    }
+
+   FSeek(basePos + LastOffset);
+   ObjectEntry o;
+} Obj;
+
+struct EVS
+{
+    struct Header
+    {
+        char Magic[4];
+        int Unk;
+        short Minus2;
+        short a;
+        int DataPtr <format=hex, fgcolor=cRed>;
+        short ElementCount;
+        short __pad__;
+    } header <bgcolor=cPurple>;
+
+    int ObjectsOffsets[header.ElementCount] <format=hex, bgcolor=cBlue, fgcolor=cRed>;
+
+    local int i = 0;
+    for (i = 0; i < header.ElementCount; i++)
+    {
+        FSeek(ObjectsOffsets[i]);
+        Obj oo;
+    }
+
+} EventScheduler;
