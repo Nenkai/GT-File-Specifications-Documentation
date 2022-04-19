@@ -12,7 +12,14 @@
 //------------------------------------------------
 
 // Incomplete
+BigEndian();
+
 int64 DLSSize;
+
+typedef struct PieceHash
+{
+    byte hashData[0x20];
+};
 
 struct DLS
 {
@@ -20,11 +27,17 @@ struct DLS
     short VersionMinor;
     int64 MovieFileSize <fgcolor=cGreen>;
     short unk1;
-    short idLen;
-    char fileId[idLen];
+    short fileIdLen;
+    char fileId[fileIdLen];
     byte unk3;
-    short unk4;
+    byte unk4;
 
-    byte strLen;
-    char str[strLen];
+    short trackerUrlLen;
+    char trackerUrl[trackerUrlLen];
+
+    uint unk <format=hex>;
+    uint numPieces <format=hex>; // 0x80000 each
+
+    PieceHash pieces[numPieces];
+    PieceHash final;
 } dls;
