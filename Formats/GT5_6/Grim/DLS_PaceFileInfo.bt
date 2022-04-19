@@ -4,14 +4,13 @@
 //      File: PaceFileInfo_DLS.bt
 //   Authors: Nenkai#9075
 //   Version: 
-//   Purpose: Describes a download information for a pace movie file (GT5 GTTV)
+//   Purpose: Sony Torrent File (Pace Info File)
 //  Category: 
 // File Mask: 
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
 
-// Incomplete
 BigEndian();
 
 int64 DLSSize;
@@ -41,3 +40,150 @@ struct DLS
     PieceHash pieces[numPieces];
     PieceHash final;
 } dls;
+
+/*
+ * The library used for this is libpace - which is an undocumented SCE library
+ * and not provided by the PS3 (or other) SDKs. Seems to be mostly used by
+ * games which Sony is the developer, or publisher.
+
+ * DLS files/Pace System are like torrent files, they allow peers and seeders 
+ * to send files between each other - using a tracker URL. libpace is more or less a P2P file share/torrent client.
+
+ * SOCOM 4 does uses it along with some other internal SCE libraries (under the SCEA namespace).
+ * (there are some other libraries used like libcrashreport, libbinxml, libmovie (uses cellSurMixer) , libmalloc
+ * SCEA::PSArc::ArchiveParser, edgezlib (SPURS based zlib decompressor), SCEA::Recap)
+
+ * List of Pace APIs:
+ *  cellPaceIndexGetFirst
+ *  cellPaceGetClientStatistics
+ *  cellPaceIndexGetNext
+ *  cellPaceFileId2String
+ *  cellPaceDeactivate
+ *  cellPaceIndexAddFile
+ *  cellPaceIndexSuspendFile
+ *  cellPaceGetFileInfoContent
+ *  cellPaceInitializeActivateParams
+ *  cellPaceActivate
+ *  cellPaceDestroyClient
+ *  cellPaceCreateClient
+ *  cellPaceInit
+ *  cellPaceInitializeTransferParams
+ *  cellPaceEnd
+ *  cellPaceIndexResumeFile
+ *  cellPaceInitializeClientParams
+ *  cellPaceIndexRemoveFile
+ *  cellPaceGetFileStatus
+
+ * GT5P/5/6 uses perhaps a modified version of libpace (statically linked)
+
+ * Some structs:
+
+   struct CellPaceTransferParams
+   {
+     uint32_t cookie;
+     int32_t maxUploadRate;
+     int32_t minDownloadRate;
+     int32_t maxDownloadRate;
+     int32_t maxPeers;
+     int32_t maxCdnDownloadRate;
+     int32_t maxPeerDownloadRate;
+     float uploadSizeRatio;
+     int64_t uploadSizeLimit;
+     uint64_t cursor;
+     int32_t targetCdnOffloadRate;
+     int32_t interestThreshold;
+     uint32_t options;
+   };
+   
+   struct CellPaceConnInfo
+   {
+     uint8_t state;
+     CellPacePeerId id;
+     char onlineId[65];
+     uint32_t rtt;
+     float packetLossRatio;
+   };
+   
+   struct CellPacePeerId
+   {
+     uint8_t peerId[32];
+   };
+   
+   struct CellPaceClientStatistics
+   {
+     uint64_t since;
+     uint64_t cumulativePeerUploadedBytes;
+     uint64_t cumulativePeerDownloadedBytes;
+     uint64_t cumulativeCdnDownloadedBytes;
+     uint64_t totalPeerUploadedBytes;
+     uint64_t totalPeerDownloadedBytes;
+     uint64_t totalCdnDownloadedBytes;
+     uint32_t peerUploadRate;
+     uint32_t peerDownloadRate;
+     uint32_t cdnDownloadRate;
+     uint32_t totalInboundPeerConnections;
+     uint32_t totalOutboundPeerConnections;
+     uint32_t totalFailedPeerConnections;
+     uint32_t currentPeerConnections;
+     uint32_t totalCdnConnections;
+     uint32_t currentTcpConnections;
+     uint32_t totalFailedCdnConnections;
+     uint32_t totalTrackerConnections;
+     uint32_t totalFailedTrackerConnections;
+     uint32_t currentMemoryUsage;
+     uint32_t peakMemoryUsage;
+     uint32_t memoryAllocations;
+     uint32_t memoryFrees;
+     uint32_t metadataDiskUsage;
+     uint64_t contentDiskUsage;
+     uint32_t totalFileOpens;
+     uint32_t totalFileCloses;
+     uint32_t totalFileSeeks;
+     uint64_t totalFileBytesWritten;
+     uint64_t totalFileBytesRead;
+     uint32_t totalFileOpenErrors;
+     uint32_t totalFileCloseErrors;
+     uint32_t totalFileReadErrors;
+     uint32_t totalFileWriteErrors;
+     uint32_t totalFileSeekErrors;
+     uint32_t numActiveFiles;
+     uint32_t numInactiveFiles;
+     uint64_t sizeRemaining;
+     uint32_t numPieces;
+     uint32_t numPiecesRemaining;
+     uint32_t numUploadSlotsUsed;
+     uint32_t totalNumPeerEnobufs;
+     uint32_t totalNumHttpEnobufs;
+     uint64_t totalBlockWriteTime;
+     uint32_t totalBlockWriteCount;
+     uint32_t peakBlockWriteTime;
+     uint64_t totalBlockReadTime;
+     uint32_t totalBlockReadCount;
+     uint32_t peakBlockReadTime;
+     uint64_t totalBlockHashTime;
+     uint32_t totalBlockHashCount;
+     uint32_t peakBlockHashTime;
+     CellPaceConnInfo peers[64];
+     size_t numPeers;
+   };
+   
+   struct CellPaceFileId
+   {
+     uint8_t fileId[32];
+   };
+   
+   struct CellPaceFileInfoContent
+   {
+     char name[64];
+     char trackerUrl[512];
+     CellPaceFileId fileId;
+     uint64_t size;
+     uint32_t numPieces;
+   };
+   
+   typedef unsigned int *CellPaceHttpClientId;
+   typedef int32_t CellPaceClientId;
+   
+ * Cell Error Codes
+   <TODO (?) - Check SOCOM 4 Debug Symbols at zNetwork::DLSImpl::PrintDLSError>
+*/
