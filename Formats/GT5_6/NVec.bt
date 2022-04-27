@@ -13,6 +13,9 @@
 
 BigEndian();
 BitfieldDisablePadding();
+
+local int entryBitSize;
+
 typedef struct (int charCount)
 {
    wchar_t fontChar[charCount];
@@ -22,24 +25,120 @@ typedef struct
 {
     wchar_t fontChar <fgcolor=cYellow>;
     short flags;
-    int unka : 21;
-    int unkb : 11;
-
+    int disabled : 1;
+    int unk : 10;
+    int xOffset : 9;
+    int yOffset : 10;
+    int pad : 2;
     int DataLen <format=hex, fgcolor=cGreen>;
-    int unkc: 12 <format=hex>;
-    int unkd : 20 <format=hex>;
+    
+    int unk12 : 12 <format=hex>;
+    int unk20 : 20;
+    /*
+    byte a;
+    byte b;
+    byte c;
+    byte d; // Confirmed
+    */
 
     int OffsetWithinData <format=hex, fgcolor=cRed>;
 
 } CharInfos <bgcolor=cPurple>;
 
+
+string ReadAsFloat12Bits( int value )
+{
+    int maxVal = Pow(2, 12);
+
+    string s;   
+    if (value > (maxVal / 2))
+        value = value - maxVal;
+
+    SPrintf( s, "%f", (float)value );
+    return s;
+}
+
+string ReadAsFloatVariable( int value )
+{
+    int maxVal = Pow(2, 9);
+
+    string s;   
+    if (value > (maxVal / 2))
+        value = value - maxVal;
+
+    Printf("%d bits: %d %d\n", entryBitSize, value, maxVal);
+
+    SPrintf( s, "%f", (float)value );
+    return s;
+}
+
+string ReadAsFloatVariablePlus2( int value )
+{
+    int maxVal = Pow(2, entryBitSize + 2);
+
+    string s;   
+    if (value > (maxVal / 2))
+        value = value - maxVal;
+
+    SPrintf( s, "%f", (float)value );
+    return s;
+}
+
 typedef struct 
 {
     
-} test <optimize=false>;
-typedef struct 
-{
-    byte a;
+    uint x : 12 <comment=ReadAsFloat12Bits>;
+    uint y : 12 <comment=ReadAsFloat12Bits>;
+
+    struct
+    {
+        int flags : 6 <format=hex>;
+        if (flags == 0)
+            break;
+
+        if (flags & 0x20)
+        {
+            if (flags & 0x10 == 0)
+            {
+
+            }
+            else
+            {
+                int flags2 : 2;
+                
+                entryBitSize = flags & 0x0F;
+
+                if (flags2 & 0x02)
+                {
+                    int x : (entryBitSize + 2) - 1;
+                    int y : (entryBitSize + 2);
+                }
+                else
+                {
+                    int unkValue : (entryBitSize + 2) <comment=ReadAsFloatVariablePlus2>;
+                    if (flags2 & 0x01)
+                    {
+                    
+                    }
+                }
+            }
+        }
+        else if (flags & 0x01)
+        {
+            int size : 5;
+
+            int x : size <comment=ReadAsFloatVariable>;
+            int y : size <comment=ReadAsFloatVariable>;
+
+            if (flags & 0x02)
+                int b : 1;
+    
+            if (flags & 0x04)
+                int b : 1;
+        }
+   
+    } vecdataentry[12] <optimize=false>;
+
 } CharData;
 
 typedef struct (int dataOffset, int size)
