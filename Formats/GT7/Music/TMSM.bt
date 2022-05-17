@@ -13,7 +13,7 @@
 
 typedef struct
 {
-    int a;
+    int TimeMS;
     byte b;
     short c;
     short d;
@@ -96,9 +96,19 @@ typedef struct
     
 } Music;
 
+string PrintMusic(Music& music)
+{
+    string str = "";
+    if (music.nMusicRallyInfo > 0)
+        str += "[R] ";
+
+    str += music.Name + " (" + music.Label + ")";
+    return str;
+}
+
 typedef struct
 {
-    string name;
+    string Name;
     short nName;
 
     if (nName > 0)
@@ -122,6 +132,10 @@ typedef struct
 
 } Playlist <optimize=false>;
 
+string PrintPlaylist(Playlist& playlist)
+{
+    return playlist.Name;
+}
 
 struct TMSM
 {
@@ -129,8 +143,8 @@ struct TMSM
     int Version;
 
     short nTrackCount;
-    Music m[nTrackCount] <optimize=false, bgcolor=cYellow>;
+    Music m[nTrackCount] <optimize=false, bgcolor=cYellow, comment=PrintMusic>;
 
     short nPlaylistCount;
-    Playlist playlists[nPlaylistCount] <bgcolor=cLtBlue>;
+    Playlist playlists[nPlaylistCount] <bgcolor=cLtBlue, comment=PrintPlaylist>;
 } tmsm;
