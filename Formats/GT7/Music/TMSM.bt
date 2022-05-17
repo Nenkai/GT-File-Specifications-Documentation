@@ -1,0 +1,136 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: TMSM - Music Library Information for GT7
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int a;
+    byte b;
+    short c;
+    short d;
+    short e;
+
+    if (tmsm.Version >= 10)
+       byte f;
+
+} MusicRallyPoint <optimize=false>;
+
+typedef struct
+{
+    string unkStr;
+    short nPoints;
+    
+    if (nPoints > 0)
+        MusicRallyPoint points[nPoints];
+} MusicRallyInfo <optimize=false>;
+
+typedef struct
+{
+    if (tmsm.Version >= 6)
+        short ID;
+
+    string Label;
+    string Name;
+    string Artist;
+    string Genre;
+
+    if (tmsm.Version < 8)
+    {
+        int a;
+
+        if (tmsm.Version >= 5)
+        {
+            short b; 
+            short c;
+        }
+        
+        if (tmsm.Version >= 7)
+            short d;
+    }
+    else
+    {
+        short nMusicRallyInfo;
+
+        if (nMusicRallyInfo > 0)
+        {
+            MusicRallyInfo musicRallyInfos[nMusicRallyInfo];
+        }
+
+        if (nMusicRallyInfo != 0)
+        {
+            Printf("Music Rally Track: " + Name + " (" + Label + ")\n");
+        }
+    }
+
+    
+    short StartMS;
+
+    if (tmsm.Version < 2)
+    {
+        short unk;
+    }
+    else
+    {
+        int EndMS;
+        if (tmsm.Version < 11)
+        {
+            byte unk;
+            if (version < 9)
+                return;
+        }
+        else
+        {
+            byte unk;
+            byte unk;
+        }
+    }
+    
+} Music;
+
+typedef struct
+{
+    string name;
+    short nName;
+
+    if (nName > 0)
+    {
+        struct
+        {
+            string name;
+        } names[nName] <optimize=false>;
+    }
+
+    string unk;
+    
+    byte unk;
+    if (tmsm.Version > 2)
+    {
+        byte unk;
+        if (tmsm.Version != 3)
+            byte unk;
+    }
+    
+
+} Playlist <optimize=false>;
+
+
+struct TMSM
+{
+    char Magic[4];
+    int Version;
+
+    short nTrackCount;
+    Music m[nTrackCount] <optimize=false, bgcolor=cYellow>;
+
+    short nPlaylistCount;
+    Playlist playlists[nPlaylistCount] <bgcolor=cLtBlue>;
+} tmsm;
