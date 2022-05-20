@@ -1,0 +1,139 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: GT7 File System Minimal Perfect Hash
+//   Authors: flatz for initial research, Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+BitfieldDisablePadding();
+
+typedef struct VolumeInfo
+{
+    char file_name[0x10];
+    byte PlayGoChunkIndex;
+    short Unk;
+    int64 volume_size : 40 <format=hex>;
+} volumeInfo;
+
+typedef enum <uint> { SI_NONE, SI_ENCRYPT, SI_DICT_INFO } SuperIntendentFlags;
+
+typedef enum <byte> { KIND_LUMP, KIND_FRAG } NodeKind;
+typedef enum <byte> { FORMAT_PLAIN, FORMAT_PZ1, FORMAT_PZ2, FORMAT_PFS } NodeFormat;
+typedef enum <byte> { ALGO_ZLIB, ALGO_ZSTD, ALGO_KRAKEN } NodeAlgo;
+
+
+struct FileSystemMPHIndex
+{
+    struct SuperintendentBlock
+    {
+        int magic <comment="Must match 0x5B745163">;
+        uint Unk <format=hex>;
+        int64 timestamp <comment="Julian Time">;
+        int64 serial_number;
+        int unk <format=hex>;
+        SuperIntendentFlags flags;
+        
+        uint formatter_code <format=hex, comment="Must be 0x11160000, 'invalid formatter code. This code is not suported.'">;
+        uint index_data_offset <format=hex, fgcolor=cRed>;
+        uint index_data_size <format=hex, fgcolor=cYellow>;
+        uint node_table_offset <format=hex, fgcolor=cRed>;
+        uint node_table_size <format=hex, fgcolor=cYellow>;
+
+        local uint volInfoOffset;
+        if (serial_number > 660770580)
+        {   
+            uint volume_info_offset <format=hex, fgcolor=cRed>;
+            uint volume_info_count <fgcolor=cGreen>;
+            uint dict_info_offset <format=hex, fgcolor=cRed>;
+            uint dict_info_count <fgcolor=cGreen>;
+
+            volInfoOffset = volume_info_offset;
+        }
+        else
+        {
+            uint volume_info_count <fgcolor=cGreen>;
+
+            volInfoOffset = FTell();
+        }
+
+        FSeek(volInfoOffset);
+        VolumeInfo volumes[volume_info_count];
+    } header <bgcolor=cPurple, comment="CRC32 encryption layer on top">;
+
+    FSeek(header.index_data_offset);
+    struct IndexerMPH
+    {
+        int node_count <comment="Number of files">;
+        int64 exists_count;
+        int _exists[exists_count];
+        int64 exists_acm256_count;
+        int _exists_acm256[exists_acm256_count];
+        int64 exists_acm32_count;
+        byte _exists_acm32[exists_acm32_count];
+        int vertex_count;
+        int seeds[3];
+        int64 g_value_count;
+        byte g_values[g_value_count];
+    } indexer <bgcolor=cYellow>;
+
+    FSeek(header.node_table_offset);
+    struct
+    {
+        int entry_hash <format=hex>;
+        int compressed_size_lo;
+        int nonce <format=hex, comment="Nonce/IV for this node's data, for ChaCha20">;
+        int uncompressed_size_lo;
+        int sector_index : 25 <comment="Sector index within the specified volume">;
+        byte volume_index : 7 <comment="Volume File in which this node is located">;
+        byte compressed_size_hi;
+
+        union
+        {
+            byte format_bits;
+            struct
+            {
+                NodeFormat flags_format : 2;
+                byte Encrypt : 1;
+                byte Unk : 1;
+                NodeKind flags_kind : 2;
+                NodeAlgo flags_algo : 2;
+            } fields <optimize=false>;
+        } format_flags <optimize=false>;
+
+        byte uncompressed_size_hi;
+
+        union
+        {
+            byte extra_flags_bits : 8 <format=hex>;
+            struct
+            {
+                byte dict_info_index : 4;
+                byte unk : 3;
+                byte uses_cluster_volume : 1;
+            } fields <optimize=false>;
+        } extra_flags <optimize=false>;
+
+    } NodeInfo[indexer.node_count] <bgcolor=cGreen>;
+
+    if (header.serial_number > 660770580)
+    {   
+        if (header.dict_info_count > 0)
+        {
+            FSeek(header.dict_info_offset);
+            struct
+            {
+                uint ID;
+                uint Size <format=hex>;
+                uint64 Offset <format=hex, fgcolor=cRed>;
+
+            } DictInfo[header.dict_info_count];
+        }
+    }
+} Index <comment="ChaCha20 Encrypted">;
