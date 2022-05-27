@@ -271,6 +271,8 @@ struct CAR5
 
             int tireDataOffset <format=hex, fgcolor=cRed>;
 
+            int unkCount14 <fgcolor=cGreen>;
+            int unkOffset14 <format=hex, fgcolor=cRed>;
             if (rainSplashDataCount > 0 && rainSplashDataOffset != 0)
             {
                 FSeek(rainSplashDataOffset);
