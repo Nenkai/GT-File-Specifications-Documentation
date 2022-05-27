@@ -1,0 +1,130 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: PDI0 - 64 Bits
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: GT7 PDI0 Texture
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+BitfieldDisablePadding();
+
+typedef struct
+{
+    local int BaseTXSPos = FTell();
+
+    struct 
+    {
+        char Magic[0x04];
+        if (Magic != "IDP0" || Magic != "PDI0")
+            Printf("WARNING: Did not find PDI0 magic");
+
+        int Size;
+        int64 RelocPtr;
+        int64 RelocPtr2;
+        int unk;
+        short PGLUTextureInfoCount <fgcolor=cGreen>;
+        short ImageInfoCount <fgcolor=cGreen>;
+        int64 PGLUTextureInfoOffset <format=hex, fgcolor=cRed>;
+        int64 ImageInfoOffset <format=hex, fgcolor=cRed>;
+        int64 DataStartOffset <format=hex, fgcolor=cRed>;
+        int64 UnkOffset_0x38 <format=hex, fgcolor=cRed>;
+        int64 UnkOffset_0x40 <format=hex, fgcolor=cRed>;
+        int64 UnkOffset_0x48 <format=hex, fgcolor=cRed>;
+        short UnkCount0x50 <comment="Count for Offset0x48">;
+        byte Empty[0x0E];
+        int64 UnkOffset_0x60 <format=hex, fgcolor=cRed>;
+        
+    } Header <size=0x70, bgcolor=cGreen>;
+
+    if (Header.PGLUTextureInfoCount > 0)
+    {
+        FSeek(BaseTXSPos + Header.PGLUTextureInfoOffset);
+        struct
+        {
+            int reserved;
+    
+            int pad : 20;
+            int FormatMaybe : 6;
+            int b4 : 4;
+            int empty : 2;
+        
+            // new int
+            int WidthMinus1 : 14;
+            int HeightMinus1 : 14;
+            int xdd : 4;
+        
+            // new int
+            int b3 : 3;
+            int b3 : 3;
+            int b3 : 3;
+            int b3 : 3;
+            int b4 : 4;
+            int b4 : 4 <comment="Plus one is added">;
+            int b5 : 5;
+            int unkb7 : 7;
+            
+            // new int
+            int unkb13 : 13;
+            int AlignmentMinus1 : 14;
+            int emptybits : 5;
+
+            int empty;
+            int empty;
+            int ImageSize <format=hex, fgcolor=cYellow>;
+        } PGLUTextureInfo[Header.PGLUTextureInfoCount] <size=0x48>;
+    }
+
+    FSeek(BaseTXSPos + Header.ImageInfoOffset);
+    struct 
+    {
+        int ImageOffset <format=hex, fgcolor=cRed>;
+        int b;
+        int ImageSize <format=hex, fgcolor=cYellow>;
+        int d;
+        short Width;
+        short Height;
+        int Unk;
+    } ImageInfo[Header.ImageInfoCount] <size=0x30>;
+} TXS3_64;
+
+struct
+{
+    struct
+    {
+        char Magic[0x04];
+        int TypeMaybe;
+        int64 UnkOffset <format=hex, fgcolor=cRed>;
+    } Header <bgcolor=cPurple>;
+
+    struct 
+    {
+        if (Header.TypeMaybe == 1)
+        {
+    
+        }
+
+        if (Header.TypeMaybe == 2)
+        {
+            int64 EntryNameOffsets <format=hex, fgcolor=cRed>;
+            int64 unk2;
+            int64 unk3;
+            int64 EC00Offset <format=hex, fgcolor=cRed>;
+            int64 TXSOffset <format=hex, fgcolor=cRed>;
+            int64 TXSSize <format=hex, fgcolor=cYellow>;
+        }
+    
+        if (Header.TypeMaybe == 3)
+        {
+            int64 unk3;
+            int64 unk4;
+        }
+
+        FSeek(TXSOffset);
+        TXS3_64 txss;
+
+    } TOC;
+} PDITexture;
