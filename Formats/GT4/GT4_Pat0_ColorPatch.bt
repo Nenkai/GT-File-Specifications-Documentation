@@ -1,0 +1,55 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: GT4 Color Patch
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .pat
+//  ID Bytes: 50 61 74 30
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+struct Pat0
+{
+    struct 
+    {
+        char Magic[4];
+        int RelocPtr;
+        int reserved;
+        int reserved;
+
+        short VariationCount;
+        short Patches;
+
+        int reserveds[3];
+    } Header <size=0x20, bgcolor=cPurple>;
+    
+    int PatchOffsets[Header.VariationCount * Header.Patches] <format=hex, fgcolor=cRed>;
+
+    local int i = 0;
+    for (i = 0; i < Header.VariationCount; i++)
+    {
+        struct
+        {
+            local int p = 0;
+        
+            for (p = 0; p < Header.Patches; p++)
+            {
+                FSeek(PatchOffsets[(i * Header.Patches) + p]);
+
+                struct
+                {
+                    int ColorOffsets <fgcolor=cRed, format=hex, comment="In main model file, not this file">;
+                    int PaletteSize <fgcolor=cGreen>;
+                    byte PaletteMaybe[PaletteSize] <fgcolor=cGray>;
+                } Patch <optimize=false>;
+            }
+
+        } VariationPatches <optimize=false, bgcolor=cGray>;
+    }
+
+} ColorPatch;
