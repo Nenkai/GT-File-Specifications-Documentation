@@ -1,0 +1,536 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Gran Turismo 4 Save File (GAMEDATA)
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Not entirely done
+// For GT4O US so far
+
+LittleEndian();
+BitfieldDisablePadding();
+
+void SerializeAlign()
+{
+    const int alignment = 0x10;
+    local uint mask = ~(alignment - 1);
+    local int newPos = (FTell() + (alignment - 1)) & mask;
+    FSeek(newPos);
+}
+
+int IsGT4Retail()
+{
+    return FileSize() == 0x3A070;
+}
+
+
+int IsGT4Online()
+{
+    return FileSize() == 0x3A160;
+}
+
+typedef struct
+{
+    int Code;
+    int TableId;
+} DbCode;
+
+typedef struct
+{
+    int NumActiveEntries;
+    int xd;
+    int xd;
+    int xd;
+
+    int tracks[4 * 128];
+} BGMPlaylist;
+
+typedef enum <byte> { _1st, _2nd, _3rd, _4th, _5th, _6th, _7th, _8th, abandon, gold, silver, bronze, red, failed, view } Result;
+
+typedef struct (int unitCount)
+{
+    struct
+    {
+        DbCode CourseCode;
+        
+        struct
+        {
+            union
+            {
+                int RaceTime;
+                float MaxSpeed;
+            } Best;
+
+            int Date;
+            DbCode CarCode;
+            char PassCode[0x20];
+        } CourseEntryUnit[10];
+
+        int SectionTimes[16];
+        byte DriverExp[8];
+        byte unk;
+        byte pad[7];
+
+    } CourseRecordUnit[unitCount];
+    SerializeAlign();
+
+} CourseRecordBase;
+
+typedef struct
+{
+    int Max;
+    int CurrentCount;
+    DbCode codes[32];
+    SerializeAlign();
+} Favorite;
+
+
+struct
+{
+    /*
+    struct
+    {
+        int Magic <format=hex, comment="Must match">;
+        int CRCBytesSizeNegated;
+        uint CRC <format=hex>;
+        int __pad__;
+    } PackHeader;
+    */
+
+    struct
+    {
+        char username[32];
+        char UnusedPassword[8];
+        char last_entry_name[16];
+
+        int unk;
+        int unk;
+        int TotalPrizeMoney;
+        int unk;
+        int unkk;
+        int unkkk;
+        int unkkkk;
+        char idk[0x24];
+        char account[32];
+        char password[32];
+
+        if (IsGT4Retail())
+            char reserved[0x15C];
+        else
+            char reserved[0x19C];
+        SerializeAlign();
+
+        struct
+        {
+            int ActiveEntryCount;
+            struct
+            {
+                struct
+                {
+                    enum <byte> 
+                    { 
+                        NO_EVENT, 
+                        GET_CAR, 
+                        SELL_CAR, 
+                        RUN_RACE, 
+                        RUN_LICENSE, 
+                        RUN_MISSION, 
+                        BUY_WHEEL, 
+                        BUY_WING, 
+                        RUN_COURSE, 
+                    } DayEventType;
+    
+                    
+                    switch (DayEventType)
+                    {
+                        case RUN_RACE:
+                            byte c;
+                            Result result;
+                            byte d;
+                            int BestTime;
+                            DbCode RaceCode;
+                            break;
+    
+                        case RUN_COURSE:
+                            byte b;
+                            Result result;
+                            enum <byte> { NONE, FREERUN, EVENT, PRACTICE, PHOTO, TRAVEL, MACHINE_TEST, TIME_TRIAL } RunCourseMode;
+                            int BestTime;
+                            DbCode CourseCode;
+                            break;
+    
+                        case GET_CAR:
+                            byte unk;
+                            enum <byte> { Reason_NONE, BUY_NEW, BUY_USED, BUY_TRADE, GET_PRESENT } Reason;
+                            byte d;
+                            int unk;
+                            DbCode CarCode;
+                            break;
+    
+                        case SELL_CAR:
+                            byte colorIndex;
+                            short Price;
+                            int _empty_;
+                            DbCode CarCode;
+                            break;
+    
+                        case BUY_WHEEL:
+                            enum <byte> { Wheel_NONE, NORMAL, RACING, DIRT, SNOW } WheelCategoryType;
+                            byte c;
+                            byte d;
+                            int _empty_;
+                            DbCode WheelCode;
+                            break;
+    
+                        case BUY_WING:
+                            byte _empty_;
+                            byte _empty_;
+                            byte _empty_;
+                            int _empty__;
+                            DbCode WingCode;
+                            break;
+    
+                        case RUN_LICENSE:
+                            Result result;
+                            byte unk14;
+                            byte _empty_;
+                            int BestTime;
+                            DbCode RaceCode;
+                            break;
+    
+                        case RUN_MISSION:
+                            Result result;
+                            byte unk14;
+                            byte _empty_;
+                            int BestTime;
+                            DbCode RaceCode;
+                            break;
+
+                        default:
+                            byte _empty_[0x0F];
+                    }
+
+                } DayEvent[2922] <optimize=false>;
+
+            } DayEvents;
+
+            int Date <comment="In Julian">;
+
+            SerializeAlign();
+        } Calendar;
+
+        struct
+        {
+            struct
+            {
+                uint64 CarCode;
+                uint64 Flags <format=hex>;
+                int e;
+                int odometer;
+                uint64 Flags2 <format=hex>;
+            } GarageCar[1000];
+        
+            int RidingCarIndex;
+            uint UniqueID <format=hex, comment="Used as key for the garage file encryption.">;
+            /* 
+              For generation:
+                uint64 buf[2];
+                buf[0] = PDISTD::CurrentDateTime(); // Returns tm to second
+                buf[1] = PDISTD::GetSystemTimeMicroSecond();
+                uniqueId = PDISTD::crc32(v4, 0x10); */
+
+            byte test[0x14];
+        
+            struct
+            {
+                if (IsGT4Retail())
+                    byte CurrentCarParameterMaybe[0x468];
+                else
+                    byte CurrentCarParameterMaybe[0x4B0];
+
+                byte b[0x20];
+                int c;
+                byte d[0x0C];
+                byte e[0x20];
+                SerializeAlign();
+            } CarGarage <optimize=false>;
+            
+            SerializeAlign();
+        } GarageScratch;
+
+        struct
+        {
+            struct
+            {
+                int Rank : 4;
+                int unk : 4;
+                byte BestScore : 8;
+                int empty_bits : 4;
+                int Result1 : 4;
+                int Result2 : 4; // IsPerfect = 9
+
+                enum <byte> { none, license, event, mission, } Type : 4;
+
+            } RaceRecordUnit[768] <optimize=false>;
+    
+            SerializeAlign();
+        } RaceRecord;
+
+        CourseRecordBase recBase(128);
+        CourseRecordBase recBase2(4);
+        
+        struct
+        {
+            struct
+            {
+                struct
+                {
+                    int RaceTime;
+                    int Date;
+                    Result result;
+                    char PassCode[0x20] <format=hex>;
+                    byte data[3];
+                } CourseEntryUnit[10];
+
+                int SectorTimes[16];
+            } LicenseRecordUnit[125];
+
+            SerializeAlign();
+        } LicenseRecord;
+
+        struct
+        {
+            int64 CarIdsAvailable[1024] <comment="Must be sorted">;
+            int64 CourseIdsAvailable[128] <comment="Must be sorted">;
+            byte unk;
+            SerializeAlign();
+        } Available;
+
+        Favorite favoriteCourse;
+        Favorite favoriteCars;
+
+        struct
+        {
+            byte IDBits[0x74] <format=binary>;
+
+            SerializeAlign();
+        } Present;
+
+        struct
+        {
+            byte data[0x88];
+
+            SerializeAlign();
+        } ChampionshipContext;
+
+        struct
+        {
+            byte bitFlags[0x20] <format=binary>;
+            int week;
+
+            SerializeAlign();
+        } UsedCar;
+    } UserProfile;
+
+    struct
+    {
+        int OptionStructSize <format=hex>;
+        int Language;
+        byte WideMode;
+        byte UnitVelocityType;
+        byte UnitPowerType;
+        byte UnitTorqueType;
+        byte WideMode;
+        byte a;
+        byte a;
+        byte a;
+        int a;
+        int a;
+        int SharpnessModeDef;
+
+        struct
+        {
+            float MonitorSize1;
+            float MonitorSize2;
+            float MonitorSize3;
+            float MonitorSize4;
+            float MonitorSize5;
+            float MonitorSize6;
+            float MonitorSize7;
+            float MonitorSize8;
+            float MonitorSize9;
+            float MonitorSize10;
+            float MonitorSize11;
+        } PhysicalMonitorSize;
+
+        int unk1;
+        int unk2;
+        int unk3;
+        int menu_bgm;
+        int menu_bgm_volume;
+        int menu_se;
+        int menu_se_volume;
+        int race_bgm;
+        int race_bgm_volume;
+        int race_se;
+        int race_se_volume;
+        int replay_bgm;
+        int replay_bgm_volume;
+        int replay_se;
+        int replay_se_volume;
+        int slide_bgm_volume;
+        BGMPlaylist bgm_playlist;
+        BGMPlaylist slide_playlist;
+        int sound_type;
+        int narration;
+        int enableAC3;
+        int auto_save;
+        int race_laps;
+        int tire_damage;
+        int automatic_gear;
+        int automatic_ghost;
+        int assist_asm;
+        int assist_tcs;
+        int difficulty;
+        int professional_control_1p;
+        int professional_control_2p;
+        int penalty_type;
+        int limit_favorite_car_only;
+        int limit_favorite_course_only;
+        int limit_enemies_to_favorite_car_only;
+        int view_type;
+        int view_type_2p;
+
+        if (IsGT4Online())
+        {
+            int strict_judgment;
+            int display_license_bestline;
+        }
+        
+        int split_race_laps;
+        int split_tire_damage;
+        int split_handicap;
+        int split_boost_level;
+        int photo_quality;
+        int photo_manual_focus;
+        int photo_aspect;
+        
+        int photo_shutter;
+        int photo_professional;
+        int photo_saturation;
+        int photo_save_slot;
+        int photo_save_method;
+        int steering_assist_1p;
+        int steering_assist_2p;
+        int active_steering_1p;
+        int active_steering_2p;
+        
+        // GT4 has forcefeedback here, but not sure where - works for now 
+        // Needs investigation
+
+        int replay_mode;
+        int replay_display_enable_flags;
+        int replay_2p_split;
+        int replay_memory_card_slot;
+        int album_slide_effect;
+        int album_slide_play_time;
+        int album_slide_transition_time;
+        int album_memory_card_slot;
+        int ustorage_photo_quality;
+        int timeout_count_to_autodemo;
+        int timeout_count_to_topmenu;
+        int machine_role;
+        int special_arcade_tuner;
+        int arcade_skip_to_favorite;
+        int opening_after_autoload;
+        int can_watch_ending;
+        int demo_movie_interval;
+        int unk[9];
+    
+        if (IsGT4Online())
+        {
+            char entrance_addr[0x40];
+            int entrance_port;
+            int use_upnp;
+            int udp_bind_port_setting;
+            int udp_bind_port;
+            byte unk_[0x34];
+        }
+        else
+        {
+             byte unk_[0x24];
+        }
+        SerializeAlign();
+
+        struct
+        {
+            enum <int> { UNDEF, JP, US, UK, EU, KR, CN } Zone;
+
+            SerializeAlign();
+        } GameZone;
+
+        struct
+        {
+            int unk;
+            struct
+            {
+                byte data[0xB8];
+            } OptionRaceInputPortPS2[1];
+
+            SerializeAlign();
+        } OptionRaceControllerPS2;
+
+        // Padding behaves oddly from this point
+        struct
+        {
+            char Name1[0x40];
+            enum <int> { play, live, monitor, auto, server } style;
+            char Name2[0x40];
+            int style2;
+            byte data[0x24];
+
+            // No align
+        } OptionLANBattle;
+
+        struct
+        {
+            struct
+            {
+                byte data[0x258];
+            } PDINetConf;
+            int pad[2];
+        } OptionNetConfig;
+
+        struct
+        {
+            char EventName[0x50];
+
+        } OptionEvent;
+
+        struct
+        {
+            byte loggers[5];
+
+            SerializeAlign();
+        } OptionLogger;
+
+        SerializeAlign();
+    } Option;
+
+    struct
+    {
+        char MajorProject[0x20]; // 0xC28
+        char MajorPage[0x20]; // 0xC48
+
+        int CurrentStackSize;
+        byte StackBuffer[0x100];
+        SerializeAlign();
+    } Context;
+} Status;
