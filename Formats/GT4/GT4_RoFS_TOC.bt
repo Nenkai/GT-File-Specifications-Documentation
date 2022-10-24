@@ -11,121 +11,123 @@
 //   History: 
 //------------------------------------------------
 
-
-typedef struct (byte isIndexingBlock)
+typedef struct
 {
-    short entryMetaOffset <format=hex, fgcolor=cRed>;
-    short entryMetaLength <format=hex, fgcolor=cGreen>; // int + string
-
-    if (isIndexingBlock)
-        int BlockIndexForEntry;
-    else
-    {
-        short entryTypeMetaOffset <format=hex, fgcolor=cRed>;
-        short entryTypeMetaLength <format=hex, fgcolor=cGreen>;
-    }
-} TocBlockTableEntry <optimize=false>;
-
-typedef struct (int entryCount, byte isIndexingBlock)
-{
-    local int i = 0;
-    for (i; i < entryCount; i++)
-       TocBlockTableEntry entry(isIndexingBlock);
-} TocBlockTable;
-
-typedef struct (int baseBlockOffset, TocBlockTableEntry &entry, byte isIndexingBlock)
-{
-    local int cPos = FTell(); // Needed, else: Invalid structure. Ending position was in front of starting position. ??????
-    FSeek(baseBlockOffset + entry.entryMetaOffset);
-    
-    if (isIndexingBlock)
-        byte Entry[entry.entryMetaLength] <fgcolor=0xAAAA00>;
-    else
-    {
-        LittleEndian();
-        uint ParentNode;
-        BigEndian();
-
-        char Name[entry.entryMetaLength - 4] <fgcolor=0xAAAA00>;
-    }
-
-    if (!isIndexingBlock)
-    {
-        FSeek(baseBlockOffset + entry.entryTypeMetaOffset);
-        enum<byte> { Directory, File, CompressedFile } Type <fgcolor=cGreen>;
-
-    if (Type == Directory)
-    {
-        LittleEndian();
-        int NodeId;
-    }
-    else if (Type == File)
-    {
-        int PageOffset <format=hex>;
-        time_t ModifiedDate <format=hex>;
-        int RealSize <format=hex>;
-    }
-    else if (Type == CompressedFile)
-    {
-        int PageOffset <format=hex, fgcolor=cRed>;
-        time_t ModifiedDate <fgcolor=0xFFFFFF>;
-        int CompressedFile <format=hex>;
-        int RealSize <format=hex>;
-    }
-    }
-    FSeek(cPos);
-
-    // Entry is aligned to 0x04
-
-} TocMetaEntry <optimize=false>;
-
-
-typedef struct (int blockSize, int index)
-{
-    BigEndian();
-    int CompressedBlockOffset <format=hex, fgcolor=cRed>;
-
-    local int baseBlockOffset = 0x708 + (blockSize * index);
-    FSeek(baseBlockOffset);
-
-    local int cPos = FTell();
-
     LittleEndian();
-    short IsIndexingBlock <fgcolor=cYellow>;
-    short EntryCount <fgcolor=cGreen>;
-    int NextPage <fgcolor=cWhite>;
-    int PreviousPage <fgcolor=cWhite>;
+    local int baseBlockOffset = FTell();
+
+    short IsIndexingBlock <comment="Whether this block is used for indexing to find files, if not, it contains file information", fgcolor=cYellow>;
+    short EntryCount <comment="Number of entries in this page (should be / 2)", fgcolor=cGreen>;
+    int NextPage <comment="If this block has a next page for searching", fgcolor=cWhite>;
+    int PreviousPage <comment="If this block has a previous page for searching", fgcolor=cWhite>;
     
-    FSeek((baseBlockOffset + blockSize) - (0x08 * (EntryCount / 2)));
-    if (IsIndexingBlock == 1)
-        TocBlockTable entryTable(EntryCount / 2, 1) <bgcolor=cGray>;
-    else
-        TocBlockTable entryTable(EntryCount / 2, 0) <bgcolor=cGray>;
+    local int PosToPageTocEnd = (baseBlockOffset + Header.PageSize);
+    local int PosToPageTocStart = PosToPageTocEnd - ((EntryCount / 2) * 0x08) - 4;
+    local int j = 0;
+    local short entryOffset, entryLength, entryTypeMetaOffset;
+    for (j = 0; j < EntryCount / 2; j++)
+    {
+        entryOffset = ReadShort(PosToPageTocEnd - ((j + 1) * 0x08));
+        entryLength = ReadShort(PosToPageTocEnd - ((j + 1) * 0x08) + 2);
+        entryTypeMetaOffset = ReadShort(PosToPageTocEnd - ((j + 1) * 0x08) + 4);
 
-    BigEndian();
-    local int i = (EntryCount / 2) - 1;
-    for (i; i >= 0; i--)
-        TocMetaEntry entry(baseBlockOffset, entryTable.entry[i], IsIndexingBlock);
+        FSeek(baseBlockOffset + entryOffset);
 
-} TocBlock <optimize=false>;
+        struct
+        {
+            if (IsIndexingBlock)
+                byte NextDifferenceIndexingBytes[entryLength] <comment="Node ID and file name string concatenated until FIRST difference that seperates two pages", fgcolor=0xAAAA00>;
+            else
+            {
+                BigEndian();
+                uint ParentNode <comment="Parent folder for this entry, as an ID - 0 is filesystem root">;
+                LittleEndian();
+        
+                char Name[entryLength] <fgcolor=0xAAAA00>;
+            }
+        
+            if (!IsIndexingBlock)
+            {
+                FSeek(baseBlockOffset + entryTypeMetaOffset);
+                enum<byte> { Directory, File, CompressedFile } Type <fgcolor=cGreen>;
+        
+                if (Type == Directory)
+                {
+                    struct
+                    {
+                        int NodeId;
+                    } DirectoryInfo;
+                }
+                else if (Type == File)
+                {
+                    struct
+                    {
+                        int PageOffset <format=hex>;
+                        time_t ModifiedDate <format=hex>;
+                        int RealSize <format=hex>;
+                    } FileInfo;
+                }
+                else if (Type == CompressedFile)
+                {
+                    struct
+                    {
+                        int PageOffset <format=hex, fgcolor=cRed>;
+                        time_t ModifiedDate <fgcolor=0xFFFFFF>;
+                        int CompressedFile <format=hex>;
+                        int RealSize <format=hex>;
+                    } CompressedFile;
+                }
+            }
+        } TocPageEntry <comment="Each entry is aligned to 0x04", optimize=false>;
+    }
+    
+    byte garbage[PosToPageTocStart - FTell()] <comment="Garbage", fgcolor=cDkGray>;
+   
+    struct
+    {
+        int IndexEnd <comment="Final index/delimiter">;
+        struct
+        {
+            short EntryMetaOffset <comment="From start of this block", format=hex, fgcolor=cRed>;
+            short EntryMetaLength <format=hex, fgcolor=cGreen>; // int + string
+    
+            if (IsIndexingBlock)
+                int BlockIndexForEntry;
+            else
+            {
+                short EntryTypeMetaOffset <comment="From start of this block", format=hex, fgcolor=cRed>;
+                short EntryTypeMetaLength <format=hex, fgcolor=cGreen>;
+            }
+        } TocBlockTableEntry[(EntryCount / 2)] <comment="Table is in reverse order", optimize=false>;
+    } TocEntryInfos <comment="Main TOC for this page, always at the bottom of each page in reverse order (for seeking purposes">;
+
+} TocPage <optimize=false>;
 
 struct RoFS
 {
     LittleEndian();
-    char Magic[4];
-    short VersionHigh;
-    short VersionLow;
-    int PageCount;
-    int PageLength;
-    ushort BlockSize;
-    ushort EntryCount;
+    struct
+    {
+        char Magic[4] <comment="0xACB990AD or 'RoFS' for decrypted">;
+        short VersionHigh;
+        short VersionLow;
+        int PageCount;
+        int PageLength;
+        ushort PageSize;
+        ushort PageCount;
+    } Header <size=0x40, bgcolor=cPurple>;
 
     FSeek(0x40);
+    int PageOffsets[Header.PageCount + 1] <bgcolor=cRed, format=hex, comment="Offsets to COMPRESSED pages - each offset normally encrypted">;
+    local int PageStartOffset = FTell();
 
     local int i = 0;
-    for (i; i < EntryCount; i++)
+    for (i; i < Header.PageCount; i++)
     {
-        FSeek(0x40 + (i * 4));
-        TocBlock block (BlockSize, i);
+        if (i == 0)
+            FSeek(PageOffsets[0]);
+        else
+            FSeek(PageStartOffset + (i * Header.PageSize));
+        TocPage page;
     }
 } rofs <optimize=false>;
