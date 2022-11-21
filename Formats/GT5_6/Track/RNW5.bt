@@ -26,13 +26,6 @@ typedef struct
     float R <comment="Angle in radians, -pi to pi">;
 } Vec3R;
 
-typedef struct
-{
-    Vec3 vert;
-    short VertCount <comment="Count of verts for the current the submesh, Negative is terminator">;
-    short Unk;
-} BoundaryVec3;
-
 typedef struct UnkVec3
 {
     Vec3 left;
@@ -42,7 +35,25 @@ typedef struct UnkVec3
 
 typedef struct
 {
-    if (header.VersionMajor >= 4)
+    if (header.VersionMajor >= 6)
+    {
+        byte SurfaceType;
+        int VertA : 24;
+        
+        byte FlagA;
+        int VertB : 24;
+
+        byte faceCount;
+        int VertC : 24;
+
+        int boundaryFaceIndex : 18;
+        int unk1 : 1;
+        int test2 : 13;
+
+        byte unk;
+        byte pad[3];
+    }
+    else if (header.VersionMajor >= 4)
     {
         int VertA : 24;
         byte SurfaceType;
@@ -73,8 +84,17 @@ typedef struct
 {
     struct SectorInfoMapMeta
     {
-        int Count <fgcolor=cGreen>;
-        int Offset <fgcolor=cRed, format=hex>;
+        if (header.VersionMajor < 4)
+        {
+            int Count <fgcolor=cGreen>;
+            int Offset <fgcolor=cRed, format=hex>;
+        }
+        else
+        {
+            uint64 Count <fgcolor=cGreen>;
+            uint64 Offset <fgcolor=cRed, format=hex>;
+        }
+
     } sectorInfoMapMeta[header.SectorInfoCount];
 
     local int i = 0;
@@ -123,18 +143,6 @@ typedef struct (int arrSize)
 {
     Checkpoint checkpoint[arrSize];
 } CheckpointInfo;
-
-typedef struct (int arrSize)
-{
-    BoundaryVec3 vec[arrSize];
-} BoundaryVec3Map;
-
-typedef struct (int arrSize)
-{
-    Vec3 vertices[arrSize];
-    if (header.VersionMajor >= 4)
-        short x[arrSize] <comment="VersionMajor > 4">;
-} RoadVertMap <optimize=false>;
 
 typedef struct 
 {
@@ -235,8 +243,16 @@ struct RNW5
         int fileRuntimePtr;
         int fileSize;
 
-        ushort VersionMajor <comment="GT6 may only support 4.4 (scenery 4.0?)">;
-        ushort VersionMinor;
+        if (magic == "5WNR")
+        {
+            ushort VersionMajor <comment="GT6 may only support 4.4 (scenery 4.0?)">;
+            ushort VersionMinor;
+        }
+        else
+        {
+            ushort VersionMajor;
+            ushort VersionMinor;
+        }
         uint flags <comment="Fetched at FUN_00520838 & 51effc, GT6 1.22 EU disc eboot">;
         float TrackVLength; // Sometimes an uint?
         uint unkVCoord; // 5207d8
@@ -245,56 +261,125 @@ struct RNW5
         Vec3 BoundsMax;
         uint unk <comment="GT6 doesn't read it">;
         uint unk <comment="GT6 doesn't read it">;
-        uint _empty_ <hidden=true>;
-
-        uint SectorInfoCount <fgcolor=cGreen>;
-        uint SectorInfoOffset <format=hex, fgcolor=cRed>; // Something about vcoords?
-
-        uint StartingGridCount <fgcolor=cGreen>;
-        uint StartingGridOffset <format=hex, fgcolor=cRed>;
-
-        uint CheckpointCount <fgcolor=cGreen>;
-        uint CheckpointsOffset <format=hex, fgcolor=cRed>;
-
-        uint CheckpointListCount <fgcolor=cGreen>;
-        uint CheckpointListOffset <format=hex, fgcolor=cRed>;
-
-        uint LightDefCount <fgcolor=cGreen>;
-        uint LightDefOffset <format=hex, fgcolor=cRed>;
-        uint LightSetCount <fgcolor=cGreen>;
-        uint LightSetOffset <format=hex, fgcolor=cRed>;
-
-        uint StaticGadgetCount <fgcolor=cGreen>;
-        uint StaticGadgetsOffset <format=hex, fgcolor=cRed>;
-
-        uint RoadVertCount <fgcolor=cGreen>;
-        uint RoadVertOffset <format=hex, fgcolor=cRed>;
-
-        uint RoadTriCount <format=hex, fgcolor=cRed>;
-        uint RoadTriOffset <format=hex, fgcolor=cRed>;
-
-        uint _empty_;
         uint _empty_;
 
-        uint RayCastTreeMaxDepth <fgcolor=cGreen>;
-        uint RayCastTreeOffset <format=hex, fgcolor=cRed>;
+        if (VersionMajor >= 6)
+        {
+            int unkPad;
+            int unkPad2;
+            int unkPad3;
+        }
 
-        uint TotalBoundaryVertCount <fgcolor=cGreen>;
-        uint BoundaryMeshesOffset <format=hex, fgcolor=cRed>;
+        if (VersionMajor < 6)
+        {
+            uint SectorInfoCount <fgcolor=cGreen>;
+            uint SectorInfoOffset <format=hex, fgcolor=cRed>; // Something about vcoords?
+    
+            uint StartingGridCount <fgcolor=cGreen>;
+            uint StartingGridOffset <format=hex, fgcolor=cRed>;
+    
+            uint CheckpointCount <fgcolor=cGreen>;
+            uint CheckpointsOffset <format=hex, fgcolor=cRed>;
+    
+            uint CheckpointListCount <fgcolor=cGreen>;
+            uint CheckpointListOffset <format=hex, fgcolor=cRed>;
+    
+            uint LightDefCount <fgcolor=cGreen>;
+            uint LightDefOffset <format=hex, fgcolor=cRed>;
+            uint LightSetCount <fgcolor=cGreen>;
+            uint LightSetOffset <format=hex, fgcolor=cRed>;
+    
+            uint StaticGadgetCount <fgcolor=cGreen>;
+            uint StaticGadgetsOffset <format=hex, fgcolor=cRed>;
+    
+            uint RoadVertCount <fgcolor=cGreen>;
+            uint RoadVertOffset <format=hex, fgcolor=cRed>;
+    
+            uint RoadTriCount <format=hex, fgcolor=cRed>;
+            uint RoadTriOffset <format=hex, fgcolor=cRed>;
+    
+            uint _empty_;
+            uint _emptyOffset_;
+    
+            uint RayCastTreeMaxDepth <fgcolor=cGreen>;
+            uint RayCastTreeOffset <format=hex, fgcolor=cRed>;
+    
+            uint TotalBoundaryVertCount <fgcolor=cGreen>;
+            uint BoundaryMeshesOffset <format=hex, fgcolor=cRed>;
+    
+            uint BoundaryFaceCount <fgcolor=cGreen>;
+            uint BoundaryFaceOffset <format=hex, fgcolor=cRed>;
+    
+            uint PitStopCount <fgcolor=cGreen>;
+            uint PitStopOffset <format=hex, fgcolor=cRed>;
+    
+            uint UnkCount <fgcolor=cGreen>;
+            uint UnkOffset <format=hex, fgcolor=cRed>;
+            uint unk;
+            uint PitStopAdjacentsOffset <format=hex, fgcolor=cRed>;
+            uint unkOffset <format=hex, fgcolor=cRed>; // 520710
+            uint LightParticlesOffset <format=hex, fgcolor=cRed>;
+            uint unkk; // 520774
+        }
+        else
+        {
+            uint64 SectorInfoCount <fgcolor=cGreen>;
+            uint64 SectorInfoOffset <format=hex, fgcolor=cRed>; // Something about vcoords?
 
-        uint BoundaryFaceCount <fgcolor=cGreen>;
-        uint BoundaryFaceOffset <format=hex, fgcolor=cRed>;
+            uint64 StartingGridCount <fgcolor=cGreen>;
+            uint64 StartingGridOffset <format=hex, fgcolor=cRed>;
 
-        uint PitStopCount <fgcolor=cGreen>;
-        uint PitStopOffset <format=hex, fgcolor=cRed>;
+            uint64 CheckpointCount <fgcolor=cGreen>;
+            uint64 CheckpointsOffset <format=hex, fgcolor=cRed>;
 
-        uint UnkCount <fgcolor=cGreen>;
-        uint UnkOffset <format=hex, fgcolor=cRed>;
-        uint unk;
-        uint PitStopAdjacentsOffset <format=hex, fgcolor=cRed>;
-        uint unkOffset <format=hex, fgcolor=cRed>; // 520710
-        uint LightParticlesOffset <format=hex, fgcolor=cRed>;
-        uint unkk; // 520774
+            uint64 CheckpointListCount <fgcolor=cGreen>;
+            uint64 CheckpointListOffset <format=hex, fgcolor=cRed>;
+
+            FSkip(0x20); // Figure later
+
+
+            uint64 StaticGadgetCount <fgcolor=cGreen>;
+            uint64 StaticGadgetsOffset <format=hex, fgcolor=cRed>;
+
+            uint RoadVertCount <fgcolor=cGreen>;
+            byte BBoxAndRoadVertScaleX;
+            byte BBoxAndRoadVertScaleY;
+            byte BBoxAndRoadVertScaleZ;
+            byte unk;
+
+            uint64 RoadVertOffset <format=hex, fgcolor=cRed>;
+
+            uint64 RoadTriCount <format=hex, fgcolor=cRed>;
+            uint64 RoadTriOffset <format=hex, fgcolor=cRed>;
+
+            uint64 _empty_;
+            uint64 _empty_;
+
+            uint64 RayCastTreeMaxDepth <fgcolor=cGreen>;
+            uint64 RayCastTreeOffset <format=hex, fgcolor=cRed>;
+
+            uint TotalBoundaryVertCount <fgcolor=cGreen>;
+            byte BoundaryVertScaleX;
+            byte BoundaryVertScaleY;
+            byte BoundaryVertScaleZ;
+            byte unk;
+
+            uint64 BoundaryMeshesOffset <format=hex, fgcolor=cRed>;
+
+            uint64 BoundaryFaceCount <fgcolor=cGreen>;
+            uint64 BoundaryFaceOffset <format=hex, fgcolor=cRed>;
+
+            uint64 PitStopCount <fgcolor=cGreen>;
+            uint64 PitStopOffset <format=hex, fgcolor=cRed>;
+
+            uint64 UnkCount <fgcolor=cGreen>;
+            uint64 UnkOffset <format=hex, fgcolor=cRed>;
+
+            uint64 PitStopAdjacentsOffset <format=hex, fgcolor=cRed>;
+            uint64 unkOffset <format=hex, fgcolor=cRed>; // 520710
+            uint64 LightParticlesOffset <format=hex, fgcolor=cRed>;
+            uint64 unkk; // 520774        
+        }
     } header <bgcolor=cPurple, comment="Aligned to 0x100", size=0x100>;
 
     if (header.SectorInfoCount > 0)
@@ -321,17 +406,21 @@ struct RNW5
         ushort CheckpointIndices[header.CheckpointListCount] <bgcolor=cBlue>;
     }
 
-    if (header.LightDefCount > 0)
+    if (header.VersionMajor < 6)
     {
-        FSeek(header.LightDefOffset);
-        LightDef LightDefs[header.LightDefCount] <bgcolor=cYellow, comment="Count also defined 4 bytes before it">;
+        if (header.LightDefCount > 0)
+        {
+            FSeek(header.LightDefOffset);
+            LightDef LightDefs[header.LightDefCount] <bgcolor=cYellow, comment="Count also defined 4 bytes before it">;
+        }
+
+        if (header.LightSetCount > 0)
+        {
+            FSeek(header.LightSetOffset);
+            LightSetMap lightSets(header.LightSetCount) <comment="If using, make sure light sets are set">;
+        }
     }
 
-    if (header.LightSetCount > 0)
-    {
-        FSeek(header.LightSetOffset);
-        LightSetMap lightSets(header.LightSetCount) <comment="If using, make sure light sets are set">;
-    }
 
     if (header.StaticGadgetCount > 0)
     {
@@ -348,7 +437,12 @@ struct RNW5
     if (header.RoadVertCount > 0)
     {
         FSeek(header.RoadVertOffset);
-        RoadVertMap roadVerts(header.RoadVertCount) <bgcolor=cDkGray>;
+        struct
+        {
+            Vec3 vertices[header.RoadVertCount];
+            if (header.VersionMajor >= 4)
+                short x[header.RoadVertCount] <comment="VersionMajor > 4">;
+        } RoadVertMap <bgcolor=cDkGray, optimize=false>;
     }
 
     if (header.RoadTriCount > 0)
@@ -357,6 +451,7 @@ struct RNW5
         RoadTri roadTri[header.RoadTriCount] <bgcolor=cWhite>;
     }
 
+    /*
     if (header.RayCastTreeOffset > 0)
     {
         FSeek(header.RayCastTreeOffset);
@@ -414,12 +509,24 @@ struct RNW5
 
              } Root <bgcolor=cPurple>;
          } tree;
-    }
+    }*/
 
     if (header.TotalBoundaryVertCount > 0)
     {
         FSeek(header.BoundaryMeshesOffset);
-        BoundaryVec3Map BoundaryMeshes(header.TotalBoundaryVertCount) <bgcolor=cYellow, comment="Has submeshes, count for each defined by the short">;
+        struct
+        {
+            Vec3 vert;
+            if (header.VersionMajor >= 6)
+            {
+                float unkVersion6Float;
+                float unkVersion6Float;
+                float unkVersion6Float;
+            }
+
+            short VertCount <comment="Count of verts for the current the submesh, Negative is terminator">;
+            short Unk;
+        } BoundaryVec3[header.TotalBoundaryVertCount] <bgcolor=cYellow, comment="Has submeshes, count for each defined by the short">;
     }
 
     if (header.BoundaryFaceCount > 0)
