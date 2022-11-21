@@ -1,0 +1,116 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: LIDAR Course Line
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 52 41 44 41
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vector3;
+
+typedef struct
+{
+    int EntryCount;
+    byte unk;
+    byte unk;
+    byte EntryFullSizeBytes;
+    byte XByteSize : 2;
+    byte YByteSize : 2;
+    byte ZByteSize : 2;
+    byte empty : 2;
+    Vector3 vec1;
+    Vector3 vec2;
+    float unk;
+    int unk;
+    int64 dataOffset <fgcolor=cRed, format=hex>;
+    int64 VCoordsOffset <fgcolor=cRed, format=hex>;
+    int64 padding;
+
+    FSeek(dataOffset);
+    byte Data1[EntryCount * EntryFullSizeBytes];
+
+    FSeek(VCoordsOffset);
+    float VCoords[EntryCount];
+} Entry;
+
+struct
+{
+    struct
+    {
+        char Magic[4];
+        int RelocSize <format=hex>;
+        int64 RelocPtr;
+        int unk;
+        int unkCount;
+        int unk3;
+        int CountFor0x28 <fgcolor=cGreen>;
+        int CountFor0x30 <fgcolor=cGreen>;
+        int CountFor0x38 <fgcolor=cGreen>;
+        int64 MapEntriesPtr_0x20 <fgcolor=cRed, format=hex>;
+        int64 MapEntriesPtr_0x28 <fgcolor=cRed, format=hex>;
+        int64 MapEntriesPtr_0x30 <fgcolor=cRed, format=hex>;
+        int CountFor0x48 <fgcolor=cGreen>;
+        int empty;
+        int64 MapEntriesPtr_0x48 <fgcolor=cRed, format=hex>;
+    } Header <size=0x80, bgcolor=cPurple>;
+
+    FSeek(Header.MapEntriesPtr_0x20);
+    struct
+    {
+        int64 EntryOffsets[Header.CountFor0x28] <format=hex, fgcolor=cRed>;
+        
+        local int i = 0;
+        for (i = 0; i < Header.CountFor0x28; i++)
+        {
+            FSeek(EntryOffsets[i]);
+            Entry entry;
+        }
+    } EntryMap1;
+
+    FSeek(Header.MapEntriesPtr_0x28);
+    struct
+    {
+        int64 EntryOffsets[Header.CountFor0x30] <format=hex, fgcolor=cRed>;
+
+        local int i = 0;
+        for (i = 0; i < Header.CountFor0x30; i++)
+        {
+            FSeek(EntryOffsets[i]);
+            Entry entry;
+        }
+    } EntryMap2;
+
+    FSeek(Header.MapEntriesPtr_0x30);
+    struct
+    {
+        int64 EntryOffsets[Header.CountFor0x38] <format=hex, fgcolor=cRed>;
+        local int i = 0;
+        for (i = 0; i < Header.CountFor0x38; i++)
+        {
+            FSeek(EntryOffsets[i]);
+            Entry entry;
+        }
+    } EntryMap3;
+
+    FSeek(Header.MapEntriesPtr_0x48);
+    struct
+    {
+        int64 EntryOffsets[Header.CountFor0x48] <format=hex, fgcolor=cRed>;
+        local int i = 0;
+        for (i = 0; i < Header.CountFor0x48; i++)
+        {
+            FSeek(EntryOffsets[i]);
+            Entry entry;
+        }
+    } EntryMap3;
+} LidarCourseLine;
