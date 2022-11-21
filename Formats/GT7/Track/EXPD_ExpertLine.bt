@@ -1,0 +1,82 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: expert_line template
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 45 58 50 44
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vector3;
+typedef struct
+{
+    Vector3 Pos;
+    float d;
+    float e;
+    float f;
+    float VCoord;
+    float h;
+    float i;
+    float j;
+} Data <bgcolor=cBlue>;
+
+typedef struct
+{
+    byte UnkData[0x120] <bgcolor=cBlack>;
+} Data2;
+
+struct
+{
+    struct
+    {
+        char Magic[4];
+        int VersionMaybe2;
+        int Size;
+        int VersionMaybe;
+
+        int CountFor0x18 <fgcolor=cGreen>;
+        int pad;
+        int64 MapEntriesPtr_0x18 <format=hex, fgcolor=cRed>;
+    } Header <bgcolor=cPurple>;
+
+    FSeek(Header.MapEntriesPtr_0x18);
+    struct
+    {
+        int64 EntryOffsets[Header.CountFor0x18] <format=hex, fgcolor=cRed>;
+
+        local int i = 0;
+        for (i = 0; i < Header.CountFor0x18; i++)
+        {
+            FSeek(EntryOffsets[i]);
+            struct
+            {
+                int EntryCount <fgcolor=cGreen>;
+                int pad;
+                int64 offset <format=hex>;
+                int UnkCount2;
+                int pad2;
+                int64 offset2 <format=hex>;
+                float unks[4];
+
+                FSeek(offset);
+                Data data[EntryCount];
+            
+                
+                if (UnkCount2 > 0)
+                {
+                    FSeek(offset2);
+                    Data2 unk[UnkCount2];
+                }
+            } Map;
+        }
+    } UnkMaps;
+} ExpertLine;
