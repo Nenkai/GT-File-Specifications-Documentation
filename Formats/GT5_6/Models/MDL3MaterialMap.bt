@@ -1,0 +1,194 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "TXS3.bt"
+
+typedef struct
+{
+    int StringOffset <fgcolor=cRed, format=hex>;
+    int ImageMetadataIndex <fgcolor=cYellow>;
+    FSeek(BasePos + StringOffset);
+    string Name;
+} ImageMetadataKey;
+
+typedef struct
+{
+    int UnkOffset <bgcolor=cDkYellow>;
+    ushort UnkIndexForParent0x0CMap <fgcolor=cYellow, bgcolor=cDkYellow>;
+    ushort Unk <bgcolor=cDkYellow>;
+    short Unk : 11;
+    short Unk : 2;
+    short Unk : 3;
+    short KeyCount <fgcolor=cGreen, bgcolor=cDkYellow, comment="If Flag & 1 then count is > 1">;
+    int KeysOffset <format=hex, fgcolor=cRed, bgcolor=cDkYellow, comment="If Flag & 1 then count exists, 0x08 Stride">;
+    byte padding[0x24] <bgcolor=cDkYellow>;
+
+    local int n = 0;
+    for (n = 0; n < KeyCount; n++)
+    {
+        FSeek(BasePos + KeysOffset + (n * 8));
+        ImageMetadataKey Key;
+    }
+
+} Material;
+
+typedef struct
+{
+    int NameOffset <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="Own Thing">;
+    int UnkIndex <fgcolor=cYellow, bgcolor=cDkGray>;  
+    byte Unk <bgcolor=cDkGray>;
+    byte Version <bgcolor=cDkGray>;
+    short KeysCount <fgcolor=cGreen, bgcolor=cDkGray>;
+    int UnkOffset0x0C <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="Own Thing">;
+    if (Version == 0)
+    {
+        int UnkOffset0x10 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 0, 0x08 Strides">;
+        FSkip(0x10);
+        int UnkOffset0x24 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 0, 0x20 Strides">;
+        /**(undefined2 *)(this->field_0x24 + 0x14) = 0xffff;
+          *(undefined2 *)(this->field_0x24 + 0x16) = 0xffff;
+          *(undefined2 *)(this->field_0x24 + 0x18) = 0xffff; */
+    }
+    else if (Version == 1)
+    {
+        int UnkOffset0x10 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 1, 0x08 Strides">;
+        FSkip(0x04);
+        int UnkOffset0x18 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 1, Own Thing">;
+        int UnkOffset0x1C <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 1, Own Thing">;
+        int UnkOffset0x20 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 1, Own Thing">;
+        int UnkOffset0x24 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 1, Own Thing">;
+    }
+    else if (Version == 2)
+    {
+        int KeysOffset <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, Own Thing">;
+        int UnkOffset0x14 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, Own Thing">;
+        int UnkOffset0x18 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, 0x08 Strides">;
+        int UnkOffset0x1C <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, Own Thing">;
+        short _empty_ <bgcolor=cDkGray>;
+        short Count0x18 <fgcolor=cGreen, bgcolor=cDkGray>;
+        int UnkOffset0x24 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, 0x30 Strides (?)">;
+        /* if (this->field_0x10 == 0x0) {
+            this->field_0x10 = *(int *)(this->field_0x14 + 0x1c); */
+
+        typedef struct
+        {
+            int StringOffset <fgcolor=cRed, format=hex>;
+            int UnkIndex <fgcolor=cYellow, comment="0 to 1?">;
+            FSeek(BasePos + StringOffset);
+            string Name;
+        } Material2Name;
+
+        typedef struct
+        {
+            int StringOffset <fgcolor=cRed, format=hex, bgcolor=cLtGray>;
+            int UnkIndex <fgcolor=cYellow, bgcolor=cLtGray>;
+            int _empty_ <bgcolor=cLtGray>;
+            int UnkOffset0x0C <format=hex, fgcolor=cRed, bgcolor=cLtGray>;
+            short UnkCount <bgcolor=cLtGray>;
+            short UnkCount2 <bgcolor=cLtGray>;
+            int UnkOffset0x10 <format=hex, fgcolor=cRed, bgcolor=cLtGray>;
+            int TypeOrVersion <bgcolor=cLtGray>;
+            int KeyOffset <format=hex, fgcolor=cRed, bgcolor=cLtGray>;
+
+            FSeek(BasePos + StringOffset);
+            string Name;
+
+            FSeek(BasePos + UnkOffset0x0C);
+            byte d;
+        } Material2Unk0x14;
+
+        typedef struct
+        {
+            int DataCount;
+            int DataOffset <fgcolor=cRed, format=hex>;
+        } Material2Unk0x18;
+
+        local int n = 0;
+        for (n = 0; n < KeysCount; n++)
+        {
+            FSeek(BasePos + KeysOffset + (n * 8));
+            Material2Name ElementKey;
+        }
+
+        FSeek(BasePos + UnkOffset0x14);
+        Material2Unk0x14 unk0x14;
+
+        FSeek(BasePos + UnkOffset0x18);
+        Material2Unk0x18 unk0x18;
+
+        if (UnkOffset0x24 > 0)
+        {
+            FSeek(BasePos + UnkOffset0x24);
+            byte xd <bgcolor=cWhite>;
+        }
+    }
+
+    if (NameOffset > 0)
+    {
+        FSeek(BasePos + NameOffset);
+        string Name;
+    }
+
+    if (UnkOffset0x0C > 0)    
+    {
+        FSeek(BasePos + UnkOffset0x0C);
+        float unkFloats0x0C[8] <fgcolor=cLtBlue>;
+    }
+} Material2;
+
+typedef struct
+{
+    ushort MaterialCount <fgcolor=cGreen>;
+    ushort UnkCount0x0C <fgcolor=cGreen>;
+    byte unk;
+    byte UnkCount0x10 <fgcolor=cGreen>;
+    ushort TextureParameterCount <fgcolor=cGreen>;
+    uint MaterialsOffset <format=hex, fgcolor=cRed, comment="0x34 Stride">;
+    uint UnkOffset0x0C <format=hex, fgcolor=cRed, comment="0x28 Stride">;
+    uint UnkOffset0x10 <format=hex, fgcolor=cRed, comment="Own Thing, If Version < 13">;
+    uint TextureParameterMapOffset <format=hex, fgcolor=cRed, comment="0x44 Stride">;
+
+    local int j = 0;
+    struct 
+    {
+        for (j = 0; j < MaterialCount; j++)
+        {
+            FSeek(BasePos + MaterialsOffset + (j * 0x34));
+            Material MaterialEntry <comment="0x34 Stride">;
+        }
+    } MaterialEntryArray;
+
+    local int cPos = FTell();
+    struct
+    {
+        for (j = 0; j < UnkCount0x0C; j++)
+        {
+            FSeek(BasePos + UnkOffset0x0C + (j * 0x28));
+            Material2 entry;
+            FSeek(cPos);
+        }
+    } MaterialMap2;
+
+    FSeek(BasePos + UnkOffset0x10);
+    byte unk0x10[0xA0 * UnkCount0x10] <bgcolor=cDkRed, comment="Might be a RSX/CELL structure, 0xA0 strides">;
+    FSeek(cPos);
+
+    struct
+    {
+        FSeek(BasePos + TextureParameterMapOffset);
+        ImageMetadata TextureParameter[TextureParameterCount];
+
+        FSeek(cPos);
+    } TextureParameters <comment="May have more entries than images, but image ids will fit the TXS count and will have different parameters such as Aniso">;
+ 
+ } MaterialMap;

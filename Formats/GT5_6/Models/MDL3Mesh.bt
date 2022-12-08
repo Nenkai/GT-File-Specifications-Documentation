@@ -1,0 +1,164 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} MeshVec3;
+typedef struct
+{
+    uint Offset0x00 <format=hex, fgcolor=cRed, comment="0x08 Stride">;
+    uint Offset0x04 <format=hex, fgcolor=cRed, comment="0x10 Stride">;
+    uint Offset0x08 <format=hex, fgcolor=cRed, comment="0x04 Stride">;
+    uint Offset0x0C <format=hex, fgcolor=cRed, comment="0x30 Stride">;
+    uint Offset0x10 <format=hex, fgcolor=cRed, comment="Own Thing">;
+    uint Unk[3];
+    byte Count0x00 <fgcolor=cGreen>;
+    byte Unk;
+    byte Count0x04_0x0C <fgcolor=cGreen>;
+    byte Count0x08 <fgcolor=cGreen>;
+    uint Offset0x24 <format=hex, fgcolor=cRed, comment="Own Thing">;
+    uint Offset0x28 <format=hex, fgcolor=cRed, comment="Own Thing">;
+    FSeek(FileSize());
+} MeshUnk0x2C_0x04_0x04_0x08;
+
+typedef struct
+{
+    int _empty_;
+    byte unk[3];
+    byte Count <fgcolor=cGreen, comment="Count for both">;
+    int Offset0x08 <format=hex, fgcolor=cRed>;
+    int Offset0x0C <format=hex, fgcolor=cRed>;
+
+    FSeek(Offset0x08);
+    int EntryOffsets0x08[Count] <format=hex, fgcolor=cRed>;
+
+    local int w = 0;
+    for (w = 0; w < Count; w++)
+    {
+        FSeek(BasePos + EntryOffsets0x08[w]);
+        MeshUnk0x2C_0x04_0x04_0x08 entry;
+    }
+    FSeek(FileSize());
+
+} MeshUnk0x2C_0x04_0x04;
+
+typedef struct
+{
+    ushort Count0x04 <fgcolor=cGreen>;
+    ushort Unk;
+    uint Offset0x04 <format=hex, fgcolor=cRed>;
+    uint Offset0x08 <format=hex, fgcolor=cRed>;
+    int _pad_;
+
+    if (Count0x04 > 0)
+    {
+        FSeek(BasePos + Offset0x04);
+        MeshUnk0x2C_0x04_0x04 unk;
+    }
+
+    FSeek(FileSize());
+} MeshUnk0x2C_0x04;
+
+typedef struct
+{
+    int UnkEmpty[12];
+    int UnkOff <format=hex, fgcolor=cRed>;
+    int PMSHIndex <fgcolor=cYellow>;
+    
+    if (UnkOff != 0)
+    {
+        FSeek(BasePos + UnkOff);
+        int Offset0x00 <format=hex, fgcolor=cRed, comment="0x10 Stride, always 1">;
+        int Offset0x04 <format=hex, fgcolor=cRed, comment="0x10 Stride, always 1">;
+        int RelocPtr;
+        short UnkBits : 4;
+        short UnkBits : 12;
+
+        FSeek(BasePos + Offset0x04);
+        MeshUnk0x2C_0x04 unk0x04;
+    }
+
+    FSeek(FileSize());
+} MeshUnk0x2C;
+
+typedef struct
+{
+    ushort Flags <bgcolor=cGreen, format=hex, comment="0x80 = No verts?, Removing 0x01 causes massive vertex fuckery">;
+    short FVFIndex <fgcolor=cYellow, bgcolor=cGreen>;
+    short MaterialIndex <fgcolor=cYellow, bgcolor=cGreen>;
+    ushort Unk <bgcolor=cGreen, comment="Wiping did nothing">;
+    uint VertCount <fgcolor=cGreen, bgcolor=cGreen>;
+    uint VerticesOffset <format=hex, fgcolor=cRed, bgcolor=cGreen>;
+    uint Unk <bgcolor=cGreen>;
+    uint TriLength <fgcolor=cGreen, bgcolor=cGreen>;
+    uint TriOffset <format=hex, fgcolor=cRed, bgcolor=cGreen, comment="Giving an offset in shapestream course: nothing happens">;
+    uint Unk <bgcolor=cGreen>;
+    if (Header.VersionMajor < 10)
+    {
+        ushort Unk <comment="version < 10", bgcolor=cGreen>;
+        short UnkIndex <comment="version < 10", bgcolor=cGreen>;   
+    }
+    else
+    {
+        uint UnkOffset <format=hex, fgcolor=cRed, comment="Confirmed offset, version >= 10", bgcolor=cGreen>;
+    }
+    ushort Unk <bgcolor=cGreen>;
+    ushort TriCount <fgcolor=cGreen, bgcolor=cGreen>;
+    uint BoundaryBoxOffset <format=hex, fgcolor=cRed, bgcolor=cGreen>;
+    uint UnkOffset2 <format=hex, fgcolor=cRed, comment="Confirmed offset", bgcolor=cGreen>;
+
+    /*
+    local int vertexLen = mdl3.FVFDefMap.Def[FVFIndex].DataLength;
+
+    local int cPos = FTell();
+    FSeek(BasePos + VerticesOffset);
+    byte VerticesData[vertexLen * VertCount] <bgcolor=cBlue>;
+    FSeek(cPos);
+
+    FSeek(BasePos + TriOffset);
+    short Indices[TriCount * 3] <bgcolor=cGray>;
+    FSeek(cPos);*/
+
+    if (UnkOffset2 != 0)
+    {
+        FSeek(BasePos + UnkOffset2);
+        MeshUnk0x2C unk0x2C;
+    }
+
+    FSeek(FileSize());
+
+    FSeek(BasePos + BoundaryBoxOffset);
+    MeshVec3 Boundaries[8];
+    FSeek(0x1ED0);
+    int test : 11;
+    int test2 : 11;
+    int test3 : 10;
+
+    int test : 11;
+    int test2 : 11;
+    int test3 : 10;
+
+    int test : 11;
+    int test2 : 11;
+    int test3 : 10;
+
+    int test : 11;
+    int test2 : 11;
+    int test3 : 10;
+
+    int test : 11;
+    int test2 : 11;
+    int test3 : 10;
+} Mesh <comment="Mapped at FUN_008e7dac">;
