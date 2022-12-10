@@ -43,6 +43,8 @@ typedef struct
     string Artist;
     string Genre;
 
+    short nMusicRallyInfo;
+
     if (tmsm.Version < 8)
     {
         int a;
@@ -58,8 +60,6 @@ typedef struct
     }
     else
     {
-        short nMusicRallyInfo;
-
         if (nMusicRallyInfo > 0)
         {
             MusicRallyInfo musicRallyInfos[nMusicRallyInfo];
@@ -74,24 +74,28 @@ typedef struct
     
     short StartMS;
 
-    if (tmsm.Version < 2)
-    {
-        short unk;
-    }
-    else
-    {
+    if (tmsm.Version >= 2)
         int EndMS;
-        if (tmsm.Version < 11)
-        {
-            byte unk;
-            if (version < 9)
-                return;
-        }
-        else
-        {
-            byte unk;
-            byte unk;
-        }
+
+    if (tmsm.Version >= 13) 
+    {
+        short unk_V13;
+        short unk2_V13;
+    }
+
+    if (tmsm.Version >= 11)
+    {
+        byte unk_V11;
+    }
+
+    if (tmsm.Version >= 14)
+    {
+        byte unk_V14;
+    }
+
+    if (tmsm.Version >= 9)
+    {
+        byte unk_V9;
     }
     
 } Music;
@@ -119,15 +123,17 @@ typedef struct
         } names[nName] <optimize=false>;
     }
 
-    string unk;
-    
+    string unkStr;
+    if (tmsm.Version >= 12)
+        string unkStr_V12;
+
     byte unk;
-    if (tmsm.Version > 2)
-    {
-        byte unk;
-        if (tmsm.Version != 3)
-            byte unk;
-    }
+
+    if (tmsm.Version >= 3)
+        byte unk_V4;
+
+    if (tmsm.Version >= 4)
+        byte unk2_V4;
     
 
 } Playlist <optimize=false>;
