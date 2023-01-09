@@ -81,6 +81,7 @@ ai.slot_id.ranked - Returns specific slot id - Function (1 argument (slot_id)) -
 ai.slot_id.crash1 - Unknown - Attribute (Int)
 ai.slot_id.crash2 - Unknown - Attribute (Int)
 ai.slot_id.crashed_enemy - Unknown - Attribute (Int)
+ai.slot_id.mine - Current slot id - Attribute (Int)
 
 ai.assist_off - Unknown - Function (1 (or more?) arguments (unk, ...))
 ai.battlef - Battle Front - Function (2 arguments) - ai.battlef 0 0.0
