@@ -1,0 +1,153 @@
+////////////////////////////////////////
+// XML Documentation
+////////////////////////////////////////
+Anything in () are XML attributes, [] just declares the expected type
+
+script (version [Int]) - Must start with it, version should be 100 in GT6
+defconst (skip [String, can be "yes"], name, value) - Declares a constant i.e <defconst name="goal_stop" value="-4" />
+defvar (name [String]) - Declares a variable i.e <defvar name="mode" />
+event (skip [String, can be "yes"], type [String]) 
+  rule (skip [String, can be "yes"])
+    conds - Conditions
+      cond (s [String]) - Condition
+	  not - Equivalent to !<cond>
+	    cond
+		
+	  or - Unknown
+	  and - Unknown
+	  
+	acts - Actions to execute if conditions satisfied
+	  act (cmd [String]) - Action
+	  disable_rule - Disables the current rule
+	  if
+	  else - not sure if that one actually is there
+	  
+Anything with "skip" marks the xml reader to stop processing the current node
+
+////////////////////////////////////////
+// Built-in functions
+////////////////////////////////////////
+add - Adds numbers together. - Variable amount of arguments - (add 5)
+sub - Subtracts numbers together. - Variable amount of arguments - (sub 5)
+mul - Multiplies numbers together. - Variable amount of arguments - (mul 5)
+div - Divides numbers together. - Variable amount of arguments - (div 5)
+sqrt - Square Root - 1 argument - (sqrt 5)
+abs - Absolute number - 1 argument - (abs 5.5)
+clamp - Clamp number - 3 arguments (value, min, max) - (clamp 8.5 1 5)
+linear - Unknown - 5 arguments - (linear ? ? ? ? ?)
+if - If statement - ? - if (ai.event_goal_v < 0) 0 ai.event_goal_v
+case - ? - At least two arguments, and must be even - ?
+to_int - Number to Int - 1 argument - (to_int 5.5)
+print - Stubbed print.
+
+////////////////////////////////////////
+// Expression syntax explanation
+////////////////////////////////////////
+Attribute paths can be either an attribute or function
+
+> ai.steering ai.slot_id.mine (ai.trace_road ai.slot_id.mine 0.7)
+is equivalent to
+> ai.steering(ai.slot_id.mine, ai.trace_road(ai.slot_id.mine 0.7))
+
+the ()'s are there to seperate the expressions together for the expression evaluator
+
+Valid operators/keywords are
+- true/false
+- + (plus), - (minus), / (division), % (modulus), = (equals)
+- Logical operators: > >= < <= != == and operators in non html decoded form aswell?
+- ( and ) for expression encapsulating
+- strings with ''? maybe?
+
+////////////////////////////////////////
+// Events
+////////////////////////////////////////
+Valid events are
+- start
+- change
+- update
+- update1
+- crash
+
+Update is presumably ran on every tick for every car 
+
+////////////////////////////////////////
+// Available attributes
+////////////////////////////////////////
+ai - Refers to the current ai - Structure
+
+ai.slot_id - Slot ID aka car indices on the grid - Structure
+ai.slot_id.player - Returns player's slot id - Attribute
+ai.slot_id.ranked - Returns specific slot id - Function (1 argument (slot_id)) - ai.slot_id.ranked 1
+ai.slot_id.crash1 - Unknown - Attribute (Int)
+ai.slot_id.crash2 - Unknown - Attribute (Int)
+ai.slot_id.crashed_enemy - Unknown - Attribute (Int)
+
+ai.assist_off - Unknown - Function (1 (or more?) arguments (unk, ...))
+ai.battlef - Battle Front - Function (2 arguments) - ai.battlef 0 0.0
+ai.boost - Boosts AI - Function (3 arguments (slot_id, unk, boost)) - ai.boost ai.slot_id.crashed_enemy 8 t
+ai.braking_g_mod - Unknown - Function (1 or 2 arguments (unk, unk))
+ai.brake - Unknown - Function (2 arguments (slot_id, unk))
+ai.brake_length - Unknown - Function (2 arguments (unk, unk))
+ai.braking_skill - Unknown - Function (2 arguments (unk, unk))
+ai.cancel_wheelie - Unknown - Function (1 argument (slot_id)) - ai.cancel_wheelie enemy_id
+ai.cancel_giveway - Unknown - Function (1 argument (slot_id)) - ai.cancel_wheelie enemy_id
+ai.corner_out - Sets skill (?) - Function (2 arguments, (unk, unk) - ai.corner_out enemy_id 30 100
+ai.cancel_us - Unknown - Function (1 argument (slot_id)) - ai.cancel_us ai.slot_id.mine
+ai.course_v - Gets the current Vcoord of an ai - Function (1 argument (slot_id)) - ai.course_v enemy_id
+ai.change_default_line - Unknown - (2 arguments (unk, unk)) - ai.change_default_line 2 1
+ai.diff_v - Unknown - Function (2 arguments (unk_float, unk_float))
+ai.distance - Unknown - Function (2 arguments (p1, p2))
+ai.driver_name - Unknown - Function (1 argument (unk))
+ai.edge_correction - Unknown - Function (2 argument (slot_id, unk_float)) - ai.edge_correction enemy_id (-1.0)
+ai.eyepoint0 - Unknown - Function (2 arguments (unk, unk))
+ai.eyepoint_correction_margin - Unknown - Function (1 arguments (unk))
+ai.event_goal_v - Gets goal V - Attribute
+ai.flag - Unknown - Function (1 or 2 arguments (unk, unk))
+ai.flash - Unknown - Function (1 argument (unk))
+ai.get_change_ranking - Unknown - Function (1 argument (slot_id))
+ai.impact - Crash impact - Attribute (Float)
+ai.is_complete - Gets whether a certain slot is finished - Function (1 argument (slot_id)) - ai.is_complete ai.slot_id.mine
+ai.is_pit - Returns whether an entry is pitting - Function (1 argument, (slot_id) - ai.is_pit ai.slot_id.mine
+ai.is_v_range - Gets whether an AI is within a vcoord range - Function (3 arguments (minv, maxv, currentv))
+ai.lap_count - Gets lap count of entry - Function (1 argument (slot_id)) - ai.lap_count slot_id
+ai.is_change_lap - Unknown - Function (1 arguments (unk))
+ai.is_change_section - Unknown - Function (1 arguments (unk))
+ai.judge_rain - Unknown - Function (3 arguments, (unk, unk, unk))
+ai.last_lap_time - Unknown - Function 1 arguments (unk))
+ai.last_sector_time - Unknown - Function (1 arguments (unk))
+ai.on_race - Unknown - Function (1 argument (slot_id))
+ai.pit_tire_wear - Unknown - Function (1 argument (slot_id))
+ai.pitin - Unknown - Function (1 argument (unk))
+ai.ranking - Gets entry ranking - Function (1 argument, (slot_id)) - ai.ranking slot_id
+ai.race_class_id - Unknown - Function (1 argument, (slot_id))
+ai.reaction_level - Unknown - Function (1 or 2 arguments (unk, unk))
+ai.sp_flag - Unknown - Function (1 or 2 arguments, (flag, bool)) - ai.sp_flag MIXED true
+ai.skill - Unknown - Function (2 or 3 arguments (unk, unk, unk))
+ai.skill_base - Unknown, refer to skill enum for type - Function (2 arguments (unk, type)) 
+ai.side_brake - Unknown - Function (2 arguments (slot_id, unk))
+ai.signal - Unknown - Function (1 argument (unk))
+ai.speed - Gets current speed - Function (1 argument (slot_id)) - ai.speed ai.slot_id.mine
+ai.slow_down - Unknown - Function (2 arguments (unk, unk))
+ai.steering - Unknown - Function (2 arguments (slot_id, unk)) - ai.steering ai.slot_id.mine (ai.trace_road ai.slot_id.mine 0.7)
+ai.stop_at - Unknown - Function (4 arguments (slot_id, mode, goal_stop, goal_limit)) - ai.stop_at ai.slot_id.mine mode goal_stop goal_limit
+ai.stop - Unknown - Function (1 or 2 arguments (unk, unk))
+ai.striker_mode - Unknown - Function (2 or 3 arguments (unk, unk, unk))
+ai.throttle - Sets throttle - Function (2 arguments (slot_id, throttle)) - ai.throttle ai.slot_id.mine 0
+ai.total_time - Unknown - Attribute (Float)
+ai.tire_num_off_road - Unknown - Function (1 argument (slot_id))
+ai.turn_in_speed_B - Unknown. - Function (2 arguments (slot_id, unk)) - ai.turn_in_speed_B enemy_id 200
+ai.turn_in_speed_A - Unknown - Function (2 arguments (slot_id, unk)) - ai.turn_in_speed_B enemy_id 200
+ai.update_braking_g_mod - Unknown - Function (1 (or 2?) arguments (unk, dummy?))
+ai.water_retention - Unknown - Function (1 argument (unk))
+
+ACCEL = 0;
+BRAKING = 1;
+CORNERING = 2;
+CORNEROUT = 3;
+SHIFTUP = 4;
+STARTING = 5;
+
+MIXED = 0;
+EXTRA_MU = 1;
+TCS = 2;
+ASM = 3;
