@@ -1,36 +1,75 @@
+// Documentation is added from GT HD Release & GT5 Prologue JP Demo which had descriptions embedded in EUC-JP encoding
+
 loadCommandFile
+コマンドを列挙したファイルを読み込みます
+read a file listing commands
+
 clearStage
+
 clearAllModel
+モデルをすべてクリアします。
+Clear all models.
+
 clearEntity
 clearModel
 resetEntity
 setEntityActive
 loadSchedule
 resetSchedule
-loadModel
+
+loadModel filename [name] [world] [env] [priority]
+
 swapTexture
+
 setCurrentModel
+カレントのモデルを name にします
+set the current model to name
+
 changeModel
-changeCurrentModel
+
+changeCurrentModel filename [name] [world] [env]
+モデルを読み込み、カレントモデルと入れ替えます。name という名前が付きます。
+Load a model and replace it with the current model. It will be named name.
+
 setModelTranslation
+カレントのモデルを x y z に移動します
+move current model to x y z
+
 setModelRotation
+カレントのモデルを x y z (deg)に回転します
+Rotate the current model by x y z (deg)
+
 setModelRotationIdentity
 setEntityRotationToCamera
-setModelVariation
+
+setModelVariation idx
+カレントのモデルのマテリアルバリエーション(主に色)を設定します
+Sets the material variation (mainly color) of the current model
+
 setModelVariation2
 setModelVariation3
 setAllModelVariation
 setLightProbe
 setStaticLOD
-setModelSetID
-setModelSetIDbits
+
+setModelSetID id [name]
+対象モデルセット内で表示するモデルIDを設定します。
+Set the model ID to be displayed in the target model set.
+
+setModelSetIDbits startIndex, Indexnum, idbits
+対象モデルセット内で表示するモデルIDをbitで指定します。
+
 setModelSetIDByName
 loadModelSchedule
 setModelSchedule
 setModelScheduleIndex
 setVisible
 enableIrradianceMap
-swapEnvMap
+
+swapEnvMap obj_tex [shader]
+環境マップを入れ替えます
+Swap the environment map
+
 loadDefaultDriverModel
 reloadDefaultDriverModel
 loadSpecifiedDriverModel
@@ -41,8 +80,15 @@ setModelPlaneShadowCutoff
 setModelPlaneShadowAlphaScale
 setModelTransBoneRevising
 setEntityRenderingConfig
-loadSky
-loadCrowd
+
+loadSky filename [name]
+天球モデルを読み込みます
+load the sky model
+
+loadCrowd filename
+群集ファイル (CrowdPack) を読み込みます
+Load the crowd file (CrowdPack)
+
 loadCrowd2
 loadStrobe
 loadTexture
@@ -53,34 +99,89 @@ createFontTexture
 createMovieTexture
 createEmitter
 createGarnishEmitter
+
 loadMotion
-setMotion
+
+
+setMotion index [name]
+カレントモデルに対して、再生するモーションを設定します。
+Set the motion to play for the current model.
+
 setMotionLoopMode
 setTweenLoopMode
-setGlobalMotionSpeed
-resetGlobalMotionFrame
+
+setGlobalMotionSpeed 
+グローバルのモーション更新スピードを設定します。デフォルトは1.0fです。
+Sets the global motion update speed. Default is 1.0f.
+
+resetGlobalMotionFrame [frame]
+オブジェクト、車、カメラ、シーンのモーションフレームをframeにセットします。frameを指定しない場合は0.0fがセットされます
+Sets the motion frame of an object, car, camera, or scene to frame. If frame is not specified, 0.0f is set.
+
 setEntityMotionConfig
 loadFacialMotion
 loadFacialLip
+
 setDefaultSceneParameter
-setBGColor
-loadSceneMotion
+シーンパラメータをデフォルト値にします。
+Set scene parameters to default values.
+
+setBGColor r g b [a]
+BGカラーを設定します
+Set BG color
+
+loadSceneMotion 
+シーンに対して、モーションを読み込みます。
+Loads the motion for the scene.
+
 loadLightProbeMesh
 loadFixEnvDDS
 setSceneMotionEnable
 setSceneMotionLoopMode
-setLightDir
+
+setLightDir x y z
+light の方向を設定します
+sets the direction of the light
+
 setLightDiffuse
+diffuse light color を設定します
+set diffuse light color
+
 setLightSpecular
-setGlobalAmbient
+speculae light color を設定します
+set the speculae light color
+
+setGlobalAmbient global ambient
+global ambient を設定します
+set the global ambient
+
 setLightSHCoefficient
 setLightScale
+
 setAmbientCubeXp
+x+ 方向の irradiance color を設定します
+Sets the irradiance color in the x+ direction
+
 setAmbientCubeXm
+x- 方向の irradiance color を設定します
+Sets the irradiance color in the x- direction
+
 setAmbientCubeYp
+y+ 方向の irradiance color を設定します
+Sets the irradiance color in the y+ direction
+
 setAmbientCubeYm
+y- 方向の irradiance color を設定します
+Sets the irradiance color in the y- direction
+
 setAmbientCubeZp
+z+ 方向の irradiance color を設定します
+Sets the irradiance color in the z+ direction
+
 setAmbientCubeZm
+z- 方向の irradiance color を設定します
+Sets the irradiance color in the z- direction
+
 setEnvClearMode
 setTimeZone
 setCrowdLightScale
@@ -93,8 +194,15 @@ setRaceStabLapCount
 enableRaceStab
 setEnvironmentParameter
 enableSmoothLODAdjust
-enableFlags
-disableFlags
+
+enableFlags [glare] [defocus] [blur] [vignetting] [autoexposure] [heatsimmer] [heatmirage]
+指定したエフェクトを有効にします。
+Activates the specified effect.
+
+disableFlags [glare] [defocus] [blur] [vignetting] [autoexposure] [heatsimmer] [heatmirage]
+指定したエフェクトを無効にします。
+Disables the specified effect.
+
 setEffectParameter
 prepareParticleSystem
 setParticleBufferSize
@@ -108,39 +216,98 @@ setForceAstronomyFile
 prepareGarnishSystem
 setGarnishBufferSize
 loadGarnishGoalModel
-setMirrorMode
+
+setMirrorMode flag
+ミラーモードのONOFFを設定します。
+Set mirror mode ON/OFF.
+
 setMirrorMeshLodBase
-setMirrorRenderRate
+ミラー表示オブジェクトのMeshBaseLodを設定します。
+Sets the MeshBaseLod of the mirror display object.
+
+setMirrorRenderRate rate
+ミラー表示の描画サイズを元バッファサイズrate分の1で指定します
+Specify the mirror display drawing size as 1/rate of the original buffer size
+
 setAutoFocus
 setFocusDelay
 setFixSceneBlur
 setAutoExposureSetting
 reqOneShotAutoFocus
+
 setAAmode
+アンチエイリアスモードを設定します。(0, 1, 2)。詳細は秘密。
+Sets the antialiasing mode. (0, 1, 2). Details are confidential.
+
 useScatteringFog
-setSunColor
-setRayleigh
+
+setSunColor r g b [w]
+スキャッタリングの太陽色を設定します。(wは輝度倍率)
+Sets the scattering sun color. (w is luminance magnification)
+
+setRayleigh r g b w
+スキャッタリングのレイリー係数を設定します。(wはマスターボリューム)
+Sets the Rayleigh factor for scattering. (w is master volume)
+
 setMie
+スキャッタリングのミー係数を設定します。(wはマスターボリューム)
+Sets the Mie factor for scattering. (w is master volume)
+
 setGprm
+スキャッタリングのG係数を設定します。([0.5-1.0]が一般的)
+Sets the scattering G factor. ([0.5-1.0] is common)
+
 setDistanceFactor
 selectCurrentCamera
-setPerspective
-setCameraPosition
-setCameraLookAt
-setCameraUp
+
+setPerspective fovy aspect near far
+カメラの投影行列をfovy aspect near farに設定します。
+Set the camera's projection matrix to fovy aspect near far.
+
+setCameraPosition x y z
+カメラの座標を x y z に設定します。
+Set the camera coordinates to x y z.
+
+setCameraLookAt x y z
+カメラの注視点を x y z に設定します。
+Set the camera look-at point to x y z.
+
+setCameraUp x y z
+カメラのUpVecを x y z に設定します。
+Set the camera's UpVec to x y z .
+
 setCameraFovY
 setCameraFocusLength
-setNear
-setFar
+
+setNear v
+カメラの near を v に設定します
+set camera near to v
+
+setFar v
+カメラの far を v に設定します
+set camera far to v
+
 setCameraPosAndRot
+
 setEnvCenterOffset
+環境マップカメラの中心をview coordinateでオフセットします
+Offset the center of the environment map camera by the view coordinate
+
 setEnvCenterTargetMode
 copyEnvCenterOffset
 setFixFnumber
 setTargetDistance
+
 loadCameraMotion
+カメラに対して、モーションを読み込みます。
+Load the motion for the camera.
+
 loadCameraSchedule
+
 setCameraMotionEnable
+カメラモーションを使うかどうかを設定します。
+Set whether to use camera motion.
+
 setCameraMotionOffsetMode
 setCameraMotionLoopMode
 setAutoFollowCamera
@@ -156,21 +323,65 @@ createBox3dCursor
 startBox3dCurosrAnime
 createPhotoIcon
 setPhotoCollisionType
-setShadowBias
-setShadowBiasCar
-setShadowOverride
-setShadowMapLightNumber
+
+setShadowBias texelbias [constbias]
+シャドウマップのバイアスを設定します
+Sets the shadow map bias
+
+setShadowBiasCar texelbias [constbias]
+車用のシャドウマップのバイアスを設定します
+Sets the shadow map bias for the car
+
+setShadowOverride near far
+シャドウマップのオーバーライドNEAR FARを設定します
+Set shadow map override NEAR FAR
+
+setShadowMapLightNumber number 
+シャドウマップに使うライト番号を指定します
+Specifies the light number to use for shadow maps
+
 setShadowOptimize
-setGlareThreshold
-setGlareSigma
-setGlareMAsterWeight
-setGlareWeights
-setColorCorrection
-enableColorCorrection
-setGain
+
+setGlareThreshold param
+グレアの閾値を設定します。(1.0fがデフォルト)
+Sets the glare threshold. (1.0f is default)
+
+setGlareSigma param
+グレアの分散（ボケ度）を設定します。(2.0fがデフォルト)
+Sets the variance (bokeh degree) of the glare. (2.0f is default)
+
+setGlareMasterWeight param
+グレアのボケ合成度を設定します。(0.3fがデフォルト)
+Sets the degree of glare bokeh. (0.3f is default)
+
+setGlareWeights w1 w2 w3 w4
+グレアのボケ合成度を設定します。(1.0fがデフォルト)
+Sets the degree of glare bokeh. (1.0f is default)
+
+setColorCorrection gain(x3) gamma(x3) bias(x3) chroma [num]
+色補正を設定します
+Set color correction
+
+enableColorCorrection enable [num]
+色補正を有効/無効にします
+Enable/disable color correction
+
+setGain r [g] [b]
+gain を設定します
+set gain
+
 setDynamicRangeCompress
+カラーのダイナミックレンジを設定します
+Sets the color dynamic range
+
 setDynamicRangeCompressEnv
+環境マップのダイナミックレンジを設定します
+Sets the dynamic range of the environment map
+
 setMaxIntensity
+シーン中最大輝度を設定します
+Sets the maximum brightness in the scene
+
 setExposureCorrect
 sendSignal
 setGlobalFixFadeTarget
@@ -178,6 +389,11 @@ setColorPalette
 setCarBufferInfo
 setCarBufferDetail
 setCarLoadingAllParts
+
+loadCar carcode [name]
+車モデルを読み込みます。name という名前が付きます。
+Load the car model. It will be named name.
+
 loadLodCar
 loadLodCarWithInterior
 loadCarWithMeter
@@ -187,10 +403,18 @@ changeCar
 changeLodCar
 changeLodCarWithInterior
 changeInteriorWithLodCar
-loadCarMotion
+
+loadCarMotion filename [name]
+車に対して、モーションを読み込みます。
+Load the motion for the car.
+
 setCarRaceReplay
 loadCarSound
-setCarVariation
+
+setCarVariation color [name]
+車に対して、マテリアルバリエーション（主に色）を設定します。
+Set the material variation (mainly color) for the car.
+
 swapCarExtraColor
 setCarWheelVariation
 setCarWheelColorVariation
@@ -200,15 +424,27 @@ swapCarWingExtraColor
 setCarTireWidth
 setCarWheelDiameter
 setCarWheelOffset
-setDefaultCarCode
+
+setDefaultCarCode carcode
+デフォルトの車コードを指定します。
+Specifies the default car code.
+
 setDefaultCarVariation
 setDefaultCarModelType
 setDefaultDriver
 cleanCarDirtiness
+
 setCarOcclusionShadowAlphaScale
+車の板影の透明度に対するスケールを設定します。
+Sets the scale for the transparency of the car's shadow.
+
 setCarWheelBlur
 setCarBrakeHeat
-setCarSteer
+
+setCarSteer deg [name]
+車に対して、ステアリング角度を指定します。
+Specifies the steering angle for the car.
+
 setAllCarSteer
 setCarInteriorMode
 setCarLampMode
@@ -221,7 +457,11 @@ setCarMeterParameter
 setCarConsoleSwitch
 toggleCarConsoleSwitch
 setCarPartsRotation
-setCarTailLamp
+
+setCarTailLamp switch
+車のテールランプのONOFFを設定します。
+Sets ON/OFF of the tail lamp of the car.
+
 setCarDeckenType
 setCarDeckenNumber
 setCarDeckenCustom
@@ -251,7 +491,11 @@ setDriverMainSize
 setDriverVramSize
 disableDriverExternalForce
 notUseRecordedVehicleVelocity
-loadCourse
+
+loadCourse crscorde
+コースモデルを読み込みます。
+Load the course model.
+
 loadCourseWithCrowd
 setCourseVisionList
 setBlendSkyParameter
@@ -267,9 +511,17 @@ setSoundDirectParam
 resetReservePlace
 setReservePlace
 setEntityToReservePlace
-screenShot
+
+screenShot filename
+スクリーンショットを transient/capture/filename.jpgに保存します
+Save the screenshot to transient/capture/filename.jpg
+
 takePhoto
-setScreenShotPath
+
+setScreenShotPath path
+スクリーンショット保存時のパスを設定します。
+Set the path for saving screenshots.
+
 setScreenShotDivision
 setScreenShotSubFrame
 setScreenShotShutterSpeed
@@ -278,3 +530,236 @@ setScreenShotImageFormat
 setScreenShotImageHDR
 setScreenShotImageQuality
 resetScreenShotSetting
+
+/////////////////////////////////////
+// Exclusive in GTHD Release at least
+/////////////////////////////////////
+
+setDir dir
+モデルを読むカレントディレクトリをセットします
+Sets the current directory for reading models
+
+ls 
+カレントディレクトリのリストを表示します
+display a list of the current directory
+
+setMotionFrame frame [name]
+カレントモデルに対して、モーションのフレームを指定します。
+Specifies the frame of motion for the current model.
+
+setSceneMotionFrame frame
+シーンモーションのフレーム数を指定します。
+Specifies the number of frames for scene motion.
+
+setSceneMotionEnable switch
+シーンモーションを使うかどうかを設定します。
+Sets whether to use scene motion.
+
+setTweenCycle index [name]
+ブレンドシェイプの周期を設定します。
+Sets the period of the blendshape.
+
+setCarMotionFrame frame_[name]
+車に対して、モーションのフレームを指定します。
+Specifies the frame of motion for the car.
+
+showCarShadow [flat] [box] [projection] [name]
+車の板影、箱影、プロジェクション影を表示するかどうかを設定します。
+Set whether to display the car's plate shadow, box shadow, and projection shadow.
+
+setCarDispFlag body shadow mirror [name]
+車のボディ、影、鏡面表示 を表示するかどうかを設定します。1で表示。0で非表示。
+Sets whether to display the car's body, shadows, and mirror display. Displayed by 1. 0 to hide.
+
+setCarPath path
+クルマ読み込みパスを設定します（'car/lod' か 'car/menu'）。
+Set the car load path (either 'car/lod' or 'car/menu').
+
+setLightColor r g b [a]
+light color (diffuse,specular同値) を設定します
+set light color (diffuse,specular equivalent)
+
+setSkyColor r g b [a]
+sky color を設定します
+set sky color
+
+setGroundColor r g b [a]
+ground color を設定します
+set the ground color
+
+setFogColor r g b
+fog 色を設定します
+set the fog color
+
+setFogDensity v
+fog 濃度を設定します(linear 以外)
+set fog density (other than linear)
+
+setFogRange start end
+fog の開始点と終了点を設定します
+set fog start and end points
+
+setFogMode mode
+fog モードを設定します(linear, exp, exp2). ※linearは使えないようです
+Set fog mode (linear, exp, exp2).
+
+enableShadowMap [flag]
+シャドウマップを有効/無効にします
+Enable/disable shadow maps
+
+enableCarShadowMap [flag]
+車のシャドウマップを有効/無効にします
+Enable/disable car shadow maps
+
+setModelProperty name, value
+ 対象のモデルの属性の値を設定／取得します。
+Sets/gets the attribute value of the target model.
+
+printModelInfo [name]
+nameのモデルの位置と回転を出力します。nameを省略するとカレントのモデルになります。
+Outputs the position and rotation of the model named name. If you omit the name, it becomes the current model.
+
+setVirtualObjectScale scale [x y z]
+x y z にあるオブジェクトが scale 倍されたようなカメラを設定します
+set the camera like the object at x y z scaled by scale
+
+getCameraPosition
+カメラの視点座標をコンソールとTCP接続先に出力します。
+Outputs the camera viewpoint coordinates to the console and TCP connection destination.
+
+getCameraLookAt
+カメラの注視点座標をコンソールとTCP接続先に出力します。
+Outputs the coordinates of the camera gaze point to the console and TCP connection destination.
+
+getCameraUp
+カメラのUpVectorをコンソールとTCP接続先に出力します。
+Outputs the camera's UpVector to the console and TCP connection destination.
+
+setNavigateMode mode
+pad による操作モードを変更します。(fly, course, ps2model, ps2course)
+Change the mode of operation by pad. (fly, course, ps2model, ps2course)
+
+setLODBase v
+LOD base を設定します
+Set LOD base
+
+setLinearMode [flag]
+リニアモードの設定をします。
+Set the linear mode.
+
+setScreenShotQuality value
+スクリーンショット保存時の画質(0-100)を設定します。
+Set the image quality (0-100) when saving screenshots.
+
+setCaputerDivs x y
+高解像度スクリーンショット撮影時の画面分割数を指定します。
+Specify the number of screen divisions when taking high resolution screenshots.
+
+setScreenShotType type
+スクリーンショット保存するファイルタイプを指定します。0:JPEG 1:SGI
+Specify the file type to save the screenshot. 0: JPEG 1: SGI
+
+writeLngLatMap path.pfm [width] [height] [near] [far]
+カメラ位置のキューブマップを出力します。
+Outputs a cubemap of the camera position.
+
+disableTexture [flag]
+テクスチャをとっても荒くします
+make the texture very rough
+
+disableFragmentProgram [flag]
+ピクセルシェーダをとっても単純にします
+Makes pixel shaders super simple
+
+disableFragmentParameter [flag]
+ピクセルシェーダ変数設定をしません
+do not set pixel shader variables
+
+startMovieCapture [path]
+ムービーレンダリングを開始します。パスは省略可能。デフォルトはh:/movie-out
+Start movie rendering. Path is optional. Default is h:/movie-out
+
+setMoviePath path
+ムービー連番ファイルをセーブするパスを指定します。
+Specify the path to save the movie serial number file.
+
+setMovieStartWaitFrame frame
+Movieレンダリング開始までの待ちフレーム数を指定します。
+Specifies the number of frames to wait before starting movie rendering.
+
+setMovieEndFrame frame
+Movieレンダリング終了フレームを指定します。
+Specifies the movie rendering end frame.
+
+setMovieSubFrame frame
+Movieレンダリング時のサブフレーム数を指定します。
+Specifies the number of subframes when rendering a Movie.
+
+setMovieShutterRate rate
+Movieレンダリング字のシャッターレートを指定します。(デフォルトは1.0f)
+Specifies the shutter rate for movie rendering. (default is 1.0f)
+
+printMovieSettings
+Movieレンダリング時の設定をprintします。
+Prints the settings for Movie rendering.
+
+setGridDisp switch
+グリッド表示のオンオフを指定します。0:非表示  1:表示 
+Specifies whether to display the grid on or off. 0: Hide 1: Show
+
+setTexDisp switch
+テクスチャリスト表示のオンオフを指定します。0:非表示  1:表示 
+Specifies ON/OFF of the texture list display. 0: Hide 1: Show
+
+resetTexDispPos
+テクスチャリストの表示位置をリセットします。
+Reset the display position of the texture list.
+
+loadAprvCarCode filename
+アプルーブキャプチャ用のカーコード一覧ファイルを読み込みます。
+Load the car code list file for approve capture.
+
+loadAprvCommandSet filename
+アプルーブキャプチャ用のカメラ等、それぞれ一枚撮影するのにセッティングファイル一覧を読み込みます。
+A list of setting files is loaded for taking one picture, such as a camera for approving capture.
+
+startAprvCapture
+アプルーブキャプチャを開始します。
+Start Approve capture.
+
+close
+TCP接続を切断します。
+Disconnect TCP connection.
+
+help
+コレを表示します
+display this
+
+loadSplitModel filename0 filename1 [name] [world] [env]
+分割したモデルを読み込みます。name という名前が付きます。
+Loads the split model, which will be named name.
+
+changeCurrentModelCar
+車モデルを読み込み、カレントモデルと入れ替えます。name という名前が付きます。
+Reads the car model and replaces it with the current model. It will be named name.
+
+changeModelPriority
+name のモデルの描画順を変更します。
+Change the drawing order of the model named name.
+
+loadEnvSky
+環境天球モデルを読み込みます
+Load the environment sky model
+
+loadFar
+Farモデルを読み込みます
+Load the Far model
+
+// GT5 JP Demo
+setShadowPerspectiveWeight w
+シャドウマップのパースによる重みを指定します
+Specifies the perspective weight of the shadow map
+
+setShadowBlurness a b
+ソフトシャドウのボケ具合を設定します
+Sets the degree of soft shadow blur
