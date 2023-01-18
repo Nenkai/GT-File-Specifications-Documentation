@@ -1,0 +1,211 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    float Rotation <comment="In radians">;
+    float b;
+    float XScale;
+    float YScale;
+    float XPos;
+    float YPos;
+} Transform;
+
+typedef struct
+{
+    ubyte r;
+    ubyte g;
+    ubyte b;
+    ubyte a;
+} ColorTransform;
+
+// 0x28
+typedef struct
+{
+    enum <short> 
+    {
+        ShapeObject = 0,
+        MorphShapeObject = 1,
+        Sprite = 2,
+        Unk,
+        Text = 4,
+        EditText = 5,
+        Button = 6,
+        ExtRenderShape = 7,
+    } TagType;
+    short FrameStart;
+    short FrameEnd;
+
+    short CharacterId <comment="CharacterId this points to, depends on TagType">;
+    int b;
+    int EventFlags;
+
+    if (Header.Version >= 2)
+    {
+        int64 d <format=hex, fgcolor=cRed>;
+        int64 e;
+
+        int64 PlaceParamOffset <format=hex, fgcolor=cRed>;
+        int64 PlaceParamCount <fgcolor=cGreen>;
+
+        int64 NameOffset <format=hex, fgcolor=cRed>;
+        int64 NameLength <fgcolor=cGreen>;
+    }
+    else
+    {
+        int d <format=hex, fgcolor=cRed>;
+        int e;
+
+        int PlaceParamOffset <format=hex, fgcolor=cRed>;
+        int PlaceParamCount <fgcolor=cGreen>;
+
+        int NameOffset <format=hex, fgcolor=cRed>;
+        int NameLength <fgcolor=cGreen>;
+    }
+
+
+    FSeek(PlaceParamOffset);
+    struct
+    {
+        Transform transform <comment="Matrix to scale, rotation , position of the character.">;
+        ColorTransform color <comment="Color effect applied to the character.">;
+        float unk;
+        int pad;
+    } PlaceParam[PlaceParamCount] <bgcolor=cGreen, size=0x24>;
+    
+    if (NameLength != 0)
+    {
+        FSeek(NameOffset);
+        string Name;
+    }
+} PlaceObject;
+
+
+typedef struct
+{
+    int unk;
+    int labelOffset <format=hex, fgcolor=cRed>;
+    int labelLength;
+} FrameLabel;
+
+typedef struct (int offset, int length)
+{
+    local int j = 0;
+    for (j; j < length ; j++)
+    {
+        FSeek(offset + (j * 0x14));
+        FrameLabel frameLabel;
+    }
+} FrameLabelMap;
+
+typedef struct
+{
+    if (Header.Version >= 2)
+    {
+        int64 PlaceObjectIndicesOffset <format=hex, fgcolor=cRed>;
+        int64 PlaceObjectIndicesCount;
+    }
+    else
+    {
+        int PlaceObjectIndicesOffset <format=hex, fgcolor=cRed>;
+        int PlaceObjectIndicesCount;
+    }
+
+    if (PlaceObjectIndicesCount > 0)
+    {
+        FSeek(PlaceObjectIndicesOffset);
+        short Indices[PlaceObjectIndicesCount];
+    }
+} Frame <bgcolor=cRed>;
+
+typedef struct (int offset, int length)
+{
+    local int j = 0;
+    for (j; j < length ; j++)
+    {
+        if (Header.Version >= 2)
+            FSeek(offset + (j * 0x10));
+        else
+            FSeek(offset + (j * 0x08));
+        Frame frame;
+    }
+} FrameMap;
+
+// 0x24
+typedef struct
+{
+    if (Header.Version >= 2)
+    {
+        int64 PlaceObjectOffset <format=hex, fgcolor=cRed>;
+        int64 PlaceObjectCount <fgcolor=cGreen>;
+        int64 UnkOffset <format=hex, fgcolor=cRed>;
+        int64 _empty_;
+        int64 FrameLabelOffset <format=hex, fgcolor=cRed>;
+        int64 FrameLabelCount <fgcolor=cGreen>;
+        int64 FrameOffset <format=hex, fgcolor=cRed>;
+        int64 FrameCount <fgcolor=cGreen>;
+        int FrameCount2;
+        int unk2;
+    }
+    else
+    {
+        int PlaceObjectOffset <format=hex, fgcolor=cRed>;
+        int PlaceObjectCount <fgcolor=cGreen>;
+        int UnkOffset <format=hex, fgcolor=cRed>;
+        int _empty_;
+        int FrameLabelOffset <format=hex, fgcolor=cRed>;
+        int FrameLabelCount <fgcolor=cGreen>;
+        int FrameOffset <format=hex, fgcolor=cRed>;
+        int FrameCount <fgcolor=cGreen>;
+        int FrameCount2 <fgcolor=cGreen>;
+    }
+
+    if (PlaceObjectCount > 0)
+    {
+        FSeek(PlaceObjectOffset);
+        local int j;
+        for (j; j < PlaceObjectCount ; j++)
+        {
+            if (Header.Version >= 2)
+                FSeek(PlaceObjectOffset + (j * 0x40));
+            else
+                FSeek(PlaceObjectOffset + (j * 0x28));
+
+            PlaceObject placeObject <bgcolor=cYellow>;
+        }
+    }
+
+    if (FrameLabelCount > 0)
+    {
+        FSeek(FrameLabelOffset);
+        FrameLabelMap frameLabelMap(FrameLabelOffset, FrameLabelCount);
+    }
+
+    if (FrameCount > 0)
+        FrameMap frameMap(FrameOffset, FrameCount);
+
+} StrobeSprite <optimize=false>;
+
+typedef struct
+{
+    local int i = 0;
+    for (i; i < Header.SpritesCount; i++)
+    {
+        if (Header.Version >= 2)
+            FSeek(Header.SpritesOffset + (i * 0x48));
+        else
+            FSeek(Header.SpritesOffset + (i * 0x24));
+        StrobeSprite sprite;
+    }
+    
+} StrobeSpriteMap;

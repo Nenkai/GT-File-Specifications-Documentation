@@ -1,0 +1,49 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct
+{
+    int TextureHeaderOffset <format=hex, fgcolor=cRed>;
+    int TextureHeaderSize <format=hex>;
+    short Width;
+    short Height;
+    int pad;
+
+    FSeek(TextureHeaderOffset);
+    byte TextureHeader[TextureHeaderSize] <bgcolor=cLtBlue>;
+} Bitmap;
+
+typedef struct
+{
+    if (Header.Version >= 2)
+    {
+        struct
+        {
+            short Width;
+            short Height;
+            int TextureSetTextureIndex;
+        } TXSBitmapEntry[Header.BitmapCount];
+    }
+    else
+    {
+
+        local int j = 0;
+        for (j; j < Header.BitmapCount; j++)
+        {
+            FSeek(Header.BitmapOffset + (j * 0x10));
+            Bitmap shapeObject;
+        }
+    }
+} BitmapMap;

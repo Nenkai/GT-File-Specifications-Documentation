@@ -1,0 +1,171 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    short UnkBits;
+    short unk;
+
+    if (Header.Version >= 2)
+        int unk;
+
+    float unk;
+    float unk;
+
+    if (Header.Version >= 2)
+    {
+        int64 DataOffset <format=hex, fgcolor=cRed>;
+        int64 unk;
+    }
+    else
+    {
+        int DataOffset <format=hex, fgcolor=cRed>;
+        int unk;
+    }
+    FSeek(DataOffset);
+    struct
+    {
+        int flags;
+        float Data1;
+        float Data2;
+        float Data3;
+        float Data4;
+        float Data5;
+        float Data6;
+        float Data7;
+        float Data8;
+        float Data9;
+        float Data10;
+        float Data11;
+        float Data12;
+        float Data13;
+        float Data14;
+        float Data15;
+        float Data16;
+        float Data17;
+        float Data18;
+        float Data19;
+    } Data;
+} Stroke;
+
+typedef struct (int offset, int length)
+{
+    local int m = 0;
+    for (m; m < length ; m++)
+    {
+        if (Header.Version >= 2)
+            FSeek(offset + (m * 0x20));
+        else
+            FSeek(offset + (m * 0x14));
+
+        Stroke stroke;
+    }
+} StrokeMap;
+
+typedef struct
+{
+    if (Header.Version >= 2)
+    {
+        int64 BitmapId;
+        int64 StrokesOffset <format=hex, fgcolor=cRed>;
+        int64 StrokeCount <fgcolor=cGreen>;
+    }
+    else
+    {
+        int BitmapId;
+        int StrokesOffset <format=hex, fgcolor=cRed>;
+        int StrokeCount <fgcolor=cGreen>;
+    }
+
+    if (StrokeCount > 0)
+        StrokeMap strokeMap(StrokesOffset, StrokeCount);
+} Shape;
+
+typedef struct (int offset, int length)
+{
+    local int l = 0;
+    for (l; l < length ; l++)
+    {
+        if (Header.Version >= 2)
+            FSeek(offset + (l * 0x18));
+        else
+            FSeek(offset + (l * 0x0C));
+        Shape shape;
+    }
+} ShapeMap;
+
+typedef struct
+{
+    if (Header.Version >= 2)
+    {
+        int64 ShapeOffset <format=hex, fgcolor=cRed>;
+        int64 ShapeCount <fgcolor=cGreen>;
+    }
+    else
+    {
+        int ShapeOffset <format=hex, fgcolor=cRed>;
+        int ShapeCount <fgcolor=cGreen>;
+    }
+
+    if (ShapeCount > 0)
+        ShapeMap shapes(ShapeOffset, ShapeCount);
+} ShapeGroup;
+
+typedef struct (int offset, int length)
+{
+    local int k = 0;
+    for (k; k < length ; k++)
+    {
+        if (Header.Version >= 2)
+            FSeek(offset + (k * 0x10));
+        else
+            FSeek(offset + (k * 0x08));
+        ShapeGroup group;
+    }
+} ShapeGroupMap;
+
+typedef struct
+{
+    float Left;
+    float Top;
+    float Right;
+    float Bottom;
+
+    if (Header.Version >= 2)
+    {
+        int64 ShapeGroupOffset <format=hex, fgcolor=cRed>;
+        int64 ShapeGroupCount <fgcolor=cGreen>;
+    }
+    else
+    {
+        int ShapeGroupOffset <format=hex, fgcolor=cRed>;
+        int ShapeGroupCount <fgcolor=cGreen>;
+    }
+
+    if (ShapeGroupOffset > 0)
+        ShapeGroupMap shapeGroup(ShapeGroupOffset, ShapeGroupCount);
+
+} ShapeObject;
+
+typedef struct
+{
+    local int j = 0;
+    for (j; j < Header.ShapeObjectCount; j++)
+    {
+        if (Header.Version >= 2)
+            FSeek(Header.ShapeObjectOffset + (j * 0x20));
+        else
+            FSeek(Header.ShapeObjectOffset + (j * 0x18));
+        ShapeObject shapeObject;
+    }
+} ShapeObjectMap;

@@ -1,0 +1,197 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+
+typedef enum <ubyte>
+{
+    ActionEnd = 0x00,
+    ActionNextFrame = 0x04,
+    ActionPlay = 0x06,
+    ActionStop = 0x07,
+    ActionAdd = 0x0A,
+    ActionSubtract = 0x0B,
+    ActionMultiply = 0x0C,
+    ActionDivide = 0x0D,
+    ActionEquals = 0x0E,
+    ActionAnd = 0x10,
+    ActionNot = 0x12,
+    ActionStringEquals = 0x13,
+    ActionPop = 0x17,
+    ActionToInteger = 0x18,
+    ActionGetVariable = 0x1C,
+    ActionSetVariable = 0x1D,
+    ActionGetProperty = 0x22,
+    ActionSetProperty = 0x23,
+    ActionTrace = 0x26,
+    ActionGetTime = 0x34,
+    ActionDefineLocal = 0x3C,
+    ActionCallFunction = 0x3D,
+    ActionReturn = 0x3E,
+    ActionModulo = 0x3F,
+    ActionNewObject = 0x40,
+    ActionDefineLocal2 = 0x41,
+    ActionInitArray = 0x42,
+    ActionInitObject = 0x43,
+    ActionTypeOf = 0x44,
+    ActionAdd2 = 0x47,
+    ActionLess2 = 0x48,
+    ActionEquals2 = 0x49,
+    ActionToNumber = 0x4A,
+    ActionToString = 0x4B,
+    ActionPushDuplicate = 0x4C,
+    ActionStackSwap = 0x4D,
+    ActionGetMember = 0x4E,
+    ActionSetMember = 0x4F,
+    ActionIncrement = 0x50,
+    ActionDecrement = 0x51,
+    ActionCallMethod = 0x52,
+    ActionNewMethod = 0x53,
+    ActionEnumerate2 = 0x55,
+    ActionBitAnd = 0x60,
+    ActionBitOr = 0x61,
+    ActionBitXor = 0x62,
+    ActionBitLShift = 0x63,
+    ActionBitRShift = 0x64,
+    ActionBitURShift = 0x65,
+    ActionStrictEquals = 0x66,
+    ActionGreater = 0x67,
+    ActionStringGreater = 0x68,
+    ActionGotoFrame = 0x81,
+    ActionStoreRegister = 0x87,
+    ActionConstantPool = 0x88,
+    ActionWith = 0x94,
+    ActionPush = 0x96,
+    ActionJump = 0x99,
+    ActionDefineFunction = 0x9B,
+    ActionIf = 0x9D,
+} ActionCode;
+
+typedef struct
+{
+    ActionCode Code;
+
+    if (Code >> 7 != 0)
+    {
+        short ActionLength;
+        local int endPos = FTell() + ActionLength;
+    }
+    
+
+    switch (Code)
+    {
+        case ActionGotoFrame:
+            short FrameID;
+            break;
+
+        case ActionStoreRegister:
+            byte RegisterNumber;
+            break;
+
+        case ActionConstantPool:
+            short Count;
+            struct
+            {   
+                string str;
+            } String[Count] <optimize=false>;
+            break;
+
+        case ActionWith:
+            short Size;
+            break;
+
+        case ActionPush:
+            while (FTell() < endPos)
+            {
+                struct
+                {
+                    byte DataType;
+                    switch (DataType)
+                    {
+                        case 0:
+                            string StrValue;
+                            break;
+                        case 1:
+                            float FloatValue;
+                            break;
+                        case 4:
+                            byte RegisterNumber;
+                            break;
+                        case 5:
+                            byte BoolValue;
+                            break;
+                        case 6:
+                            double DoubleValue;
+                            break;
+                        case 7:
+                            int IntValue;
+                            break;
+                        case 8:
+                            byte ConstantPoolIndex;
+                            break;
+                        case 9:
+                            short ConstantPoolIndex;
+                            break;
+                    }
+                } Field;
+            }
+            break;
+
+        case ActionJump:
+            short BranchOffset;
+            break;
+
+        case ActionDefineFunction:
+            string FunctionName;
+            short NumParams;
+            struct
+            {
+                string s;
+            } Param[NumParams];
+            short FuncSize <format=hex>;
+            break;
+
+        case ActionIf:
+            short BranchOffset;
+            break;
+    }
+} ActionCommand <comment=PrintAction>;
+
+string PrintAction(ActionCommand& cmd)
+{
+    return EnumToString(cmd.Code);
+}
+
+
+LittleEndian();
+
+typedef struct
+{
+    int CommandsOffset <format=hex, fgcolor=cRed>;
+    int CommandsSize <format=hex>;
+
+    FSeek(CommandsOffset);
+    while (FTell() < CommandsOffset + CommandsSize)
+    {
+        ActionCommand code <bgcolor=cBlack>;
+    }
+} Action;
+
+typedef struct
+{
+    local int j = 0;
+    for (j; j < Header.ActionCount; j++)
+    {
+        FSeek(Header.ActionOffset + (j * 0x08));
+        Action action;
+    }
+} ActionMap;

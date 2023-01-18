@@ -1,0 +1,33 @@
+//------------------------------------------------
+//--- 010 Editor v11.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct
+{
+    short Type;
+    short GradiantId;
+    short Unk_0x98_Matrix_Id;
+    short BitmapId;
+
+} FillStyle;
+
+typedef struct
+{
+    local int j = 0;
+    for (j; j < Header.FillStyleCount; j++)
+    {
+        FSeek(Header.FillStyleOffset + (j * 0x08));
+        FillStyle shapeObject;
+    }
+} FillStyleMap <bgcolor=cDkPurple>;

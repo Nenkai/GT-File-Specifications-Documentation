@@ -1,42 +1,195 @@
 //------------------------------------------------
 //--- 010 Editor v11.0.1 Binary Template
 //
-//      File: 
-//   Authors: 
+//      File: Strobe File (Converted from Flash/ActionScript .swf)
+//   Authors: Nenkai#9075
 //   Version: 
-//   Purpose: 
+//   Purpose: Displaying animations with logic
 //  Category: 
-// File Mask: 
-//  ID Bytes: 
+// File Mask: .strb
+//  ID Bytes: 53 54 52 42
 //   History: 
 //------------------------------------------------
 
+// Great resource for swf: https://open-flash.github.io/mirrors/swf-spec-19.pdf
+
 LittleEndian();
 
-#include "StrobeEntities/StrobeTexture.bt";
-#include "StrobeEntities/ShapeObject.bt";
+#include "StrobeEntities/StrobeSprite.bt";
+#include "StrobeEntities/StrobeShapeObject.bt";
+#include "StrobeEntities/StrobeFillStyle.bt";
+#include "StrobeEntities/StrobeAction.bt";
+#include "StrobeEntities/StrobeBitmap.bt";
 
 struct STRB
 {
-    char Magic[4];
-    int _empty_;
-    int RelocPtrFileSize <format=hex>;
-    int RuntimePtr;
+    struct
+    {
 
-    FSeek(0x1C);
-    float Frames;
-    short UnkRelatedToTime;
+        char Magic[4];
+        int Version <comment="2 for GTS/GT7, 0 for everything else. Not backwards compatible">;
 
-    FSeek(0x30);
-    int SpritesOffset <format=hex, fgcolor=cRed>;
-    int SpritesCount <fgcolor=cGreen>;
+        if (Version >= 2)
+        {
+            int64 RelocPtrFileSize <format=hex>;
+            int64 RuntimePtr;
+            int64 TextureSetDataOffset <format=hex, fgcolor=cRed>;
+            float Width;
+            float Height;
+            
+            int unk <format=hex>;
 
-    int ShapeObjectOffset <format=hex, fgcolor=cRed>;
-    int ShapeObjectCount <fgcolor=cGreen>;
+            float FrameRate <comment="Divide this by UnkRelatedToTime to get Loops per sec">;
+            int64 FrameCount;
+            
+            int64 TextureSetOffset <format=hex, fgcolor=cRed>;
 
-    if (SpritesCount > 0)
-        StrobeTextureMap textureMap(SpritesOffset, SpritesCount);
-    if (ShapeObjectCount)
-        ShapeObjectMap sObjectMap(ShapeObjectOffset, ShapeObjectCount);
+            int64 SpritesOffset <format=hex, fgcolor=cRed>;
+            int64 SpritesCount <fgcolor=cGreen>;
+        
+            int64 ShapeObjectOffset <format=hex, fgcolor=cRed>;
+            int64 ShapeObjectCount <fgcolor=cGreen>;
+    
+            int64 MorphShapeOffset <format=hex, fgcolor=cRed>;
+            int64 MorphShapeObjectCount <fgcolor=cGreen>;
+    
+            int64 unkOffset_0x48 <format=hex, fgcolor=cRed>;
+            int64 empty;
+    
+            int64 FontOffset <format=hex, fgcolor=cRed>;
+            int64 FontCount <fgcolor=cGreen>;
+    
+            int64 TextOffset <format=hex, fgcolor=cRed>;
+            int64 TextCount <fgcolor=cGreen>;
+    
+            int64 EditTextOffset <format=hex, fgcolor=cRed>;
+            int64 EditTextCount <fgcolor=cGreen>;
+    
+            int64 FillStyleOffset <format=hex, fgcolor=cRed>;
+            int64 FillStyleCount;
+    
+            int64 unkOffset_0x70 <format=hex, fgcolor=cRed>;
+            int64 unkCount;
+    
+            int64 GradiantOffset <format=hex, fgcolor=cRed>;
+            int64 GradiantCount <fgcolor=cGreen>;
+    
+            int64 unkOffset_0x80 <format=hex, fgcolor=cRed>;
+            int64 empty;
+    
+            int64 unkOffset_0x88 <format=hex, fgcolor=cRed>;
+            int64 empty;
+    
+            int64 MorphGradiantOffset <format=hex, fgcolor=cRed>;
+            int64 MorphGradiantCount <fgcolor=cGreen>;
+    
+            int64 BitmapMatrixOffset_0x98 <format=hex, fgcolor=cRed>;
+            int64 BitmapMatrixCount;
+    
+            int64 ButtonOffset <format=hex, fgcolor=cRed>;
+            int64 ButtonCount <fgcolor=cGreen>;
+    
+            int64 ActionOffset <format=hex, fgcolor=cRed>;
+            int64 ActionCount <fgcolor=cGreen>;
+    
+            int64 BitmapOffset <format=hex, fgcolor=cRed>;
+            int64 BitmapCount <fgcolor=cGreen>;
+    
+            int64 ExtRenderShapeOffset <format=hex, fgcolor=cRed>;
+            int64 ExtRenderShapeCount <fgcolor=cGreen>;
+        }
+        else
+        {
+            int RelocPtrFileSize <format=hex>;
+            int RuntimePtr;
+            float Width;
+            float Height;
+            int unk <format=hex>;
+        
+            float FrameRate <comment="Divide this by UnkRelatedToTime to get Loops per sec">;
+            short FrameCount;
+            short unk;
 
+            FSkip(0x0C);
+
+            int SpritesOffset <format=hex, fgcolor=cRed>;
+            int SpritesCount <fgcolor=cGreen>;
+        
+            int ShapeObjectOffset <format=hex, fgcolor=cRed>;
+            int ShapeObjectCount <fgcolor=cGreen>;
+    
+            int MorphShapeOffset <format=hex, fgcolor=cRed>;
+            int MorphShapeObjectCount <fgcolor=cGreen>;
+    
+            int unkOffset_0x48 <format=hex, fgcolor=cRed>;
+            int empty;
+    
+            int FontOffset <format=hex, fgcolor=cRed>;
+            int FontCount <fgcolor=cGreen>;
+    
+            int TextOffset <format=hex, fgcolor=cRed>;
+            int TextCount <fgcolor=cGreen>;
+    
+            int EditTextOffset <format=hex, fgcolor=cRed>;
+            int EditTextCount <fgcolor=cGreen>;
+    
+            int FillStyleOffset <format=hex, fgcolor=cRed>;
+            int FillStyleCount;
+    
+            int unkOffset_0x70 <format=hex, fgcolor=cRed>;
+            int unkCount;
+    
+            int GradiantOffset <format=hex, fgcolor=cRed>;
+            int GradiantCount <fgcolor=cGreen>;
+    
+            int unkOffset_0x80 <format=hex, fgcolor=cRed>;
+            int empty;
+    
+            int unkOffset_0x88 <format=hex, fgcolor=cRed>;
+            int empty;
+    
+            int MorphGradiantOffset <format=hex, fgcolor=cRed>;
+            int MorphGradiantCount <fgcolor=cGreen>;
+    
+            int BitmapMatrixOffset_0x98 <format=hex, fgcolor=cRed>;
+            int BitmapMatrixCount;
+    
+            int ButtonOffset <format=hex, fgcolor=cRed>;
+            int ButtonCount <fgcolor=cGreen>;
+    
+            int ActionOffset <format=hex, fgcolor=cRed>;
+            int ActionCount <fgcolor=cGreen>;
+    
+            int BitmapOffset <format=hex, fgcolor=cRed>;
+            int BitmapCount <fgcolor=cGreen>;
+    
+            int ExtRenderShapeOffset <format=hex, fgcolor=cRed>;
+            int ExtRenderShapeCount <fgcolor=cGreen>;
+        }
+
+    } Header <bgcolor=cPurple>;
+
+    
+    FSeek(Header.SpritesOffset);
+    if (Header.SpritesCount > 0)
+        StrobeSpriteMap sprites;
+    
+    FSeek(Header.ShapeObjectOffset);
+    if (Header.ShapeObjectCount)
+        ShapeObjectMap sObjectMap;
+
+    FSeek(Header.FillStyleOffset);
+    if (Header.FillStyleCount);
+        FillStyleMap fillStyleMap;
+    
+
+    
+    FSeek(Header.ActionOffset);
+    if (Header.ActionCount)
+        ActionMap actions;
+    
+    FSeek(Header.BitmapOffset);
+    if (Header.BitmapCount)
+        BitmapMap bitmap;
+    
 } StrobeAnimation;
