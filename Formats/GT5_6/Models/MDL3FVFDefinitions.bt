@@ -13,7 +13,7 @@
 
 typedef struct
 {
-    int NameOffset <format=hex, fgcolor=cRed, comment="Ordered for binary search">;
+    int FieldNameOffset <format=hex, fgcolor=cRed, comment="Ordered for binary search">;
     byte StartOffset <format=hex, fgcolor=cRed>;
     byte Count <format=hex, fgcolor=cGreen>;
     enum <byte> CELL_GCM_VERTEX_TYPE
@@ -28,8 +28,8 @@ typedef struct
 
     } DataType;
     byte UnkIndex;
-    FSeek(BasePos + NameOffset);
-    string Name;
+    FSeek(BasePos + FieldNameOffset);
+    string FieldName;
 } FVFField;
 
 typedef struct
@@ -44,8 +44,10 @@ typedef struct
 
 typedef struct
 {
-    int StringOffset <format=hex, fgcolor=cRed>;
-    int empty;
+    local int basePos = FTell();
+
+    int FVFNameOffset <format=hex, fgcolor=cRed>;
+    int ShaderRelatedIndex;
     int FieldDefsOffset <format=hex, fgcolor=cRed>;
     short RuntimeIndex <comment="Set to -1 At runtime">;
     short Pad;
@@ -57,12 +59,6 @@ typedef struct
     byte _runtime_data_[0x58];
     int FVFArraysOffset <format=hex, fgcolor=cRed, comment="Own Thing, Possibly Unused (debug?) - No changes when all wiped to 0">;
 
-    if (StringOffset != 0)
-    {
-        FSeek(BasePos + StringOffset);
-        string Name;
-    }
-
     local int j = 0;
     for (j = 0; j < FieldCount; j++)
     {
@@ -72,5 +68,9 @@ typedef struct
     
     FSeek(BasePos + FVFArraysOffset);
     FVFArrayDefinition ArrayDefinition;
+
+    FSeek(FVFNameOffset);
+    string FVFName <comment="Used directly to search in Shaders">;
+
 
 } FVFDefinition;

@@ -1,0 +1,40 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Names for each Mesh entry.
+
+typedef struct
+{
+    int NameOffset <format=hex, fgcolor=cRed>;
+    int MeshID;
+    
+    FSeek(NameOffset);
+    string Name;
+} MeshKey;
+
+typedef struct
+{
+    local int i = 0;
+    for (i = 0; i < Header.MeshKeyCount; i++)
+    {
+        FSeek(BasePos + Header.MeshKeysOffset + (i * 0x08));
+        MeshKey key <comment=PrintMeshKey>;
+    }
+} MeshKeys;
+
+string PrintMeshKey(MeshKey& meshKey)
+{
+    string str;
+    SPrintf(str, "%s (ID: %d)", meshKey.Name, meshKey.MeshID);
+    return str;
+}

@@ -1,0 +1,131 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    short StructDeclarationIndex;
+    short ElementBitLayoutDefinitionIndex;
+    short unk;
+    byte CountOfUnk;
+    byte unk;
+    int UnkOffset <format=hex, fgcolor=cRed>;
+    float unk;
+    int compOffset<format=hex, fgcolor=cRed>; // combine with countofunk
+    int unk;
+} Format;
+
+typedef struct
+{
+    int TotalBitCount;
+    ubyte XBitCount;
+    ubyte YBitCount;
+    ubyte ZBitCount;
+    ubyte WBitCount;
+    ubyte XBitEnd;
+    ubyte YBitEnd;
+    ubyte ZBitEnd;
+    ubyte WBitEnd;
+    short unk;
+    short unk;
+    float ScaleX;
+    float ScaleY;
+    float ScaleZ;
+    float ScaleW;
+    float OffsetX;
+    float OffsetY;
+    float OffsetZ;
+    float OffsetW;
+} ElementBitLayoutDefinition;
+
+typedef struct
+{
+    struct
+    {
+        char Magic[4];
+        int Version;
+        int RelocSize <format=hex>;
+        int RelocPtr;
+        short FormatCount_0x18;
+        short UnkCount_0x1C;
+        short ElementBitLayoutDefinitionArrayCount_0x20;
+        short StructDeclarationCount_0x24;
+        int FormatsOffset_0x18 <format=hex, fgcolor=cRed>;
+        int UnkOffset_0x1C <format=hex, fgcolor=cRed>;
+        int ElementBitLayoutDefinitionArraysOffset_0x20 <format=hex, fgcolor=cRed>;
+        int StructDeclarationsOffset_0x24 <format=hex, fgcolor=cRed>;
+        int UnkOffset_0x28;
+        int Unk;
+        int UnkOffset_0x30;
+
+        local int i = 0;
+        local int j = 0;
+        struct
+        {
+            for (i = 0; i < FormatCount_0x18; i++)
+            {
+                FSeek(BasePos + FormatsOffset_0x18 + (i * 0x30));
+                Format format;
+            }
+        } Formats;
+
+        struct
+        {
+            
+            for (i = 0; i < ElementBitLayoutDefinitionArrayCount_0x20; i++)
+            {
+                FSeek(BasePos + ElementBitLayoutDefinitionArraysOffset_0x20 + (i * 0x08));
+                struct
+                {
+                    int Length;
+                    int EntriesOffset <format=hex, fgcolor=cRed>;
+
+                    FSeek(BasePos + EntriesOffset + (j * 0x10));
+                    ElementBitLayoutDefinition layout[Length];
+
+                } ElementBitLayoutDefinitionArray;
+            }
+        } ElementBitLayoutDefinitions;
+
+        struct
+        {
+            for (i = 0; i < StructDeclarationCount_0x24; i++)
+            {
+                struct
+                {
+                    FSeek(BasePos + StructDeclarationsOffset_0x24 + (i * 0x10));
+                    byte ElementCount;
+                    byte ElementCount2;
+                    byte Unk;
+                    byte Stride;
+                    int unk;
+                    int offset;
+                    int ElementNamesArrayOffset <format=hex, fgcolor=cRed>;
+
+                    struct
+                    {
+                        FSeek(BasePos + ElementNamesArrayOffset);
+                        int NamesOffsets[ElementCount + ElementCount2];
+    
+                        for (j = 0; j < ElementCount + ElementCount2; j++)
+                        {
+                            FSeek(NamesOffsets[j]);
+                            String name;
+                        }
+                    } ElementNames;
+
+                } StructDeclaration;
+            }
+        } StructDeclarations;
+    } Header;
+
+} PMSH <comment="Replaces FVF stuff">;

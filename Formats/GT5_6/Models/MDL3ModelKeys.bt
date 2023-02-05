@@ -1,0 +1,42 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Names for each Model entry.
+
+typedef struct
+{
+    int NameOffset <format=hex, fgcolor=cRed>;
+    int ModelID;
+    
+    FSeek(NameOffset);
+    string Name;
+} ModelKey;
+
+typedef struct
+{
+    local int i = 0;
+    for (i = 0; i < Header.ModelKeyCount; i++)
+    {
+        FSeek(BasePos + Header.ModelKeysOffset + (i * 0x08));
+        ModelKey key <comment=PrintModelKey>;
+    }
+} ModelKeys;
+
+string PrintModelKey(ModelKey& model)
+{
+    string str;
+    SPrintf(str, "%s (ID: %d)", model.Name, model.ModelID);
+    return str;
+}
+
+

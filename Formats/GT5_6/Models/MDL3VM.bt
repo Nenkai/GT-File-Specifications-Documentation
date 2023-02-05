@@ -26,10 +26,80 @@
 
 typedef struct
 {
+    int NameOffset;
+    short SizeInts;
+    short StorageIndex;
+
+    FSeek(NameOffset);
+    string Name;
+} VMRegisterVal;
+
+typedef struct
+{
+    // For the full struct size:
+
+    byte header[0x40]; // 0x30 if version < 0x0c
+
+    // int stack1[mdl->short_at_0x14]
+    // 0x2C in header is pointer for this ^
+
+    // size_0x10_t stack2[(short)mdl->0xB8_Offset->0x1A_field] where stride is 0x10 so 4 = 0x40
+    // 0x0C in header is pointer for this ^
+    
+    // int stack3[mdl->short_at_0x14] - mdl->0xB8_Offset->0x1C_field might also be combined
+    // 0x14 in header is pointer to this
+    
+    // int stack4[mdl->VMVariablesCountAt0x1E]
+    // 0x10 in header is pointer to this
+} VMInstance;
+
+typedef struct
+{
+    for (i = 0; i < Header.HostMethodCount; i++)
+    {
+        FSeek(BasePos + Header.HostMethodsOffset + (i * 0x08));
+        VMRegisterVal var;
+        FSeek(FileSize());
+    }
+
+} VMRegisterVals;
+
+typedef struct
+{
+    short unkCount_0x08;
+    short unkCount_0x0C;
+    int offset_0x08 <format=hex, fgcolor=cRed>;
+    int offset_0x0C <format=hex, fgcolor=cRed>;
+    int UnkVMInsPtr;
+    int UnkVMInsPtr2;
+    int Offset0x14 <comment="0x10 Stride">;
+    short Count0x14;
+    short UnkCountUsedForVMStack2;
+    short UnkCountUsedForVMStack3;
+
+    for (i = 0; i < unkCount_0x08; i++)
+    {
+        FSeek(BasePos + offset_0x08 + (i * 0x10));
+        struct
+        {
+            int NameOffset;
+            short StackStorage2Index;
+            short MaterialID;
+            int c;
+            int d;
+
+            FSeek(BasePos + NameOffset);
+            string Name;
+        } a;
+    }
+
+} VMRelated;
+
+typedef struct
+{
     int VMOpCodeIndex1;
     int VMOpCodeIndex2;
     short UnkCount;
     short Empty;
     int UnkOffset;
-    int AA[4];
 } VMContext;

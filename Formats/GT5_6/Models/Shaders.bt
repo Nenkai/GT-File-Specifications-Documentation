@@ -13,116 +13,163 @@
 
 typedef struct
 {
-    int ShaderTargetNameOffset <bgcolor=cBlue, format=hex, fgcolor=cRed>;
-    short Unk <bgcolor=cBlue>;
-    short Unk <bgcolor=cBlue>;
-    short Index0x20 <bgcolor=cBlue, fgcolor=cYellow, comment="Index for 0x20 Map, used to search the 0x14 map inside it">;
-    short d <bgcolor=cBlue>;
+    int NameOffset <format=hex, fgcolor=cRed>;
+    int UnkID <comment="This is addressed by FVFs on top of the name search">;
+    short ProgramID;
+    short Shader0x24_or_0x2CEntry_ID;
 
-    FSeek(BasePos + ShaderTargetNameOffset);
+    //Printf("%d\n", UnkID);
+    FSeek(NameOffset);
     string Name;
-} ShadersIndexEntry;
-
+} ShaderDefinition;
 
 typedef struct
 {
-    int Offset0x00 <bgcolor=cLtRed, fgcolor=cRed>;
-    int Unk <bgcolor=cLtRed>;
-    short IndexEntry1Count <bgcolor=cLtRed, fgcolor=cGreen>;
-    short VertexShaderIndexCount <bgcolor=cLtRed, fgcolor=cGreen>;
-    short MatricesIndexCount <bgcolor=cLtRed, fgcolor=cGreen>;
-    short _pad_ <bgcolor=cLtRed>;
-    int IndexEntry1Offset <bgcolor=cLtRed, fgcolor=cRed, format=hex>;
-    int VertexShaderIndicesOffset <bgcolor=cLtRed, fgcolor=cRed, format=hex>;
-    int MatricesIndicesOffset <bgcolor=cLtRed, fgcolor=cRed, format=hex>;
-    int Offset0x1C <bgcolor=cLtRed, fgcolor=cRed, format=hex>;
-    short Unk <bgcolor=cLtRed>;
-    short Unk <bgcolor=cLtRed>;
-    int _pad_ <bgcolor=cLtRed>;
+    int NameOffset <format=hex, fgcolor=cRed>;
+    short unk <comment="Not seen in use">;
+    short unk2 <comment="Used for PMSH struct field entries, might be a bit offset?">;
+    int c;
+    int d;
 
+    FSeek(NameOffset);
+    string Name;
+
+    FSeek(FileSize());
+} Entry0x20_0x14 <comment="Referenced by each FVF field when searching, search happens by name">;
+
+local int maxx = -1;
+
+typedef struct
+{
+    int NameOffset <format=hex, fgcolor=cRed>;
+    short unk;
+    short unk2;
+    int c;
+    int d;
+
+    FSeek(NameOffset);
+    string Name;
+
+    FSeek(FileSize());
+} Entry0x20_0x18;
+
+typedef struct
+{
+    int CgVertexProgramOffset <format=hex, fgcolor=cRed, comment="ucode">;
+    int CgVertexProgramSize <format=hex>;
+    short Count_0x10 <fgcolor=cGreen>;
+    short Count_0x14 <fgcolor=cGreen>;
+    short Count_0x18 <fgcolor=cGreen>;
+    short empty;
+    int UnkOffset_0x10 <format=hex, fgcolor=cRed>;
+    int UnkOffset_0x14 <format=hex, fgcolor=cRed>; 
+    int UnkOffset_0x18 <format=hex, fgcolor=cRed>;
+    int UnkOffset_0x1C <format=hex, fgcolor=cRed>;
+    int unk9;
+    int unk10;
+
+    FSeek(CgVertexProgramOffset);
+    byte Data[CgVertexProgramSize];
+
+    FSeek(UnkOffset_0x14);
     local int j = 0;
-
-    if (Offset0x00 != 0)
+    for (j = 0; j < Count_0x14; j++)
     {
-        FSeek(BasePos + Offset0x00);
-        byte xfdf;
-    }
-    if (IndexEntry1Count > 0)
-    {
-        for (j = 0; j < IndexEntry1Count; j++)
-        {
-            FSeek(BasePos + IndexEntryOffset1 + (j * 0x10));
-            ShadersIndexEntry e2;
-        }
+        FSeek(UnkOffset_0x14 + (j * 0x10));
+        Entry0x20_0x14 entry_0x14;
     }
 
-    if (VertexShaderIndexCount > 0)
+    for (j = 0; j < Count_0x18; j++)
     {
-        for (j = 0; j < VertexShaderIndexCount; j++)
-        {
-            FSeek(BasePos + VertexShaderIndicesOffset + (j * 0x10));
-            ShadersIndexEntry vertexIndexEntry;
-        }
+        FSeek(UnkOffset_0x18 + (j * 0x10));
+        Entry0x20_0x18 entry_0x18;
     }
 
-    if (MatricesIndexCount > 0)
-    {
-        for (j = 0; j < MatricesIndexCount; j++)
-        {
-            FSeek(BasePos + MatricesIndicesOffset + (j * 0x10));
-            ShadersIndexEntry matrixIndexEntry;
-        }
-    }
-} ShadersUnkEntry0x20;
+} ShaderProgram;
 
 typedef struct
 {
-    int Offset0x00 <format=hex, fgcolor=cRed>;
-    int Unk;
-    short Index1EntryCount <fgcolor=cGreen>;
-    byte Index2EntryCount <fgcolor=cGreen>;
-    byte Index4EntryCount <fgcolor=cGreen>;
-    byte Index3EntryCount <fgcolor=cGreen>;
-    byte unk;
-    byte unk;
-    byte unk;
-    int Index1EntryOffset <format=hex, fgcolor=cRed>;
-    int Index2EntryOffset <format=hex, fgcolor=cRed>;
-    int Index3EntryOffset <format=hex, fgcolor=cRed>;
-    int Offset0x1C <format=hex, fgcolor=cRed>;
-    int Unk0x20 <comment="0x1C is set to that if 0">;
-    byte unks[0x14];
-    int Index4EntryOffset <format=hex, fgcolor=cRed>;
-    int UnkEmpty;
-    int UnkEmpty;
-    int Offset0x44 <format=hex, fgcolor=cRed>;
-
-    if (Index1EntryCount > 0)
+    int UnkCgData0ffset <format=hex, fgcolor=cRed>;
+    int UnkCgSize;
+    short UnkCount_0x10;
+    byte UnkCount_0x38;
+    byte UnkCount_0x14;
+    short UnkCount_0x18;
+    short unk;
+    int UnkOffset_0x10 <format=hex, fgcolor=cRed>;
+    int UnkOffset_0x14 <format=hex, fgcolor=cRed>;
+    int UnkOffset_0x18 <format=hex, fgcolor=cRed>;
+    int UnkOffset_0x1C <format=hex, fgcolor=cRed>;
+    int unk_[6];
+    int UnkOffset_0x38 <format=hex, fgcolor=cRed>;
+    int unk;
+    int unk;
+    int UnkOffset_0x44;
+    FSeek(UnkOffset_0x10);
+    local int j = 0;
+    for (j = 0; j < UnkCount_0x10; j++)
     {
-        FSeek(BasePos + IndexEntryOffset);
-        ShadersIndexEntry indexEntry;
+        FSeek(UnkOffset_0x10 + (j * 0x10));
+        Entry0x20_0x14 entry_0x10;
     }
 
-    if (Index2EntryCount > 0)
+    for (j = 0; j < UnkCount_0x14; j++)
     {
-        FSeek(BasePos + Index2EntryOffset);
-        ShadersIndexEntry indexEntry2;
+        FSeek(UnkOffset_0x14 + (j * 0x10));
+        Entry0x20_0x18 entry_0x14;
     }
 
-    if (Index3EntryCount > 0)
+    for (j = 0; j < UnkCount_0x18; j++)
     {
-        FSeek(BasePos + Index3EntryOffset);
-        ShadersIndexEntry indexEntry3;
+        FSeek(UnkOffset_0x18 + (j * 0x10));
+        Entry0x20_0x18 entry_0x18;
     }
 
-    if (Index4EntryCount > 0)
+    for (j = 0; j < UnkCount_0x38; j++)
     {
-        FSeek(BasePos + Index4EntryOffset);
-        ShadersIndexEntry indexEntry4;
+        FSeek(UnkOffset_0x38 + (j * 0x10));
+        Entry0x20_0x18 entry_0x38;
     }
-} ShadersUnkEntry0x2C;
 
-typedef struct SHDS (local int basePos)
+    FSeek(FileSize());
+} UnkProgram;
+
+typedef struct
+{
+
+    int NameOffset <format=hex, fgcolor=cRed>;
+    int b;
+    int c;
+    int UnkOffset_0x0C <format=hex, fgcolor=cRed>;
+    int e;
+    int f;
+    int g;
+    int h;
+    int j;
+    int k;
+
+    FSeek(NameOffset);
+    string Name <comment="Used for searching">;
+
+    FSeek(FileSize());
+} Entry0x3C;
+
+typedef struct
+{
+
+    int UnkOffset_0x00 <format=hex, fgcolor=cRed>;
+    int ProgramOffset_0x04 <format=hex, fgcolor=cRed>;
+    int ProgramSize_0x04 <format=hex>;
+    int unk <format=hex, fgcolor=cRed>;
+    int unk;
+    int unk;
+    int unk;
+    int unk;
+
+    FSeek(FileSize());
+} Entry0x40 <comment="Referenced by 0x78's entries (entry->0x00 (short)) in model set">;
+
+typedef struct SHDS
 {
     struct SHDSHeader
     {
@@ -132,11 +179,11 @@ typedef struct SHDS (local int basePos)
         int _empty;
         int Offset0x10;
         short Empty;
-        short IndexEntryCount <fgcolor=cGreen>;
-        short Count0x20 <fgcolor=cGreen>;
+        short ShaderDefinitionCount <fgcolor=cGreen>;
+        short ShaderProgramCount <fgcolor=cGreen>;
         short Count0x24_2c <fgcolor=cGreen>;
-        uint IndicesOffset <format=hex, fgcolor=cRed, comment="0x0C Stride, also used in MDL3 itself">;
-        uint Offset0x20 <format=hex, fgcolor=cRed, comment="0x28 Stride">;
+        uint ShaderDefinitionsOffset_0x1C <format=hex, fgcolor=cRed, comment="0x0C Stride, also used in MDL3 itself">;
+        uint ShaderProgramsOffset_0x20 <format=hex, fgcolor=cRed, comment="0x28 Stride">;
         uint Offset0x24 <format=hex, fgcolor=cRed, comment="0x28 Stride">;
         int RuntimeOffset;
         int Offset0x2C <format=hex, fgcolor=cRed, comment="0x48 Stride">;
@@ -147,46 +194,73 @@ typedef struct SHDS (local int basePos)
         uint Offset0x38 <format=hex, fgcolor=cRed, comment="0x10 Stride">;
         uint Offset0x3C <format=hex, fgcolor=cRed, comment="0x4 Stride">;
         uint Offset0x40 <format=hex, fgcolor=cRed, comment="0x20 Stride">;
-    } ShaderHeader <bgcolor=cPurple>;
+    } Header <bgcolor=cPurple>;
 
     local int i = 0;
-    if (ShaderHeader.IndicesOffset > 0)
+    if (Header.ShaderDefinitionCount > 0)
     {
         struct
         {
-            local int i = 0;
-            for (i = 0; i < ShaderHeader.IndexEntryCount; i++)
+            for (i = 0; i < Header.ShaderDefinitionCount; i++) 
             {
-                FSeek(BasePos + ShaderHeader.IndicesOffset + (i * 0x0C));
-                ShadersIndexEntry entry;
+                FSeek(Header.ShaderDefinitionsOffset_0x1C + (i * 0x0C));
+                ShaderDefinition def;
             }
-        } ShadersIndexEntryMap;
+        } ShaderDefinitions;
     }
 
-    if (ShaderHeader.Count0x20 > 0)
+    if (Header.ShaderProgramCount > 0)
     {
         struct
         {
-            for (i = 0; i < ShaderHeader.Count0x20; i++)
+            
+            for (i = 0; i < Header.ShaderProgramCount; i++) 
             {
-                FSeek(BasePos + ShaderHeader.Offset0x20 + (i * 0x28));
-                ShadersUnkEntry0x20 entry;
+                FSeek(Header.ShaderProgramsOffset_0x20 + (i * 0x28));
+                ShaderProgram programs;
             }
-        } ShadersUnkEntry;
+        } ShaderPrograms;
     }
 
-    if (ShaderHeader.Count0x24_2c > 0 && ShaderHeader.Offset0x2C != 0)
+    if (Header.Count0x24_2c > 0)
     {
-        FSeek(BasePos + ShaderHeader.Offset0x2C);
         struct
         {
-            local int i = 0;
-            for (i = 0; i < ShaderHeader.Count0x24_2c; i++)
+            
+            for (i = 0; i < Header.Count0x24_2c; i++) 
             {
-                FSeek(BasePos + ShaderHeader.Offset0x2C + (i * 0x48));
-                ShadersUnkEntry0x2C entry0x2C;
+                FSeek(Header.Offset0x2C + (i * 0x48));
+                UnkProgram prog;
             }
-        } ShadersUnkMap0x2C;
-        
+        } UnkPrograms;
+    }
+
+    if (Header.Count0x3C > 0)
+    {
+        struct
+        {
+            
+            for (i = 0; i < Header.Count0x3C; i++) 
+            {
+                FSeek(Header.Offset0x3C + (i * 4));
+                int offset <format=hex, fgcolor=cRed>;
+
+                FSeek(offset);
+                Entry0x3C entry;
+            }
+        } Entries0x3C;
+    }
+
+    if (Header.Count0x40 > 0)
+    {
+        struct
+        {
+            
+            for (i = 0; i < Header.Count0x40; i++) 
+            {
+                FSeek(Header.Offset0x40 + (i * 0x20));
+                Entry0x40 entry;
+            }
+        } Entries0x40;
     }
 } Shaders;
