@@ -13,15 +13,34 @@
 
 typedef enum <ubyte> 
 {
-    DXT10_MORTON = 0x85,
-    DXT1 = 0x86,
-    DXT1_2 = 0xA6,
-    DXT3 = 0x87,
-    DXT3_2 = 0xA7,
-    DXT5 = 0x88,
-    DXT5_2 = 0xA8,
-    DXT10 = 0xA5,
-} PixelFormat;
+    CELL_GCM_TEXTURE_B8						= 0x81,
+	CELL_GCM_TEXTURE_A1R5G5B5				= 0x82,
+	CELL_GCM_TEXTURE_A4R4G4B4				= 0x83,
+	CELL_GCM_TEXTURE_R5G6B5					= 0x84,
+	CELL_GCM_TEXTURE_A8R8G8B8				= 0x85,
+	CELL_GCM_TEXTURE_COMPRESSED_DXT1		= 0x86,
+	CELL_GCM_TEXTURE_COMPRESSED_DXT23		= 0x87,
+	CELL_GCM_TEXTURE_COMPRESSED_DXT45		= 0x88,
+	CELL_GCM_TEXTURE_G8B8					= 0x8B,
+	CELL_GCM_TEXTURE_R6G5B5					= 0x8F,
+	CELL_GCM_TEXTURE_DEPTH24_D8				= 0x90,
+	CELL_GCM_TEXTURE_DEPTH24_D8_FLOAT		= 0x91,
+	CELL_GCM_TEXTURE_DEPTH16				= 0x92,
+	CELL_GCM_TEXTURE_DEPTH16_FLOAT			= 0x93,
+	CELL_GCM_TEXTURE_X16					= 0x94,
+	CELL_GCM_TEXTURE_Y16_X16				= 0x95,
+	CELL_GCM_TEXTURE_R5G5B5A1				= 0x97,
+	CELL_GCM_TEXTURE_COMPRESSED_HILO8		= 0x98,
+	CELL_GCM_TEXTURE_COMPRESSED_HILO_S8		= 0x99,
+	CELL_GCM_TEXTURE_W16_Z16_Y16_X16_FLOAT	= 0x9A,
+	CELL_GCM_TEXTURE_W32_Z32_Y32_X32_FLOAT	= 0x9B,
+	CELL_GCM_TEXTURE_X32_FLOAT				= 0x9C,
+	CELL_GCM_TEXTURE_D1R5G5B5				= 0x9D,
+	CELL_GCM_TEXTURE_D8R8G8B8				= 0x9E,
+	CELL_GCM_TEXTURE_Y16_X16_FLOAT			= 0x9F,
+	CELL_GCM_TEXTURE_COMPRESSED_B8R8_G8R8	= 0xAD,
+	CELL_GCM_TEXTURE_COMPRESSED_R8B8_R8G8	= 0xAE,
+} CELL_GCM_TEXTURE_FORMAT;
 
 typedef enum <byte>
 {
@@ -77,48 +96,194 @@ typedef enum <byte>
 	CELL_GCM_TEXTURE_MAX_ANISO_16	= (7),
 } CELL_GCM_TEXTURE_MAX_ANISO;
 
+typedef enum <byte>
+{
+    CELL_GCM_LOCATION_LOCAL = 0,
+    CELL_GCM_LOCATION_MAIN = 1,
+} CELL_GCM_LOCATION;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_DIMENSION_1 = 1,
+    CELL_GCM_TEXTURE_DIMENSION_2 = 2,
+    CELL_GCM_TEXTURE_DIMENSION_3 = 3
+} CELL_GCM_TEXTURE_DIMENSION;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_ZFUNC_NEVER	= 0,
+	CELL_GCM_TEXTURE_ZFUNC_LESS		= 1,
+	CELL_GCM_TEXTURE_ZFUNC_EQUAL	= 2,
+	CELL_GCM_TEXTURE_ZFUNC_LEQUAL	= 3,
+	CELL_GCM_TEXTURE_ZFUNC_GREATER	= 4,
+	CELL_GCM_TEXTURE_ZFUNC_NOTEQUAL	= 5,
+	CELL_GCM_TEXTURE_ZFUNC_GEQUAL	= 6,
+	CELL_GCM_TEXTURE_ZFUNC_ALWAYS	= 7,
+} CELL_GCM_TEXTURE_ZFUNC;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_BORDER_TEXTURE = 0,
+    CELL_GCM_TEXTURE_BORDER_COLOR = 1,
+} CELL_GCM_TEXTURE_BORDER;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_UNSIGNED_REMAP_NORMAL,
+    CELL_GCM_TEXTURE_UNSIGNED_REMAP_BIASED,
+} CELL_GCM_TEXTURE_UNSIGNED_REMAP;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_REMAP_FROM_A = 0,
+	CELL_GCM_TEXTURE_REMAP_FROM_R = 1,
+	CELL_GCM_TEXTURE_REMAP_FROM_G = 2,
+	CELL_GCM_TEXTURE_REMAP_FROM_B = 3,
+} CELL_GCM_TEXTURE_REMAP_FROM;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_REMAP_ORDER_XYXY = 0,
+    CELL_GCM_TEXTURE_REMAP_ORDER_XXXY = 1,
+} CELL_GCM_TEXTURE_REMAP_ORDER;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_REMAP_ZERO,
+    CELL_GCM_TEXTURE_REMAP_ONE,
+    CELL_GCM_TEXTURE_REMAP_REMAP,
+} CELL_GCM_TEXTURE_REMAP_OUT;
+
+typedef enum <byte>
+{
+    CELL_GCM_FALSE = 0,
+    CELL_GCM_TRUE = 1,
+} CELL_GCM_BOOL;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_ISO_LOW,
+    CELL_GCM_TEXTURE_ISO_HIGH,
+} CELL_GCM_TEXTURE_ISO;
+
+typedef enum <byte>
+{
+    CELL_GCM_TEXTURE_ANISO_LOW,
+    CELL_GCM_TEXTURE_ANISO_HIGH,
+} CELL_GCM_TEXTURE_ANISO;
+
+string PrintFormat(ubyte& format)
+{
+    string str = "";
+    local CELL_GCM_TEXTURE_FORMAT actualFormat = format & 0b10011111;
+    SPrintf(str, "%s (0x%x)", EnumToString(actualFormat), actualFormat);
+
+    local int bit = (format >> 5) & 1;
+    str += bit != 0 ? " - CELL_GCM_TEXTURE_LN (Bit 6)" : " - CELL_GCM_TEXTURE_SZ (Bit 6)";
+
+    bit = (format >> 6) & 1;
+    str += bit != 0 ? " - CELL_GCM_TEXTURE_UN (Bit 5)" : " - CELL_GCM_TEXTURE_NR (Bit 5)";
+    return str;
+}
+
 typedef struct 
 {
     BitfieldDisablePadding();
-    uint head0;
-    uint offset;
-    byte pad0;
-    byte mipmap;
-    PixelFormat imageFormat;
+    struct
+    {
+        uint offset <format=hex, comment="Normally CELL_GCM_NV4097_SET_TEXTURE_OFFSET aka 0x1A00 + (index * 0x20)">;
+    } CELL_GCM_METHOD_HEADER_TEXTURE_OFFSET;
 
-    byte dim : 4;
-    byte noborder : 1;
-    byte cubemap : 1 <comment="whether cube map is enabled">;
-    byte location : 2 <comment="fragment program location, 1 = local memory, 2 = main memory">;
+    // CELL_GCM_METHOD_DATA_TEXTURE_OFFSET
+    struct
+    {
+        uint offset <format=hex>;
+    } CELL_GCM_METHOD_DATA_TEXTURE_OFFSET;
 
-    byte zfunc : 5;
-    byte gamma : 8;
-    byte signExt : 4;
-    byte unk : 3;
-    CELL_GCM_TEXTURE_WRAP wrap_t : 4 <comment="adjustment when the T coordinate exceeds the texture size">;
-    byte useAniso : 3;
-    CELL_GCM_TEXTURE_WRAP wrap_s : 5 <comment="adjustment when the S coordinate exceeds the texture size">;
+    struct
+    {
+        byte pad;
+        byte mipmap;
+        ubyte format : 8 <comment=PrintFormat>;
+        CELL_GCM_TEXTURE_DIMENSION dimension : 4;
+        CELL_GCM_TEXTURE_BORDER border : 1;
+        CELL_GCM_BOOL cubemap : 1 <comment="whether cube map is enabled">;
+        CELL_GCM_LOCATION location : 2 <comment="Remove 1. fragment program location, 0 = local memory, 1 = main memory">;
+    } CELL_GCM_METHOD_DATA_TEXTURE_BORDER_FORMAT;
+
+    struct
+    {
+        CELL_GCM_TEXTURE_ZFUNC zfunc : 4;
+        byte gamma : 8;
+        CELL_GCM_TEXTURE_WRAP wrap_r : 4;
+        CELL_GCM_TEXTURE_UNSIGNED_REMAP unsignedRemap : 4;
+        CELL_GCM_TEXTURE_WRAP wrap_t : 4 <comment="adjustment when the T coordinate exceeds the texture size">;
+        byte anisoBias : 4;
+        CELL_GCM_TEXTURE_WRAP wrap_s : 4 <comment="adjustment when the S coordinate exceeds the texture size">;
+    } CELL_GCM_METHOD_DATA_TEXTURE_ADDRESS;
+
+    struct
+    {
+        CELL_GCM_BOOL enable : 1 <comment="stipple polygon rendering">;
+        short minlod : 12;
+        short maxlod : 12;
+        CELL_GCM_TEXTURE_MAX_ANISO maxAniso : 3;
+        byte pad : 1;
+        CELL_GCM_BOOL alphakill : 1;
+        byte pad : 2;
+    } CELL_GCM_METHOD_DATA_TEXTURE_CONTROL0_ALPHA_KILL;
     
-    byte enable : 1 <comment="stipple polygon rendering">;
-    short lodMin : 12;
-    short lodMax : 12;
-    CELL_GCM_TEXTURE_MAX_ANISO maxAniso : 3;
-    byte pad1 : 4;
-    
-    int remap;
+    struct
+    {
+        int pad : 15;
+        CELL_GCM_TEXTURE_REMAP_ORDER remapOrder : 1;
+        CELL_GCM_TEXTURE_REMAP_OUT OutB : 2;
+        CELL_GCM_TEXTURE_REMAP_OUT OutG : 2;
+        CELL_GCM_TEXTURE_REMAP_OUT OutR : 2;
+        CELL_GCM_TEXTURE_REMAP_OUT OutA : 2;
+        CELL_GCM_TEXTURE_REMAP_FROM InB : 2;
+        CELL_GCM_TEXTURE_REMAP_FROM InG : 2;
+        CELL_GCM_TEXTURE_REMAP_FROM InR : 2;
+        CELL_GCM_TEXTURE_REMAP_FROM InA : 2;
+    } CELL_GCM_METHOD_DATA_TEXTURE_CONTROL1;
 
-    byte signedARGB : 5;
-    CELL_GCM_TEXTURE_MAG mag : 3 <comment="filter type for texture reduction">;
-    CELL_GCM_TEXTURE_MIN min : 8 <comment="filter type for texture enlargement">;
-    CELL_GCM_TEXTURE_CONVOLUTION convultion : 3 <comment="convolution filter formula">;
-    short lodBias : 12 <comment="bias value for mipmap level in texture reductions">;
+    struct
+    {
+        CELL_GCM_BOOL bs : 1;
+        CELL_GCM_BOOL gs : 1;
+        CELL_GCM_BOOL rs : 1;
+        CELL_GCM_BOOL as : 1;
+        CELL_GCM_TEXTURE_MAG mag : 4 <comment="filter type for texture reduction">;
+        CELL_GCM_TEXTURE_MIN min : 8 <comment="filter type for texture enlargement">;
+        CELL_GCM_TEXTURE_CONVOLUTION convultion : 3 <comment="convolution filter formula">;
+        short bias : 13 <comment="bias value for mipmap level in texture reductions">;
+    } CELL_GCM_METHOD_DATA_TEXTURE_FILTER_SIGNED;
 
-    ushort Width;
-    ushort Height;
-    uint borderColor;
-    uint head1;
-    uint depth : 12;
-    uint pitch : 20;
+    struct
+    {
+        ushort width;
+        ushort height;
+    } CELL_GCM_METHOD_DATA_TEXTURE_IMAGE_RECT;
+
+    struct
+    {
+        uint borderColor;
+    } CELL_GCM_METHOD_DATA_TEXTURE_BORDER_COLOR;
+
+    struct
+    {
+        int pad : 24;
+        CELL_GCM_TEXTURE_ANISO aniso : 1;
+        CELL_GCM_TEXTURE_ISO iso : 1;
+        uint slope : 6;
+    } CELL_GCM_METHOD_DATA_TEXTURE_CONTROL2;
+
+    struct
+    {
+        uint depth : 12;
+        uint pitch : 20;
+    } CELL_GCM_METHOD_DATA_TEXTURE_CONTROL3;
+
     uint reserved0;
     uint reserved1;
     uint what6;
@@ -134,7 +299,7 @@ typedef struct
     }
     FSeek(cPos);
 
-} ImageMetadata <bgcolor=cYellow, optimize=false>;
+} PGLUTextureInfo <bgcolor=cYellow, optimize=false>;
 
 typedef struct 
 {
@@ -167,7 +332,7 @@ typedef struct
     uint ImageOffset <format=hex, fgcolor=cRed>;
     uint ImageSize <format=hex>;
     byte _two_; // 0x20 flag when running
-    PixelFormat ImageFormat;
+    ubyte ImageFormat : 8 <comment=PrintFormat>;
     byte MipmapCount;
     byte _two2_;
     ushort ImageWidth;
@@ -191,11 +356,6 @@ typedef struct
 
 typedef struct (int arrSize)
 {
-    ImageMetadata images[arrSize];
-} ImageMetadataMap;
-
-typedef struct (int arrSize)
-{
     ImageData images[arrSize];
 } ImageDataMap <bgcolor=cDkGreen>;
 
@@ -209,18 +369,18 @@ struct TXS3 {
 
     uint FileSize <format=hex>;
     uint BaseFilePos <format=hex>;
-    uint Unk1;
+    uint HeaderSizeMaybe;
     uint Unk2 <comment="Related to UnkOffset">;
-    ushort TextureRenderParamCount;
+    ushort PGLUTextureInfoCount;
     ushort TexturemageInfoCount;
-    uint TextureRenderParamOffset <format=hex, fgcolor=cRed>;
+    uint PGLUTextureInfoOffset <format=hex, fgcolor=cRed>;
     uint TextureInfoOffset <format=hex, fgcolor=cRed>;
 
     int UnkOffset <format=hex>;
 
-    FSeek(TextureRenderParamOffset);
-    ImageMetadataMap imageMetas(TextureRenderParamCount);
+    FSeek(PGLUTextureInfoOffset);
+    PGLUTextureInfo textureInfos[PGLUTextureInfoCount];
 
     FSeek(TextureInfoOffset);
     ImageDataMap data(TexturemageInfoCount);
-} txs3;
+} TextureSet3;
