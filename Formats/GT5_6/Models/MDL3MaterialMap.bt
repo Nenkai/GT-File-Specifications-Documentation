@@ -11,7 +11,7 @@
 //   History: 
 //------------------------------------------------
 
-#include "TXS3.bt"
+#include "TXS3_TextureSet3.bt"
 
 BitfieldDisablePadding();
 
