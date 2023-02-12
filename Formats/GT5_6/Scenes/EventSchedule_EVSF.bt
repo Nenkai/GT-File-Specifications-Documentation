@@ -1,0 +1,101 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    byte AttributeID;
+    byte OffsetToData;
+    byte OffsetToNext;
+    byte Unk;
+
+    if (OffsetToNext > 5)
+        byte AttributeData[OffsetToNext - 4];
+} AttributeInfo;
+
+local int cPos;
+local int dBasePos;
+
+typedef struct ObjectData (int attrCount)
+{
+    for (j = 0; j < attrCount; j++)
+    {
+        dBasePos = FTell();
+        struct ObjectEntry
+        {
+            char Name[4] <fgcolor=cPurple>;
+            short Unk;
+            byte NextObjectOffset <format=hex, fgcolor=cRed>;
+            byte AttributeCount <fgcolor=cGreen>;
+
+            cPos = FTell();
+
+            local int k;
+            for (k = 0; k < AttributeCount; k++)
+            {
+                cPos = FTell();
+                AttributeInfo attribute;
+    
+                //FSeek(cPos + attribute.OffsetToNext);
+            }
+    
+        } Entries;
+
+        FSeek(dBasePos + Entries[j].NextObjectOffset);
+    }
+};
+
+typedef struct
+{
+    local int basePos = FTell();
+    short DataOffset <fgcolor=cRed>;
+    short AttributeCount <fgcolor=cGreen>;
+    short Data2Offset <format=hex, fgcolor=cRed>;
+    short Attribute2Count;
+    short Unk;
+    short UnkCount;
+    short Unks[UnkCount];
+
+    local int j = 0;
+
+    FSeek(basePos + DataOffset);
+    ObjectData Init(AttributeCount);
+
+    FSeek(basePos + Data2Offset);
+    ObjectData Setup(Attribute2Count);
+} EventObject;
+
+struct EVS
+{
+    struct Header
+    {
+        char Magic[4];
+        int Unk;
+        short Minus2 <comment="Must be -2, explicitly checked">;
+        short a;
+        int DataPtr <format=hex, fgcolor=cRed>;
+        short ElementCount;
+        short __pad__;
+    } header <bgcolor=cPurple>;
+
+    int ObjectsOffsets[header.ElementCount] <format=hex, bgcolor=cBlue, fgcolor=cRed>;
+
+    local int i = 0;
+    for (i = 0; i < header.ElementCount; i++)
+    {
+        FSeek(ObjectsOffsets[i]);
+        EventObject objs;
+    }
+
+} EventScheduler;
