@@ -1,0 +1,67 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+typedef struct
+{
+    short CharCode;
+    short TextureID;
+    short X;
+    short Y;
+    short Width;
+    short Height;
+    int IsFlag;
+} LogoDef;
+
+typedef struct
+{
+    int64 NameOffset <format=hex, fgcolor=cRed>;
+    int64 CharCode;
+
+    FSeek(NameOffset);
+    string Name;
+} LogoNameInfo;
+
+struct LogoImageFont2
+{
+    struct
+    {
+        char Magic[4];
+        int TextureSetCount;
+        int LogoCount;
+        int LogoNameInfoCount;
+        int MainTextureSetOffset <format=hex, fgcolor=cRed>;
+        int unk <format=hex, fgcolor=cRed>;
+        int64 TextureSetOffsetsOffset <format=hex, fgcolor=cRed>;
+        int64 LogosOffset <format=hex, fgcolor=cRed>;
+        int64 LogoNameInfoOffset <format=hex, fgcolor=cRed>;
+    } Header;
+
+    FSeek(Header.TextureSetOffsetsOffset);
+    int64 TextureOffsets[Header.TextureSetCount] <format=hex, fgcolor=cRed>;
+
+    FSeek(Header.LogosOffset);
+    LogoDef logos[Header.LogoCount];
+
+    local int i = 0;
+
+    struct
+    {
+        for (i = 0; i < Header.LogoNameInfoCount; i++)
+        {
+            FSeek(Header.LogoNameInfoOffset + (i * 0x10));
+            LogoNameInfo logoNames;
+        }
+    } LogoNames;
+} LIF2;
