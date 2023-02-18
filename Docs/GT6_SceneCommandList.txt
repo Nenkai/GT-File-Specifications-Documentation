@@ -526,7 +526,10 @@ setScreenShotDivision
 setScreenShotSubFrame
 setScreenShotShutterSpeed
 setScreenShotDirectMode
-setScreenShotImageFormat
+
+setScreenShotImageFormat [type]
+0 = JPG, 1 = PNG, 2 = PNG, 3 = PPM, 4 = MPO
+
 setScreenShotImageHDR
 setScreenShotImageQuality
 resetScreenShotSetting
