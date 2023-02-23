@@ -49,7 +49,8 @@ typedef struct
 #include "MDL3VM.bt"
 #include "MDL3VMCommands.bt"
 #include "MDL3ShapeStreaming.bt"
-#include "Shaders.bt"
+#include "MDL3SeparateCarData.bt"
+#include "SHDS_Shaders.bt"
 #include "PMSH.bt"
 
 typedef struct
@@ -78,7 +79,6 @@ typedef struct
     int empty[3];
     int UnkOffset <format=hex, fgcolor=cRed>;
 } Unk0x74;
-    
 
 struct MDL3
 {   
@@ -138,10 +138,10 @@ struct MDL3
        ushort ImageMetadataKeyMapCount <fgcolor=cGreen>;
        uint ImageMetadataKeyMapOffset <format=hex, fgcolor=cRed, comment="0x8 Stride">;
        uint PossiblyEmpty;
-       ushort Count0x9C <comment="If VersionMajor < 7">;
-       ushort Count0xA0;
-       uint Offset0x9C <format=hex, fgcolor=cRed, comment="If VersionMajor < 7, 0x80 Stride">;
-       uint Offset0xA0 <format=hex, fgcolor=cRed, comment="0x8 Stride">;
+       ushort WingDataCount <comment="If VersionMajor < 7">;
+       ushort WingKeyCount;
+       uint WingDataOffset <format=hex, fgcolor=cRed, comment="If VersionMajor < 7, 0x80 Stride">;
+       uint WingKeysOffset <format=hex, fgcolor=cRed, comment="0x8 Stride">;
        uint Offset0xA4 <format=hex, fgcolor=cRed, comment="0x4 Stride">;
        uint PossiblyEmpty;
        uint ShapeStreamingMapOffset <format=hex, fgcolor=cRed, comment="If VersionMajor > 1, always 1 entry, Stride 0x20">;
@@ -223,7 +223,7 @@ struct MDL3
     }
 
     FSeek(BasePos + Header.TextureSetOffset);
-    TextureSet3 TextureSet;
+    //TextureSet3 TextureSet;
 
     if (Header.ShadersOffset != 0) 
     {
@@ -233,7 +233,7 @@ struct MDL3
 
     if (Header.Count0x54 > 0)
     {
-        FSeek(BasePos + Header.UnkKeyMap0x54 + (i * sizeof(uint)));
+        FSeek(BasePos + Header.UnkKeyMap0x54);
         KeyDef def <comment="Seemingly not used">;
     }
 
@@ -286,10 +286,69 @@ struct MDL3
         UnkMap0xAC ShapeStreamingMap;
     }
 
-    FSeek(Header.Offset0xB8);
+    FSeek(BasePos + Header.Offset0xB8);
     VMRelated v;
 
-    FSeek(Header.PMSHOffset);
+    FSeek(BasePos + Header.PMSHOffset);
     PMSH pmsh;
         
+    if (Header.WingDataCount > 0)
+    {
+        FSeek(BasePos + Header.WingDataOffset);
+        struct
+        {
+            int a;
+            short PreviousWingPartID;
+            short ChildWingPartID;
+            short NextWingPartID;
+            short e;
+            short f;
+            short g;
+            float Min1;
+            float Min2;
+            float Min3;
+            float Max1;
+            float Max2;
+            float Max3;
+            float AngleMin1;
+            float AngleMin2;
+            float AngleMin3;
+            float AngleMax1;
+            float AngleMax2;
+            float AngleMax3;
+            float Pitch;
+            float Yaw;
+            float Roll;
+            float a;
+            float X;
+            float Y;
+            float Z;
+            float WholePitch;
+            float WholeYaw;
+            float WholeRoll;
+            short UnkUnusedID1;
+            short BoneID;
+            int UnkUnusedID2;
+            int UnkUnusedID3;
+            int UnkUnusedID4;
+            int unk;
+            int unk;
+        } WingData[Header.WingDataCount];
+    }
+
+    if (Header.CarBodyStreamOffset != 0)
+    {
+        FSeek(BasePos + Header.CarBodyStreamOffset);
+        SeparateCarData StreamData;
+    }
+
+    /*
+    int count;
+    short a;
+    short b;
+    int offset;
+
+    FSeek(offset);
+    int name;
+    */
 } mdl3;

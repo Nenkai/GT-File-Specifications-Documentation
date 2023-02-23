@@ -175,7 +175,7 @@ typedef struct
             short UnkCount <bgcolor=cLtGray>;
             short UnkCount2 <bgcolor=cLtGray>;
             int UnkOffset <format=hex, fgcolor=cRed, bgcolor=cLtGray>;
-            int TypeOrVersion <bgcolor=cLtGray>;
+            int KeyCount <bgcolor=cLtGray>;
             int KeyOffset <format=hex, fgcolor=cRed, bgcolor=cLtGray>;
 
             FSeek(BasePos + StringOffset);
@@ -220,6 +220,7 @@ typedef struct
     }
 } MaterialData;
 
+
 typedef struct
 {
     ushort MaterialCount <fgcolor=cGreen>;
@@ -243,76 +244,98 @@ typedef struct
     } MaterialDefinitions;
 
     local int cPos = FTell();
-    struct
+    if (MaterialDataCount_0x0C > 0)
     {
-        for (j = 0; j < MaterialDataCount_0x0C; j++)
+        struct
         {
-            FSeek(BasePos + MaterialDataOffset_0x0C + (j * 0x28));
-            MaterialData entry;
-        
-            FSeek(cPos);
-        }
-    } MaterialDataEntries;
+            for (j = 0; j < MaterialDataCount_0x0C; j++)
+            {
+                FSeek(BasePos + MaterialDataOffset_0x0C + (j * 0x28));
+                MaterialData entry;
+            
+                FSeek(cPos);
+            }
+        } MaterialDataEntries;
+    }
 
     cPos = FTell();
 
     FSeek(BasePos + CellGcmParamsOffset_0x10);
+
+#define	CELL_GCM_NV4097_SET_SURFACE_CLIP_VERTICAL	(0x00000204)
+#define	CELL_GCM_NV4097_SET_ALPHA_TEST_ENABLE	(0x00000304)
+#define	CELL_GCM_NV4097_SET_DEPTH_FUNC	(0x00000a6c)
+#define	CELL_GCM_NV4097_SET_CULL_FACE_ENABLE	(0x0000183c)
+
     struct
     {
-        
-    
-        int unk;
-        int unk2;
+        struct
+        {
+            CELL_GCM_METHOD method;
+            int enable;
+        } CELL_GCM_METHOD_SET_ALPHA_TEST_ENABLE;
+
         CELL_GCM_ENUM AlphaFunc;
-        int unk;
+        int AlphaFuncReference <format=hex>;
+
         CELL_GCM_ENUM BlendEnable;
         CELL_GCM_ENUM BlendFuncSfColor : 16;
         CELL_GCM_ENUM BlendFuncDfColor : 16;
         CELL_GCM_ENUM BlendFuncSfAlpha : 16;
         CELL_GCM_ENUM BlendFuncDfAlpha : 16;
-        int unk;
-
+        int BlendColor <format=hex>;
         CELL_GCM_ENUM BlendEquationColor : 16;
         CELL_GCM_ENUM BlendEquationAlpha : 16;
-        CELL_GCM_ENUM unk : 8;
-        CELL_GCM_ENUM unk : 8;
-        CELL_GCM_ENUM unk : 8;
-        CELL_GCM_ENUM unk : 8;
+
+        struct
+        {
+            byte CELL_GCM_COLOR_MASK_A;
+            byte CELL_GCM_COLOR_MASK_R;
+            byte CELL_GCM_COLOR_MASK_G;
+            byte CELL_GCM_COLOR_MASK_B;
+        } ColorMask;
     
-        int unk;
-        int unk;
-        CELL_GCM_ENUM BackStencilFunc;
-        CELL_GCM_ENUM BackStencilFuncRef;
-        CELL_GCM_ENUM BackStencilMask;
-        CELL_GCM_ENUM BackStencilOpFail;
-        CELL_GCM_ENUM BackStencilOpZFail;
-        CELL_GCM_ENUM BackStencilOpZPass;
-        int unk;
-        int unk;
-    
-        CELL_GCM_ENUM StencilFunc;
-        int StencilFuncRef;
+        int StencilTest;
         int StencilMask;
+        CELL_GCM_ENUM StencilFunc;
+        CELL_GCM_ENUM StencilFuncRef;
+        CELL_GCM_ENUM StencilFuncMask;
         CELL_GCM_ENUM StencilOpFail;
         CELL_GCM_ENUM StencilOpZFail;
         CELL_GCM_ENUM StencilOpZPass;
-        CELL_GCM_ENUM ShadeMode;
-        int unk;
-    
-        int unk;
-        int unk;
-        CELL_GCM_ENUM LogicOp;
-        int unk;
-        CELL_GCM_ENUM unk_;
-        
-        int unk_ : 24;
-        byte unk;
-        int unk_ : 24;
-        byte unk;
 
-        int unk;
-        int unk_ : 24;
-        byte unk;
+        int TwoSidedStencilTestEnable;
+        int BackStencilMask;
+        CELL_GCM_ENUM BackStencilFunc;
+        int BackStencilFuncRef;
+        int BackStencilFuncMask;
+        CELL_GCM_ENUM BackStencilOpFail;
+        CELL_GCM_ENUM BackStencilOpZFail;
+        CELL_GCM_ENUM BackStencilOpZPass;
+
+        CELL_GCM_ENUM ShadeMode; // SetShadeMode
+
+        int BlendEnableMRT;
+        int ColorMaskMRT; // SetColorMaskMrt
+
+        CELL_GCM_ENUM LogicOpEnable;
+        CELL_GCM_ENUM LogicOp;
+
+        struct
+        {
+            CELL_GCM_METHOD method;
+            CELL_GCM_ENUM depth_func;
+        } CELL_GCM_METHOD_SET_DEPTH_FUNC;
+        
+        CELL_GCM_ENUM DepthMask;
+        CELL_GCM_ENUM DepthTestEnable;
+
+        struct
+        {
+            CELL_GCM_METHOD method;
+            int enable;
+        } CELL_GCM_METHOD_SET_CULL_FACE_ENABLE;
+
         int unk;
     
         byte unk : 4;
@@ -321,9 +344,8 @@ typedef struct
         byte unk;
         short unk;
 
-        int unk_ : 24;
-        byte unk;
-    } CellGcmParams[CellGcmParamCount_0x10];
+        int unk;
+    } CellGcmParams[CellGcmParamCount_0x10] <comment="Order is heavily inspired from cell\gcm\gcm_macros.h">;
     
     FSeek(FileSize());
 
