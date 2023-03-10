@@ -1,0 +1,92 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: GT Database Table
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: Car Specification Database Table with or without Huffman Compression
+//  Category: 
+// File Mask: 
+//  ID Bytes: 47 54 44 42
+//   History: 
+//------------------------------------------------
+
+BitfieldDisablePadding();
+LittleEndian();
+
+struct
+{
+    struct
+    {
+        char Magic[4] <comment="GT Database Table">;
+        short VersionHigh <comment="If has 0x01 flag, the whole table is uncompressed - anything else not used">;
+        
+        switch (VersionHigh)
+        {
+            case 0x0500:
+            case 0x0700:
+            case 0x0800:
+            case 0x0801:
+                BigEndian();
+                break;
+        }
+
+        short VersionLow <comment="Not used">;
+        int RowCount;
+        int RowDataLength;
+    } Header <bgcolor=cPurple>;
+
+    if ((Header.VersionHigh & 0x01) || 
+        (Header.VersionHigh & 0x100)) /* < Ignore this, just big endian check */
+    {
+        struct
+        {
+            int RowID;
+            int EntryHuffmanCodesOffset <format=hex, fgcolor=cRed, comment="Relative to huffman codes offset">;
+        } RowIDToDataOffset[Header.RowCount];
+    
+        int HuffmanDictionarySize <format=hex, fgcolor=cYellow>;
+        int HuffmanCodeDictionaryEntryCount <fgcolor=cGreen>;
+    
+        if (HuffmanCodeDictionaryEntryCount)
+            short HuffmanPrefixTree[0x100] <comment="Used to look up codes that are less than 8 bits">;
+        struct
+        {
+            ubyte CodeBitSize <comment="Bit size of the code, should be less than 8 bits. Used to indicate how many bits to skip">;
+            ubyte Data <format=hex, comment="Byte data">;
+            FSkip(2);
+            uint HuffmanCode <comment="Fits within bit size">;
+        } HuffmanCodeDefinition[HuffmanCodeDictionaryEntryCount] <comment="Sorted by bit location, then search index for bsearch, important">;
+    
+        int TotalRawRowDataSize <format=hex, fgcolor=cYellow, comment="Size with header of the uncompressed rows">;
+        int RawRowDataCount <fgcolor=cGreen, comment="Count of uncompressed rows, no more than 64 (6 bits)">;
+        struct
+        {
+            byte data[Header.RowDataLength];
+        } RawRowData[RawRowDataCount] <comment="Raw rows, may be used as base rows for patching into other ones">;
+    
+        /* Will always be:
+           - 1 byte - Code count
+           - Code[] - first code is the type of compression, and row index
+               - type 0 = use raw
+               - type 1 = compressed, use following codes for each row byte
+               - type 2 = compressed, use a base row and patch its bytes, use following codes for each next byte
+                 there will be 1 bit for each row byte for whether to patch it, then aligned to next byte, 
+                 then codes for each byte data to patch 
+        */
+        byte EncodedHuffmanCodesForRows[FileSize() - FTell()] <comment="See template source comment">;
+    }
+    else
+    {
+        struct
+        {
+            int RowID;
+            int RowDataOffsetRelative <format=hex, fgcolor=cRed, comment="Relative to row data offset">;
+        } RowIDToDataOffset[Header.RowCount];
+
+        struct
+        {
+            byte Data[Header.RowDataLength];
+        } RowData[Header.RowCount];
+    }
+} DBT;
