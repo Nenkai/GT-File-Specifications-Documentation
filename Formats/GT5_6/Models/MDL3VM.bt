@@ -77,9 +77,10 @@ typedef struct
     short UnkCountUsedForVMStack2;
     short UnkCountUsedForVMStack3;
 
-    for (i = 0; i < unkCount_0x08; i++)
+    local int x;
+    for (x = 0; x < unkCount_0x08; x++)
     {
-        FSeek(BasePos + offset_0x08 + (i * 0x10));
+        FSeek(BasePos + offset_0x08 + (x * 0x10));
         struct
         {
             int NameOffset;

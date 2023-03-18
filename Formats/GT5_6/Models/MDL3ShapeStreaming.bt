@@ -14,62 +14,62 @@
 typedef struct
 {
     int Flag <comment="0, 0x248, 0x24C">;
-    int ShapeStreamDataOffset <format=hex, fgcolor=cPurple>;
-    int ShapeStreamDataSize <format=hex, fgcolor=cGreen>;
-    int UnkOffset0x10 <format=hex, fgcolor=cRed>;
-    short UnkCount0x10 <fgcolor=cGreen>;
+    int DeflatedChunkOffset <format=hex, fgcolor=cPurple>;
+    int DeflatedChunkSize <format=hex, fgcolor=cGreen>;
+    int MeshDescriptorsOffset <format=hex, fgcolor=cRed>;
+    short MeshCountInChunk <fgcolor=cGreen>;
     byte _pad_[0x0E] <fgcolor=cGray>;
 
-    FSeek(BasePos + UnkOffset0x10);
+    FSeek(BasePos + MeshDescriptorsOffset);
     struct
     {
-        uint OffsetWithinShapeStream <fgcolor=cRed>;
+        uint OffsetWithinShapeStream <format=hex, fgcolor=cRed>;
         short MeshIndex <fgcolor=cYellow>;
         short Unk;
-    } ShapeStreamMeshEntry[UnkCount0x10];
+    } ShapeStreamChunkMeshEntry[MeshCountInChunk];
     
-} ShapeStreamOffsetEntry;
+} ShapeStreamChunkInfo;
 
 typedef struct
 {
-    int IndicesOffset <format=hex, fgcolor=cRed>;
-    short IndicesCount;
+    int ChunkIndicesOffset <format=hex, fgcolor=cRed>;
+    short IndexCount;
     byte _empty_2[0x0A];
 
-    FSeek(BasePos + IndicesOffset);
-    int ShapeStreamIndices[IndicesCount]  <comment="To First Map">;
-} UnkMap0xACEntry2;
+    FSeek(BasePos + ChunkIndicesOffset);
+    int ChunkIndices[IndexCount]  <comment="To First Map">;
+} ShapeStreamChunkGroup;
 
 
 typedef struct
 {
-    int ShapeStreamInfoCount <fgcolor=cGreen>;
-    int ShapeStreamInfoOffset <format=hex, fgcolor=cRed>;
-    int Unk <fgcolor=cGreen>;
-    int UnkOffset0x0C <format=hex, fgcolor=cRed>;
+    int ShapeStreamChunkCount <fgcolor=cGreen>;
+    int ShapeStreamChunkInfoOffset <format=hex, fgcolor=cRed>;
+    int BufferSize <format=hex, fgcolor=cGreen, comment="Should be always 0x80 aligned">;
+    int ShapeStreamChunkGroupsOffset <format=hex, fgcolor=cRed>;
     int _empty_[3];
-    short Count0x0C <fgcolor=cGreen>;
+    short ShapeStreamChunkGroupCount <fgcolor=cGreen>;
     short a;
 
     local int n = 0;
     struct
     {
         local int n = 0;
-        for (n = 0; n < ShapeStreamInfoCount; n++)
+        for (n = 0; n < ShapeStreamChunkCount; n++)
         {
-            FSeek(BasePos + ShapeStreamInfoOffset + (n * 0x20));
-            ShapeStreamOffsetEntry shapeStreamEntry;
+            FSeek(BasePos + ShapeStreamChunkInfoOffset + (n * 0x20));
+            ShapeStreamChunkInfo Chunk;
         }
-    } ShapeStreamOffsetMap;
+    } ShapeStreamChunks;
 
     struct
     {
         local int n = 0;
-        for (n = 0; n < Count0x0C; n++)
+        for (n = 0; n < ShapeStreamChunkGroupCount; n++)
         {
-            FSeek(BasePos + UnkOffset0x0C + (n * 0x10));
-            UnkMap0xACEntry2 entries2;
+            FSeek(BasePos + ShapeStreamChunkGroupsOffset + (n * 0x10));
+            ShapeStreamChunkGroup Groups;
         }
-    } UnkMap0xAC_Map0x0C;
+    } ShapeStreamChunkGroups;
     
-} UnkMap0xAC;
+} ShapeStreaming;

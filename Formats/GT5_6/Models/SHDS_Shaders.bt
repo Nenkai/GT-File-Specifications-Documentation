@@ -11,10 +11,12 @@
 //   History: 
 //------------------------------------------------
 
+#include "RSXShaders.bt"
+
 typedef struct
 {
     int NameOffset <format=hex, fgcolor=cRed>;
-    int UnkID <comment="This is addressed by FVFs on top of the name search">;
+    int ShaderID <comment="This is addressed by FVFs on top of the name search">;
     short ProgramID;
     short Shader0x24_or_0x2CEntry_ID;
 
@@ -27,7 +29,7 @@ typedef struct
 {
     int NameOffset <format=hex, fgcolor=cRed>;
     short unk <comment="Not seen in use">;
-    short unk2 <comment="Used for PMSH struct field entries, might be a bit offset?">;
+    SrcReg unk2 <comment="Used for PMSH struct field entries, might be a bit offset?">;
     int c;
     int d;
 
@@ -51,12 +53,12 @@ typedef struct
     string Name;
 
     FSeek(FileSize());
-} Entry0x20_0x18;
+} ShaderConstSource;
 
 typedef struct
 {
-    int CgVertexProgramOffset <format=hex, fgcolor=cRed, comment="ucode">;
-    int CgVertexProgramSize <format=hex>;
+    int RSXVertexProgramOffset <format=hex, fgcolor=cRed, comment="ucode">;
+    int RSXVertexProgramSize <format=hex>;
     short Count_0x10 <fgcolor=cGreen>;
     short Count_0x14 <fgcolor=cGreen>;
     short Count_0x18 <fgcolor=cGreen>;
@@ -68,10 +70,9 @@ typedef struct
     int unk9;
     int unk10;
 
-    FSeek(CgVertexProgramOffset);
-    byte Data[CgVertexProgramSize];
+    FSeek(BasePos + RSXVertexProgramOffset);
+    RSXVertexProgram vertexProgram;
 
-    FSeek(UnkOffset_0x14);
     local int j = 0;
     for (j = 0; j < Count_0x14; j++)
     {
@@ -82,7 +83,7 @@ typedef struct
     for (j = 0; j < Count_0x18; j++)
     {
         FSeek(BasePos + UnkOffset_0x18 + (j * 0x10));
-        Entry0x20_0x18 entry_0x18;
+        ShaderConstSource constSource;
     }
 
 } ShaderProgram;
@@ -105,7 +106,7 @@ typedef struct
     int unk;
     int unk;
     int UnkOffset_0x44;
-    FSeek(UnkOffset_0x10);
+
     local int j = 0;
     for (j = 0; j < UnkCount_0x10; j++)
     {
@@ -116,19 +117,19 @@ typedef struct
     for (j = 0; j < UnkCount_0x14; j++)
     {
         FSeek(BasePos + UnkOffset_0x14 + (j * 0x10));
-        Entry0x20_0x18 entry_0x14;
+        ShaderConstSource entry_0x14;
     }
 
     for (j = 0; j < UnkCount_0x18; j++)
     {
         FSeek(BasePos + UnkOffset_0x18 + (j * 0x10));
-        Entry0x20_0x18 entry_0x18;
+        ShaderConstSource entry_0x18;
     }
 
     for (j = 0; j < UnkCount_0x38; j++)
     {
         FSeek(BasePos + UnkOffset_0x38 + (j * 0x10));
-        Entry0x20_0x18 entry_0x38;
+        ShaderConstSource entry_0x38;
     }
 
     FSeek(FileSize());
@@ -138,7 +139,7 @@ typedef struct
 {
 
     int NameOffset <format=hex, fgcolor=cRed>;
-    int b;
+    int ShaderID <comment="Cross referenced with definitions">;
     int c;
     int UnkOffset_0x0C <format=hex, fgcolor=cRed>;
     int e;
@@ -152,7 +153,7 @@ typedef struct
     string Name <comment="Used for searching">;
 
     FSeek(FileSize());
-} Entry0x3C;
+} Entry0x3C <comment="Refered to by Material Data 0x14 Entry by both Name and ID">;
 
 typedef struct
 {

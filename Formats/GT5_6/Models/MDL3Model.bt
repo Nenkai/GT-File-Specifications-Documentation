@@ -18,6 +18,7 @@
 typedef struct
 {
     local int counter = 0;
+
     while (true)
     {
         struct
@@ -88,10 +89,33 @@ typedef struct
                         float unk;
                         float unk;
                         byte flags;
-                        byte unk;
-                        float a;
-                        float b;
-                        float c;
+						
+						if ((flags & 0x80) == 0)
+						{
+						
+						}
+						else
+						{
+							if ((flags & 0x40) != 0x00)
+							{
+								float Unk7;
+							}
+
+							if ((flags & 0x20) != 0x00)
+							{
+								short Unk8;
+							}
+			
+							if ((flags & 0x10) != 0x00)
+							{
+								byte Unk9;
+							}
+						}
+			
+						float singles[flags & 0x0F];
+						
+						byte count2;
+						short unks[count2];
                     } Opcode8;
                     break;
                 case 9:
@@ -411,6 +435,13 @@ typedef struct
                     } Opcode0x48;
                     break;
 
+                case 0x4A:
+                    struct
+                    {
+                        byte MeshCount;
+                        short MeshIDs[MeshCount];
+                        byte unk;
+                    } Opcode0x4A;
                 default:
                     Printf("Unrecognized opcode %d\n", opcode);
                     break;
@@ -451,7 +482,6 @@ typedef struct
     FSeek(BasePos + CommandsOffset);
     Commands commands;
 
-
     /* All of this is LE
       The payloads in PS3 are sent directly to SPUs
       It is futile to attempt debugging this with PPU breakpoints or hardware breakpoints
@@ -462,7 +492,7 @@ typedef struct
     
     SetEndian();
     local int currentEndpos = FTell();
-    local int endPos = BasePos + CommandsOffset + CommandsLength;
+    local int endPos = BasePos + CommandsOffset + CommandsLength + 1;
     if (currentEndpos != endPos);
     {
         Printf("Payload parsed entirely %d = %d\n", currentEndpos, endPos);

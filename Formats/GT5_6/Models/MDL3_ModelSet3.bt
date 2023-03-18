@@ -51,7 +51,7 @@ typedef struct
 #include "MDL3ShapeStreaming.bt"
 #include "MDL3SeparateCarData.bt"
 #include "SHDS_Shaders.bt"
-#include "PMSH.bt"
+#include "PackedMesh.bt"
 
 typedef struct
 {
@@ -80,6 +80,7 @@ typedef struct
     int UnkOffset <format=hex, fgcolor=cRed>;
 } Unk0x74;
 
+FSeek(0x200);
 struct MDL3
 {   
 
@@ -163,15 +164,18 @@ struct MDL3
     } Header <bgcolor=cPurple>;
 
     FSeek(BasePos);
-    struct
+    if (Header.ModelCount > 0)
     {
-        local int i = 0;
-        for (i = 0; i < Header.ModelCount; i++)
+        struct
         {
-            FSeek(BasePos + Header.ModelsOffset + (i * 0x30));
-            Model model;
-        }
-    } Models <comment="Defines each model in the model set, refer to ModelKeys for the name of each model">;
+            local int i = 0;
+            for (i = 0; i < Header.ModelCount; i++)
+            {
+                FSeek(BasePos + Header.ModelsOffset + (i * 0x30));
+                Model model;
+            }
+        } Models <comment="Defines each model in the model set, refer to ModelKeys for the name of each model">;
+    }
 
     if (Header.ModelKeysOffset != 0)
     {
@@ -222,8 +226,12 @@ struct MDL3
         MaterialMap Materials;
     }
 
-    FSeek(BasePos + Header.TextureSetOffset);
-    //TextureSet3 TextureSet;
+
+    if (Header.TextureSetOffset != 0)
+    {
+        FSeek(BasePos + Header.TextureSetOffset);
+        TextureSet3 TextureSet;
+    }
 
     if (Header.ShadersOffset != 0) 
     {
@@ -246,12 +254,6 @@ struct MDL3
     {
         FSeek(BasePos + Header.VMCommandsOffset);
         VMCommands commands <bgcolor=cBlack>;
-    }
-
-    if (Header.VMContextOffset > 0)
-    {
-        FSeek(BasePos + Header.VMContextOffset);
-        VMContext vmContext;
     }
 
     if (Header.Offset0x78 > 0)
@@ -283,15 +285,27 @@ struct MDL3
     if (Header.ShapeStreamingMapOffset > 0)
     {
         FSeek(BasePos + Header.ShapeStreamingMapOffset);
-        UnkMap0xAC ShapeStreamingMap;
+        ShapeStreaming ShapeStreamingMap;
     }
 
-    FSeek(BasePos + Header.Offset0xB8);
-    VMRelated v;
+    if (Header.Offset0xB8 != 0)
+    {
+        FSeek(BasePos + Header.Offset0xB8);
+        VMRelated v;
+    }
 
-    FSeek(BasePos + Header.PMSHOffset);
-    PMSH pmsh;
-        
+    if (Header.VersionMajor > 5 && Header.VMContextOffset > 0)
+    {
+        FSeek(BasePos + Header.VMContextOffset);
+        VMContext vmContext;
+    }
+
+    if (Header.VersionMajor > 8 && Header.PMSHOffset != 0)
+    {
+        FSeek(BasePos + Header.PMSHOffset);
+        PMSH pmsh;
+    }
+
     if (Header.WingDataCount > 0)
     {
         FSeek(BasePos + Header.WingDataOffset);
@@ -336,7 +350,7 @@ struct MDL3
         } WingData[Header.WingDataCount];
     }
 
-    if (Header.CarBodyStreamOffset != 0)
+    if (Header.VersionMajor > 13 && Header.CarBodyStreamOffset != 0)
     {
         FSeek(BasePos + Header.CarBodyStreamOffset);
         SeparateCarData StreamData;

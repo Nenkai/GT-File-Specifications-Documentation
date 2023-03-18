@@ -193,24 +193,22 @@ typedef struct
     int StreamTextureMapSetOffset <format=hex, fgcolor=cRed>;
     int pad;
 
+    
     local int cPos = FTell();
     if (StreamTextureMapSetOffset != 0)
     {
-        FSeek(StreamTextureMapSetOffset);
+        FSeek(fileCpos + (StreamTextureMapSetOffset - BaseHeaderPos));
         StreamMap map;
     }
 
     FSeek(cPos);
 } ImageData <optimize=false>;
 
-typedef struct (int arrSize)
-{
-    ImageData images[arrSize];
-} ImageDataMap <bgcolor=cDkGreen>;
-
 // Main header is 0x40
 typedef struct 
 {
+    local int fileCpos = FTell();
+
     char Magic[4];
     if (Magic[0] == '3')
         LittleEndian();
@@ -218,7 +216,7 @@ typedef struct
         BigEndian();
 
     uint FileSize <format=hex>;
-    uint BaseFilePos <format=hex>;
+    uint BaseHeaderPos <format=hex>;
     uint HeaderSizeMaybe;
     uint Unk2 <comment="Related to UnkOffset">;
     ushort PGLUTextureInfoCount;
@@ -228,9 +226,17 @@ typedef struct
 
     int UnkOffset <format=hex>;
 
-    FSeek(PGLUTextureInfoOffset);
-    PGLUTextureInfo textureInfos[PGLUTextureInfoCount];
+    if (PGLUTextureInfoCount != 0)
+    {
+        FSeek(fileCpos + (PGLUTextureInfoOffset - BaseHeaderPos));
+        PGLUTextureInfo textureInfos[PGLUTextureInfoCount];
+    }
 
-    FSeek(TextureInfoOffset);
-    ImageDataMap data(TexturemageInfoCount);
+    if  (TexturemageInfoCount != 0)
+    {
+        FSeek(fileCpos + (TextureInfoOffset - BaseHeaderPos));
+        ImageData imageData[TexturemageInfoCount] <bgcolor=cDkGreen>;
+    }
+
+    FSeek(FileSize());
 } TextureSet3;
