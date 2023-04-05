@@ -11,16 +11,13 @@
 //   History: 
 //------------------------------------------------
 
-// Research has been done with IDA on TT Demo
-
-// Note: 1 word = 4 byte
 
 BitfieldDisablePadding();
 
 string PrintBufferSize(int64 val)
 {
     string s;
-    SPrintf(s, "%d bytes (* 64)", val * 64);
+    SPrintf(s, "Same as tbp/cbp, gets remapped at runtime - offset: 0x%x (0x%x * 64)", val * 64, val);
     return s;
 }
 
@@ -62,12 +59,9 @@ typedef enum <byte>
 
 typedef struct
 {
-    // the "Params", are according to the function in TT Demo Executable:
-    // 0x0049AFE0 void pgluTexParameter(PGLUTexture *this, __int64 paramNumb, __int16 value)
-    
     struct
     {
-        int64 TBP0_TextureBasePointer  : 14 <format=hex, comment="address / 64 (words aka 4)">;
+        int64 TBP0_TextureBasePointer  : 14 <format=hex, comment="address / 64 (words aka 4) - this is the block offset to the texture">;
         int64 TBW_TextureBufferWidth : 6 <format=hex, comment="Texel Unit Width / 64 (words aka 4)">;
         SCE_GS_PSM PSM_TexturePixelStorageFormat : 6 <comment="Texture pixel storage format">;
         int64 TW_TextureWidth : 4 <comment="Texture width - Actual size will be 2^w and 2^h">;
@@ -142,44 +136,75 @@ typedef struct
 
 typedef struct
 {
-    int DataOffset <format=hex, fgcolor=cRed>;
+    int FileDataOffset <format=hex, fgcolor=cRed>;
     
     struct
     {
-        short RuntimeBufferOffset <format=hex, comment=PrintBufferSize>;
-        byte UnusedMaybe <format=hex, comment="Seems to be also a size in 0x100, but not sure if it's used">;
+        short BlockOffset <format=hex, comment=PrintBufferSize>;
+        byte BufferWidth <comment="Same as TBW">;
         SCE_GS_PSM PixelFormat;
    } Params;
 
    short Width;
    short Height;
 
-} Mipmap <optimize=false>;
+} TextureBufferInfo <optimize=false, comment="Declares a buffer for textures or palettes to use">;
 
-// 0x30 Header
-struct Tex1
+// GS's Users Manual - Page 161 to 170 are useful for understanding blocks and pages
+typedef struct Tex1
 {
+    local int BasePos = FTell();
     struct
     {
         char Magic[4];
-        int relocPtr;
+        int RelocPtr;
         int unkptr;
-        int fileSize <format=hex>;
+        int FileSize <format=hex>;
     
-        short RuntimeBufferSizeUnk; // Filled at runtime? Divided by 64
-        short Unknown_BufSize <format=hex, comment="Comment seems related to the buffer in 0x100 sizes - total frame size?">;
-    
-        FSeek(0x14);
+        short BaseTBPOffset <comment="Remapped at runtime, multiplied by 64 for absolute">;
+        short TotalBlockSize <format=hex, comment="Total blocks taken by all textures">;
         short PGLUTextureCount <fgcolor=cGreen>;
-        short BufferInfoCount <fgcolor=cGreen>;
+        short TextureBufferInfoCount <fgcolor=cGreen>;
         int PGLUTextureMapOffset <format=hex, fgcolor=cRed>;
-        int bufferInfoMapOffset  <format=hex, fgcolor=cRed>;
+        int TextureBufferInfosOffset  <format=hex, fgcolor=cRed>;
         int unkOffset3 <format=hex, fgcolor=cRed>;
         int clutAnimationOffset <format=hex, fgcolor=cRed>; // TODO - havent seen any texture that uses that yet
         int unkOffset4 <format=hex, fgcolor=cRed>;
     } Header <size=0x30 , bgcolor=cPurple>;
 
     PGLUTexture textures[Header.PGLUTextureCount];
-    Mipmap mipmaps[Header.BufferInfoCount];
+    TextureBufferInfo Buffers[Header.TextureBufferInfoCount];
+}; 
 
-} pgluTexSet; 
+local int LastTexSetOffset;
+
+    
+typedef struct Images
+{
+    char Magic[4];
+    int RelocPtr;
+    int TextureCount;
+    int TextureDataOffset;
+
+    LastTexSetOffset = TextureDataOffset;
+
+    struct
+    {
+        char Name[0x3C];
+        int TexSetIndex;        
+
+        local int texSetSize = ReadInt(LastTexSetOffset + 0x0C);
+        local int lastPos = FTell();
+        FSeek(LastTexSetOffset);
+        Tex1 tex1;
+
+        LastTexSetOffset += texSetSize;
+        FSeek(lastPos);
+    } TextureName[TextureCount] <optimize=false>;
+};
+
+// GT3 'imgs'
+if (ReadInt(0x00) == 0x53474D49)
+    Images imgs;
+else
+   Tex1 tex1; 
