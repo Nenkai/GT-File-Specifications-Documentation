@@ -1,13 +1,13 @@
 //------------------------------------------------
 //--- 010 Editor v10.0.2 Binary Template
 //
-//      File: 
-//   Authors: 
+//      File: CAR4 - Cardata GT4
+//   Authors: Nenkai#9075
 //   Version: 
-//   Purpose: 
+//   Purpose: Holds all the data for one single car
 //  Category: 
 // File Mask: 
-//  ID Bytes: 
+//  ID Bytes: 43 41 52 34
 //   History: 
 //------------------------------------------------
 
@@ -15,52 +15,177 @@ LittleEndian();
 
 typedef struct
 {
-    short unk;
-    byte unkFlags;
-    byte numCrew;
-    FSeek(FTell() + 0x08);
-    int unkOffsets[4];
-    int countMaybe;
-    int unkOffset <format=hex>;
-    int countMaybe2;
-    int unkOffset2 <format=hex>;
-    int countMaybe3;
-    int unkOffset3 <format=hex>;
-    int countMaybe4;
-    int exhaustCount <format=hex>; // Also used for the after fire
-    int exhaustPosOffset <format=hex>; // Strides of 24
+    float X;
+    float Y;
+    float Z;
+} Vec3;
 
-    int unkOffset5 <format=hex>;
-    int countMaybe6;
-    int unkOffset6 <format=hex>;
-    int unkOffset7 <format=hex>;
-    int unk; // geometry related - 0x10 is float, 0x14 is float, 0x58 is vec3, 0x6a is a short bool or count
-    int tireLabelsOffset <format=hex>;
-    float tirePosRelated <format=hex>;
-    float tirePosRelated2;
-    int bikeGeometryOffset  <format=hex>;
-    int g;
-    int h;
+// NormalCarGeometry::GetShiftBoundingBox_H -> 0.0619999
+// NormalCarGeometry::GetShiftBoundingBox_W -> 0.055
+
+typedef struct
+{
+    float MatrixMaybe[16];
+    float unk[8];
+    int Flags1 <format=hex>;
+    short Flags2 <format=hex>;
+    short UnkIndex;
+    float unk;
+    short UnkIndex2;
+    short empty;
+} Light <comment="Handles light flares">;
+
+typedef struct
+{
+    Vec3 Position;
+    Vec3 Rotation;
+    float Unk;
+    int Flags <format=hex>;
+} CameraMountData;
+typedef struct
+{
+    local int basePos = FTell();
+
+    Vec3 SteeringWheelCenter;
+    Vec3 SteeringWheelNormal;
+    float SteeringWheelRadius;
+    Vec3 StepPosition;
+    Vec3 SeatOffset1;
+    Vec3 SeatOffset2;
+    float ChairAngle;
+
+    FSeek(basePos + 0x4C);
+    Vec3 ShiftPosition;
+    Vec3 UnkPostureRelated;
+    float ShiftLength;
+
+    FSeek(basePos + 0x6A);
+    short UnkType;
+
+    Vec3 SideBrakePosition;
+    float SideBrakeLength;
+
+    FSeek(basePos + 0x88);
+    Vec3 BackmirrorPosition;
+    
+    FSeek(basePos + 0xC4);
+    float UnkSeat1;
+    float UnkSeat2;
+    float UnkSeat3;
+
+    FSeek(basePos + 0xE0);
+    int PitInPillarLayout;
+} NormalCarGeometryDetail;
+
+typedef struct
+{
+    short Flags <format=hex>;
+    byte DriverModelType <format=hex>;
+    byte NumCrew;
+    int Unk;
+    int UnkOffsetsMaybeTires[4];
+
+    int FrontLampDataCount;
+    int FrontLampDataOffset;
+    int UnkLightCount;
+    int UnkLightsOffset <fgcolor=cRed, format=hex>;
+    int TailLampFlareDataCount;
+    int TailLampFlareDataOffset <fgcolor=cRed, format=hex>;
+    int CollisionParticlePositionCount;
+    int CollisionParticlesPositionsOffset <comment="Stride: 0x10", fgcolor=cRed, format=hex>;
+    int ExhaustCount <format=hex>; // Also used for the after fire
+    int ExhaustPosOffset <fgcolor=cRed, format=hex>; // Strides of 24
+
+    // Used in CameraSys::CameraOnBoard::_selectNextMount
+    int CameraMountsCount <format=hex>;
+    int CameraMountsOffset <fgcolor=cRed, format=hex>;
+    int CountForNextOffset;
+    int unkOffset6 <fgcolor=cRed, format=hex>; // Used in 2F18F8 (GT4O US)
+    int NormalCarGeometryDetailOffset <fgcolor=cRed, format=hex>; 
+    int TireLabelsOffset <fgcolor=cRed, format=hex>;
+    float TirePosRelated <format=hex>;
+    float TirePosRelated2;
+    int BikeGeometryOffset <fgcolor=cRed, format=hex, comment="Also used as check for GT4Model::CarModel::isBike">;
+    byte DefaultDecken[3];
+    byte UnkClutPatchIndex;
+    int Unk;
+
+    FSeek(FrontLampDataOffset);
+    Light FrontLightData[FrontLampDataCount] <bgcolor=cBlue>;
+
+    FSeek(UnkLightsOffset);
+    Light unkLights[UnkLightCount] <bgcolor=cYellow>;
+
+    FSeek(TailLampFlareDataOffset);
+    Light BrakeLightData[TailLampFlareDataCount] <bgcolor=cRed>;
+
+    /*
+    Bumper: 0
+    Chase: 1
+    Left Window, behind: 3
+    Right Window, behind: 4
+    Bumper 2: 5
+    Bonnet: 6
+    Dive from Roof: 7
+    Dive from Roof Behind: 8
+    Bumper Behind: 9
+    Left View: 10
+    Right View: 11
+    View on front left tire: 0x0E
+    View on front right tire: 0x0F
+    View on rear left tire: 0x10
+    View on rear right tire: 0x11
+    Dive from rear left: 0x12
+    Dive from front left: 0x13
+    Dive: 0x14
+    */
+
+    FSeek(CameraMountsOffset);
+    CameraMountData CamMounts[CameraMountsCount] <bgcolor=cGray>;
+
+    FSeek(NormalCarGeometryDetailOffset);
+    NormalCarGeometryDetail Detail;
 } GT4CarInfo <bgcolor=cGreen>;
 
-// 0xB4000
+typedef struct
+{
+    byte BoundaryCount;
+    byte unk;
+    byte unk;
+    byte unk;
+
+    struct
+    {
+        Vec3 Unk;
+        Vec3 Unk2;
+    } Bounds[BoundaryCount];
+
+} CollisionModel;
+
+// Max allowed file buffer size: 0x96000 (or 0xB4000?) - GT4O US: 0x298BE0 (VehicleModel::getDataSizeMax)
 struct GT4CarData
 {
-    char magic[4];
-    int relocatePtr <format=hex>;
-    int fileSizeForRelocation <format=hex>;
-    int empty;
-    int carInfoOffset <format=hex>;
-    int carCollisionModel <format=hex>;
-    int actualCarModelSet <format=hex>;
-    int colorPatch <format=hex>;
-    int wheelModelSet <format=hex>; // this one gets magic checked
-    int wheelColorPatch;
-    int wingModelSet;
-    int tireModelSets[2];
-    int modelSet4;
-    int texSet;
+    struct 
+    {
+        char Magic[4];
+        int RelocatePtr <format=hex>;
+        int FileSizeForRelocation <format=hex>;
+        int Empty;
+        int CarInfoOffset <format=hex>;
+        int CarCollisionModel <format=hex>;
+        int MainModelSetOffset <fgcolor=cRed, format=hex>;
+        int MainModelColorPatchOffset <fgcolor=cRed, format=hex>;
+        int WheelModelSetOffset <fgcolor=cRed, format=hex>; // this one gets magic checked
+        int WheelColorPatchOffset <fgcolor=cRed, format=hex>;
+        int WingModelSet <fgcolor=cRed, format=hex>;
+        int TireModelSetOffsets[2] <fgcolor=cRed, format=hex>;
+        int BuiltinDriverModelOffset <fgcolor=cRed, format=hex>;
+        int texSet;
+    } Header;
 
-    FSeek(carInfoOffset);
+    FSeek(Header.CarInfoOffset);
     GT4CarInfo carInfo;
-} CAR4;
+
+    FSeek(Header.CarCollisionModel);
+    CollisionModel Collision;
+} CarData;
