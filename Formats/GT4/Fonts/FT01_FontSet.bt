@@ -1,0 +1,80 @@
+//------------------------------------------------
+//--- 010 Editor v13.0.2 Binary Template
+//
+//      File: GT4 FontSet
+//   Authors: Nenkai 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .fnt
+//  ID Bytes: 46 54 30 31
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    byte X1;
+    byte Y1;
+    byte X2;
+    byte Y2;
+    int AdvanceWidthMaybe;
+    short TextureLocationX;
+    short TextureLocationY;
+    int UnkOffset <format=hex, fgcolor=cRed>;
+    int UnkOffset2 <format=hex, fgcolor=cRed>;
+} FontFace;
+
+typedef struct
+{
+    int FontNameOffset <format=hex, fgcolor=cRed>;
+    int FontFacesOffset <format=hex, fgcolor=cRed>;
+    wchar_t CharStartIndex;
+    wchar_t CharEndIndex;
+    byte DefaultWidth;
+    byte DefaultHeight;
+    byte DefaultBaseline;
+    byte unk;
+    byte DefaultKanjiWidth;
+    byte DefaultKanjiHeight;
+    byte unk;
+    byte unk;
+    byte DefaultKanjiStepWidth;
+    byte unk;
+    byte KanjiIndex;
+    byte Unk;
+    int UnkOffset  <format=hex, fgcolor=cRed>;
+
+    FSeek(FontFacesOffset);
+    FontFace Faces[((int)CharEndIndex - (int)CharStartIndex) + 1];
+
+    FSeek(FontNameOffset);
+    string Name;
+} Font <comment=Name>;
+
+struct FT01
+{
+    struct
+    {
+        char Magic[4];
+        uint RelocPtr;
+        uint Unk;
+        uint Pad;
+        short FontCount;
+        short TextureSetCount;
+        uint FontsOffset  <format=hex, fgcolor=cRed>;
+        uint TextureSetsOffset <format=hex, fgcolor=cRed>;
+    } Header <size=0x30, bgcolor=cPurple>;
+
+    FSeek(Header.FontsOffset);
+    int FontOffsets[Header.FontCount] <format=hex, fgcolor=cRed>;
+
+    FSeek(Header.TextureSetsOffset);
+    int TextureSetOffsets[Header.FontCount] <format=hex, fgcolor=cRed>;
+
+    local int i = 0;
+    for (i = 0; i < Header.FontCount; i++)
+    {
+        FSeek(FontOffsets[i]);
+        Font font;
+    }
+} FontSet;
