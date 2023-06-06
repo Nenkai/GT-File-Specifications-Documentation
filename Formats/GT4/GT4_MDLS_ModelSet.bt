@@ -17,6 +17,32 @@ local byte stop = false;
 
 typedef struct
 {
+    float X;
+    float Y;
+    float Z;
+} Vector3;
+
+typedef struct
+{
+    local int firstByte = ReadByte();
+    if (firstByte & 0x80)
+    {
+        if (firstByte & 0x40)
+        {
+            byte values[4];
+        }
+        else
+        {
+            byte values[2];
+        }
+    }
+    else
+    {
+        byte value;
+    }
+} _7bitInt <optimize=false>;
+typedef struct
+{
     byte nextSize;
 
     /* 800000 = Unk
@@ -46,12 +72,92 @@ typedef struct
 
 } ExtensionMap;
 
+uint AlignValue(uint x, uint alignment)
+{
+      local uint mask = ~(alignment - 1);
+      return (x + (alignment - 1)) & mask;
+}
+
+typedef enum<int> SCE_GS_PRIM
+{
+    SCE_GS_PRIM_POINT		= (0x00),
+    SCE_GS_PRIM_LINE		= (0x01),
+    SCE_GS_PRIM_LINESTRIP   = (0x02),
+    SCE_GS_PRIM_TRI			= (0x03),
+    SCE_GS_PRIM_TRISTRIP	= (0x04),
+    SCE_GS_PRIM_TRIFAN		= (0x05),
+    SCE_GS_PRIM_SPRITE		= (0x06),
+    SCE_GS_PRIM_IIP			= (1<<3), // Gouraud
+    SCE_GS_PRIM_TME			= (1<<4), // Textured
+    SCE_GS_PRIM_FGE			= (1<<5), // Fogging
+    SCE_GS_PRIM_ABE			= (1<<6), // Alpha Blending
+    SCE_GS_PRIM_AA1			= (1<<7), // Anti-Aliasing
+    SCE_GS_PRIM_FST			= (1<<8), // Use ST for texture coords
+    SCE_GS_PRIM_CTXT1		= (0),    // Context
+    SCE_GS_PRIM_CTXT2		= (1<<9),
+    SCE_GS_PRIM_FIX			= (1<<10), // Fragment Control
+} SceGsPrim;
+
+typedef enum<byte> SCE_GIF_FLAGS
+{
+   SCE_GIF_PACKED      = 0,
+   SCE_GIF_REGLIST     = 1,
+   SCE_GIF_IMAGE       = 2,
+   // Maybe more
+} SceGsFlags;
+
+string PrintPrimInfo(SCE_GS_PRIM& as)
+{
+   local string s;
+   if ((as & 0b111) == 1)
+      s += "SCE_GS_PRIM_LINE | ";
+   else if ((as & 0b111) == 2)
+      s += "SCE_GS_PRIM_LINESTRIP | ";
+   else if ((as & 0b111) == 3)
+      s += "SCE_GS_PRIM_TRI | ";   
+   else if ((as & 0b111) == 4)
+      s += "SCE_GS_PRIM_TRISTRIP | ";
+   else if ((as & 0b111) == 5)
+      s += "SCE_GS_PRIM_TRIFAN | ";
+   else if ((as & 0b111) == 6)
+      s += "SCE_GS_PRIM_SPRITE | ";
+   else
+      s += "SCE_GS_PRIM_POINT | ";
+
+   if ((as >> 3) & 1)
+      s += "SCE_GS_PRIM_IIP (Gouraud) | ";
+
+   if ((as >> 4) & 1)
+      s += "SCE_GS_PRIM_TME (Textured) | ";
+   
+   if ((as >> 5) & 1)
+      s += "SCE_GS_PRIM_FGE (Fogging) | ";
+
+   if ((as >> 6) & 1)
+      s += "SCE_GS_PRIM_ABE (Alpha Blending) | ";
+  
+   if ((as >> 7) & 1)
+      s += "SCE_GS_PRIM_AA1 (Anti-Aliasing) | ";
+
+   if ((as >> 8) & 1)
+      s += "SCE_GS_PRIM_FST (Use ST for texture coords) | ";
+
+   if ((as >> 9) & 1)
+      s += "SCE_GS_PRIM_CTXT2 | ";
+
+   if ((as >> 10) & 1)
+      s += "SCE_GS_PRIM_FIX (Fragment Control) | ";
+
+   return s;
+}
+
 typedef struct
 {
+    // 0xC0C0 - GIFTag? Second value = SCE_GIF_SET_TAG
     // 0x8000 = Vertices
     // 0x8040 = UVs
     // 0x8080 = Normals
-    // 0xC0C0 - First value byte = vert count
+    
     // Anything else doesn't seem related to faces
 
     ushort vuaddr <format=hex>;
@@ -80,9 +186,27 @@ typedef struct
         DIRECTHL = 0x51,
         UNPACK = 0x60,
     } cmd : 7 <format=hex>;
+
+    // MSCAL is always appended to the end (engine side)
+
     byte irq : 1;
 
-    if ((cmd >= 0x60))
+    if (vuaddr == 0xC0C0)
+    {
+        struct
+        {
+            int nloop : 15 <comment="Data per register to transfer">;
+            int eop : 1 <comment="End of packet">;
+            int pad16 : 16;
+            int id : 14;
+            int pre : 1;
+            SceGsPrim prim : 11 <comment=PrintPrimInfo>;
+            SCE_GIF_FLAGS flg : 2;
+            int nreg : 4 <comment="Number of registers">;
+        } sceGifTag;
+        int registerList <format=hex>; // Refer to https://psi-rockin.github.io/ps2tek/#gifdataformats
+    }
+    else if ((cmd >= 0x60))
     {
         struct
         {
@@ -111,19 +235,27 @@ typedef struct
             
  
         } UNPACK_DATA[num] <optimize=false>;
-
-        FSkip(FTell() % 4);
     }
+    else if (cmd == STMASK)
+    {
+        uint mask <format=hex>;
+    }
+    else if (cmd == STROW)
+    {
+        uint strow[4];
+    }
+    FSeek(AlignValue(FTell(), 4));
 
 } VifCommand <optimize=false>;
-typedef struct
+
+
+typedef struct(int quadwordSize)
 {
     local int count = 0;
-    while (true)
+    local int basePos = FTell();
+    while (FTell() < basePos + (quadwordSize * 0x10))
     {
         VifCommand cmd;
-        if (cmd[count++].cmd == 0)
-            break;
     }
 
 } VifData <optimize=false, bgcolor=cBlack>;
@@ -133,9 +265,11 @@ typedef struct
     local int baseShapePos = FTell();
     int RelocPtr;
     float Size;
-    byte unk : 5; // 2 to 6 are handled specifically
-    byte unk : 3;
+    byte unk0 : 5; // 2 to 6 are handled specifically
+    byte unk1 : 3;
 
+    if (unk0 != 5)
+        Printf("%d\n", unk0);
     byte unkFlags <format=hex>;
     short VifPartCount;
     short TotalVertCount;
@@ -144,15 +278,26 @@ typedef struct
     struct
     {
         int VifDataOffset <format=hex, fgcolor=cRed>;
-        short Size0x10Strides;
-        short Unk2;
+        short DMATagQuadwordCount;
+
+        // GT4O 0x59A7E8 -> 0x599DB8
+        short pgluMaterialFunc_TextureIndex : 9; // 511 max
+        short pgluMaterialFuncValue2 : 7; // 127 max
     } ShapeDataInfo[VifPartCount];
 
     local int j = 0;
     for (j = 0; j < VifPartCount; j++)
     {
-        FSeek(BasePos + baseShapePos + ShapeDataInfo[j].VifDataOffset);
-        VifData vif;
+        FSeek(baseShapePos + ShapeDataInfo[j].VifDataOffset);
+        VifData vif(ShapeDataInfo[j].DMATagQuadwordCount);
+    }
+
+    if (unkFlags & 0x80)
+    {
+        float unk;
+        ubyte VertCount;
+        ubyte VUAddrQWord <format=hex>;
+
     }
 } Shape <optimize=false>;
 
@@ -160,26 +305,35 @@ typedef struct
 {
     enum<byte> 
     {
-        EndTerminator = 0,
+        End = 0,
 
+        RenderModel_1ub = 2,
+        RenderModel_1us = 3,
         pgluCallShape = 4,
         Unk = 6,
         LODData = 7,
-        Seek = 8,
+        Jump = 8,
         Unk9 = 9,
+        pglUnk_Enable17_WithMatrix = 10,
+        pglUnk_Enable17 = 11,
+        pglPushMatrix = 12,
+        pglPopMatrix = 13,
+        pglMatrixMode = 14,
+        pglScale = 18,
         pglEnable_4 = 0x1A,
         pglDisable_4 = 0x1b,
-        pglAlphaFunc1ub = 0x1c,
-        pglEnable_3 = 0x1D,
-        pglDisable_3 = 0x1E,
-        pglDestinationAlphaFunc = 0x1F,
-        pglBlendFunc1ub = 0x20,
-        pglFogColor1ui = 0x21,
-        pgluColor = 0x22,
-        pglFogColor1ui2 = 0x23,
-        pglDepthMask_0Disable = 0x25,
-        pglDepthMask_1Enable = 0x26,
-        pgluCacheTexSetPath3 = 0x2b,
+        pglAlphaFunc_1ub = 28,
+        pglEnable_3 = 29,
+        pglDisable_3 = 30,
+        pglDestinationAlphaFunc = 31,
+        pglBlendFunc1ub = 32,
+        pglFogColor1ui = 33,
+        pgluColor = 34,
+        pglFogColor1ui2 = 35,
+        pglDepthMask_0Disable = 37,
+        pglDepthMask_1Enable = 38,
+        pgluTexTable_1ub = 43,
+        pglAlphaFail = 47,
         externalTexSet = 0x50,
 
     }type;
@@ -206,7 +360,7 @@ typedef struct
         byte lodCount;
         short unkOffsets[lodCount] <format=hex>;
     }
-    else if (type == 8)
+    else if (type == Jump)
     {
         byte offsetFromHere <format=hex>;
     }
@@ -214,10 +368,20 @@ typedef struct
     {
         short unkOffset <format=hex>;
     }
-    else if (type == 0x1c)
+    else if (type == pglUnk_Enable17_WithMatrix)
     {
-        byte unk;
-        byte unk2;
+        byte unkCount;
+        Vector3 vecs[unkCount];
+        short unk;
+    }
+    else if (type == 18)
+    {
+        Vector3 Scale;
+    }
+    else if (type == pglAlphaFunc_1ub)
+    {
+        byte Func;
+        ubyte Ref;
     }
     else if (type == 0x1f)
     {
@@ -232,11 +396,15 @@ typedef struct
     {
         uint color;
     }
-    else if (type == 0x2b)
+    else if (type == pgluTexTable_1ub)
     {
-        byte textureIndex;
+        byte IndexToFirstMapInTex1; // pgluCacheTexSetPath3 + pgluTexTable
     }
-    else if (type == 0x50)
+    else if (type == pglAlphaFail)
+    {
+        byte val;
+    }
+    else if (type == 80)
     {
         byte externalTexSetIndex;
     }
@@ -259,13 +427,13 @@ typedef struct
 typedef struct 
 {
     byte unk;
-    byte unkAlways8;
+    byte BoundCount;
     byte unk;
     byte unk;
-    int unk <format=hex>;
+    int BoundsOffset <format=hex, fgcolor=cRed>;
     float usedToComputeModelLODWidth;
     float usedToComputeBounds;
-    int e;
+    float e;
     int f;
     int SetupOpcodesOffset <format=hex>;
     int h;
@@ -273,10 +441,11 @@ typedef struct
     int k;
 
     FSeek(BasePos + SetupOpcodesOffset);
-    //InstMap map;
+    InstMap map;
     
 
 } Model;
+
 
 struct GT4_ModelSet
 {   
@@ -286,12 +455,15 @@ struct GT4_ModelSet
     {
         
         char Magic[4];
-        int a;
-    
+        int RelocatorDataOffset <format=hex>;
+        int RelocatorDataSize <format=hex>;
+        int RelocationBase;
+
         FSeek(BasePos + 0x10);
         int fileSize <format=hex>;
-    
-        FSeek(BasePos + 0x16);
+        byte Unk;
+        byte HasInstanceAt0x7C <format=hex>;
+
         short ModelsCount;
         short ShapeCount;
         short Unk;
@@ -351,4 +523,58 @@ struct GT4_ModelSet
     FSeek(BasePos + Header.ExtensionDataOffset);
     ExtensionMap extensionMap;
 
+    FSeek(Header.RelocatorDataOffset);
+    struct
+    {
+        int OffsetToUserData;
+        uint SymbolsPtr <comment="This is not read">;
+        _7bitInt OffsetType; // 0 = SetRelocationBase, 1 = update1/byte, 2 = update2/short, 3 = update4/int
+        _7bitInt SymbolIndex;
+        _7bitInt TotalNumberOfOffsetsToRelocate;
+        _7bitInt StartOffsetForGroup;
+
+        local int stop = false;
+        while (!stop)
+        {
+            struct
+            {
+                ubyte CountAndFlag <format=hex>;
+                if (CountAndFlag == 0)
+                {
+                    stop = true;
+                    break;
+                }
+
+                if (CountAndFlag >= 0x80) // Array, all in a row
+                {
+                    // Array, all in a row
+                    local int i = 0;
+                    local int OffsetCount = CountAndFlag - 0x80;
+                    _7bitInt OffsetsToUpdateNext[OffsetCount - 1];
+                    break;
+                }
+                else // Array with provided offsets
+                {
+                    _7bitInt NextOffsets[CountAndFlag + 1];
+                    break;
+                }
+            } RelocateOffsetGroup;
+            
+        }
+
+        // Child offsets
+        
+        FSeek(Header.RelocatorDataOffset + OffsetToUserData);
+        int SymbolCount1 <comment="Debug or stripped">;
+
+        int SymbolCount2 <comment="Debug or stripped">;
+        if (SymbolCount1 && SymbolCount2)
+        {
+            // readUserChunks(i, count1, count2) - stripped in release
+            ushort unkCount;
+
+            // Masked strings are xorred by 0xAA
+            // string uint masked_symbols_string_offsets[unkCount]
+        }
+    } RelocatorData;
 } MDLS <optimize=false>;
