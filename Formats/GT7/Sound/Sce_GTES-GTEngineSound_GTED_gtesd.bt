@@ -18,6 +18,7 @@ LittleEndian();
    * sce5Gtes29IResource
    * sce5Gtes212ResourceCore
    * N3sce5Gtes27ISystemE
+   */
    
 //---------------------------------------------
 // Random color (https://github.com/tge-was-taken/010-Editor-Templates/blob/master/releases/p5_gfd/p5_gfd_rel_2/common/utils.h#L59)
