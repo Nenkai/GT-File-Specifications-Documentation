@@ -1,0 +1,386 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: GTED.bt
+//   Authors: xfileFIN, Nenkai
+//   Version: 0.1
+//   Purpose: Parse GTED files from Gran Turismo
+//  Category: Binary
+// File Mask: *.gtesd1
+//  ID Bytes: 47 54 45 44 // GTED
+//   History: 
+//   0.1   The initial version
+//------------------------------------------------
+LittleEndian();
+
+/* This may be a format created by Sony FOR Polyphony Digital, may also be as part of the SNDZ library by SIE
+   Some mangled names: 
+   * sce5Gtes29IResource
+   * sce5Gtes212ResourceCore
+   * N3sce5Gtes27ISystemE
+   
+//---------------------------------------------
+// Random color (https://github.com/tge-was-taken/010-Editor-Templates/blob/master/releases/p5_gfd/p5_gfd_rel_2/common/utils.h#L59)
+//---------------------------------------------
+local uint __RandomSeed = 0xDEADBABE;
+local uint __RandomBit = 0;
+local uint __RandomCount = 0;
+ 
+uint MyRandom( uint to )
+{
+    ++__RandomCount;
+    __RandomBit  = ( (__RandomSeed >> 0 ) ^ ( __RandomSeed >> 2 ) ^ ( __RandomSeed >> 3 ) ^ ( __RandomSeed >> 5 ) ) & 1;
+    __RandomSeed = ( ( ( ( __RandomBit << 15 ) | ( __RandomSeed >> 1 ) ) + ( 0xBABE / __RandomCount ) ) % to );
+
+    while( __RandomSeed < 0 )
+        __RandomSeed += to;
+
+    return __RandomSeed;
+}
+
+uint RandomColor()
+{
+    return MyRandom( 0xFFFFFFFF );
+}
+
+//---------------------------------------------
+// GTED Parsing
+//---------------------------------------------
+
+typedef struct
+{
+    char Magic[4];
+    int empty;
+    int unk;
+    int empty;
+    int UnkFlags;
+
+    byte unkId <comment="Must not be > 8 - 0x20 = content index, 0x40 = content name, 0x60 = content id">;
+    byte unk;
+    short empty;
+
+    byte unkId2;
+    byte unk;
+} XFD <size=0x20>;
+
+typedef struct
+{
+    char Magic[4];
+    int empty;
+
+    int unk <format=hex>;
+    local int basePos = FTell();
+    int UnkNameOffsetRelative <format=hex>;
+    if (UnkNameOffsetRelative != 0)
+    {
+        FSeek(basePos + UnkNameOffsetRelative);
+        string scriptUnk;
+        FSeek(basePos + sizeof(int));
+    }
+
+    int empty;
+
+    basePos = FTell();
+    int IndNameOffsetRelative <format=hex>;
+    if (unk != 0)
+    {
+        FSeek(basePos + IndNameOffsetRelative);
+        string scriptUnkk;
+        FSeek(basePos + sizeof(int));
+    }
+
+    int unk;
+    byte unkIdOrType <comment="Must not be > 8, something special happens if 8">;
+    byte unk;
+    short empty_;
+
+
+    int GTEB_OffsetToSNDZ <format=hex>;
+    int GTEB_SizeOfSNDZ <format=hex>;
+
+    int GTEB_OffsetToSNDZ2 <format=hex>;
+
+    basePos = FTell();
+    int NameOffsetRelative <format=hex>;
+    FSeek(basePos + NameOffsetRelative);
+    string TrackName;
+    FSeek(basePos + sizeof(int));
+
+    int pad[6];
+} TRCK;
+
+typedef struct
+{
+    char Magic[4];
+    byte reserved[0x10];
+    byte type; // Size (or ids?) refer to different fields based on this
+
+    byte sizeOrId1; ///Max 4
+    byte sizeOrId2; // Max 8 if type 0, else 8, only read if above is not > 4
+    byte pad;
+
+    int unk;
+    float f2;
+    float f3;
+    
+    int empty;
+    int empty;
+    int empty;
+    int empty;
+    int offsetCount;
+
+    local int bPos = FTell();
+    int offs[offsetCount] <format=hex>;
+
+    local int j = 0;
+    for (j = 0; j < offsetCount; j++)
+    {
+        FSeek((bPos + (j * 4)) + offs[j]);
+        struct
+        {
+            int a;
+            int a;
+            float b;
+            float c;
+            float d;
+            int e;
+        } UnkEntry <optimize=false>;
+    }
+
+} CAMF <size=0x38>;
+
+typedef struct
+{
+    char Magic[4];
+    int a;
+    int b;
+    int c;
+    int TypeOrFlag;
+    int e;
+    int f;
+    int FadeSNDZSize <format=hex>;
+    int FadeSNDZOffsetRelative <format=hex>;
+
+    local int basePos = FTell();
+    int NameOffsetRelative <format=hex>;
+    FSeek(basePos + NameOffsetRelative);
+    string name;
+    FSeek(basePos + sizeof(int));
+
+    int empty;
+} ASST <size=0x20>;
+
+
+typedef struct
+{
+    int GTEB_SNDZOffset <format=hex, fgcolor=cRed>;
+    int GTEB_SNDZSize <format=hex>;
+    int c;
+
+    local int basePos = FTell();
+    int NameOffsetRelative <format=hex, fgcolor=cRed>;
+    FSeek(basePos + NameOffsetRelative);
+    string name;
+    FSeek(basePos + sizeof(int));
+
+    int e;
+    int f;
+
+} SNDZInfo;
+
+string PrintSNDZInfoName(SNDZInfo& info)
+{
+    return info.name;
+}
+
+typedef struct
+{
+    byte reserved[0x10];
+    int MapOffsetRelative <format=hex, fgcolor=cRed>;
+
+    int nSoundEntry;
+
+    local int baseEntryPos = FTell();
+    int SoundEntryInfoOffsets[nSoundEntry] <format=hex>;
+    
+    local int i = 0;
+    for (i = 0; i < nSoundEntry; i++)
+    {
+        FSeek(baseEntryPos + (i * 4) + SoundEntryInfoOffsets[i]);
+        SNDZInfo info <comment=PrintSNDZInfoName>;;
+    }
+} BINM;
+
+typedef struct
+{
+    char Magic[4];
+    byte reserved[0x10];
+    int SoundID;
+    int Unk;
+    float x;
+    float y;
+    float z;
+    
+    int unk;
+    float unkk;
+
+    local int basePos = FTell();
+    int IntNameOffsetRelative <format=hex>;
+    FSeek(basePos + IntNameOffsetRelative);
+    string intName;
+    FSeek(basePos + sizeof(int));
+
+    basePos = FTell();
+    int ExtNameOffsetRelative <format=hex>;
+    FSeek(basePos + ExtNameOffsetRelative);
+    string extName;
+    FSeek(basePos + sizeof(int));
+
+    int empty;
+} VHCL <size=0x3C>;
+
+string PrintTrackName(TRCK& entry)
+{
+    return entry.name;
+}
+
+typedef struct
+{
+    char Magic[4];
+    byte reserved[0x10];
+    byte type; // Must be zero?
+
+    byte sizeOrID; ///Max 4
+    
+    short pad;
+
+    float f1;
+    float f2;
+    
+    byte __pad[0x10];
+} CAMI <size=0x30>;
+
+typedef struct
+{
+    char Magic[4];
+    byte reserved[0x10];
+    byte type; // Size (or ids?) refer to different fields based on this
+    
+    byte sizeOrId1; ///Max 4
+    byte sizeOrId2; // Max 8 if type 0, else 8, only read if above is not > 4
+    byte pad;
+    
+    float f1;
+    float f2;
+    float f3;
+    float f4;
+    float f5;
+    
+    byte __pad[0x14];
+} CAMP <size=0x40>;
+
+struct GTEBEntry
+{
+    local string magic = ReadString(FTell(), 4);
+    switch (magic)
+    {
+        case "CAMP":
+            CAMP camp; break;
+
+        case "CAMI":
+            CAMI cami; break;
+
+        case "VHCL": 
+            VHCL vehicle; break;
+
+        case "CAMF": 
+            CAMF camf; break;
+
+        case "TRCK":
+            TRCK track; break;
+
+        case "XFDD":
+            XFD xfd; break;
+
+        case "ASST":
+            ASST asst; break;
+
+        case "BINM":
+            BINM binm; break;
+
+        default:
+            Printf("Unk Magic " + magic + "\n");
+            break; 
+    }
+};
+
+string PrintGTBEName(GTEBEntry& entry)
+{
+    string str = entry.magic;
+
+    switch (entry.magic)
+    {
+        case "CAMP":
+            /*CAMP camp;*/ break;
+
+        case "CAMI":
+            /*CAMI cami;*/ break;
+
+        case "VHCL": 
+            str += " (" + entry.vehicle.intName + "/" + entry.vehicle.extName + ")"; break;
+
+         case "CAMF": 
+            /*CAMF camf;*/ break;
+
+        case "TRCK":
+            str += " (" + entry.track.TrackName + ")"; break;
+
+        case "XFDD":
+            /*XFD xfd;*/ break;
+
+        case "ASST":
+            str += " (" + entry.asst.name + ")"; break;
+
+        case "BINM":
+            string s;   
+            SPrintf( s, "%d", entry.binm.nSoundEntry );
+            str += " (Entries: " + s + ")"; break;
+
+        default:
+            Printf("Unk Magic " + entry.magic + "\n");
+            break; 
+    }
+    return str;
+}
+
+struct GTEB
+{
+    char Magic[4] <fgcolor=0xFCBA03>;
+
+    uint FileSize <fgcolor=0xFFFFFF, format=hex>;
+    ushort VersionMinor <comment="Just a guess">; // Just a guess
+    ushort VersionMajor <comment="Just a guess">; // Just a guess
+    byte Padding[4] <hidden=true>;
+    char Name[80] <fgcolor=0x03CEFC>;
+    uint MapOffsetRelative;
+
+    FSeek((FTell() - sizeof(int)) + MapOffsetRelative);
+
+    struct 
+    {
+        uint nEntry <fgcolor=0xFF0000>;
+        int ChunkOffsetsRelative[nEntry] <format=hex, fgcolor=cRed>;
+    
+        local int i;
+        for (i = 0; i < nEntry; i++) 
+        {
+            FSeek(0x68 + ChunkOffsetsRelative[i] + (i * 4));
+    
+            SetForeColor(RandomColor());
+            GTEBEntry entry <comment=PrintGTBEName>;
+        }
+    
+        SetForeColor( cNone );
+    } ChunksMap;
+
+} Header;
