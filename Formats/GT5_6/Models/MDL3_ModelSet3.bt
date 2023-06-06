@@ -80,7 +80,7 @@ typedef struct
     int UnkOffset <format=hex, fgcolor=cRed>;
 } Unk0x74;
 
-FSeek(0x200);
+
 struct MDL3
 {   
 
