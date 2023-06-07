@@ -2,7 +2,7 @@
 //--- 010 Editor v11.0.1 Binary Template
 //
 //      File: Car Information
-//   Authors: Nenkai#9075
+//   Authors: Nenkai, Plunke/SockyNoob
 //   Version: 5
 //   Purpose: Car View positions, Driver Positions, Spoiler Position, Tire Visual Settings, Exhaust Afterfire Settings, Windshield Rain Splash Settings
 //  Category: 
@@ -142,18 +142,18 @@ typedef struct (int length)
 
 typedef struct
 {
-    float SpoilerPosX;
-    float SpoilerPosHeight <comment="More is higher">;
-    float SpoilerDistance;
-    float SpoilerLength;
-    float Unk <comment="No visible effect">;
-    float Unk2 <comment="No visible effect">;
-    float SpoilerHeight;
-    float Unk4 <comment="May be height related - prevents custom height ingame">;
-    float Unk5;
+    float SpoilerPosX <comment="Left and right position, unsure if it's ever not 0">;
+    float SpoilerPosHeight <comment="Wing mount height, more=higher up, usually between 0.6 and 1.0, hatchbacks above 1.0">;
+    float SpoilerDistance <comment="Wing distance from center, more=further back, usually between 1.3 and 2.7">;
+    float SpoilerLength <comment="Default wing width, more=wider, 10 ticks in game=0.1, value used by generic wings">;
+    float Unk <comment="Minimum width, should be roof width, usually between 1.0 and 1.3">;
+    float Unk2 <comment="Maximum width, should be car width, usually between 1.6 and 1.9">;
+    float SpoilerHeight <comment="Default leg height, more=higher, 10 ticks in game=0.01, all 3 same=custom height disabled">;
+    float Unk4 <comment="Minimum height, values below 0.1 are glitchy, usually between 0.15 and 0.18">;
+    float Unk5 <comment="Maximum height, should be roof height, value used by generic wings, usually between 0.25 and 0.4">;
     float Unk <comment="No visible effect">;
     float unk4[4];
-    float WingStaysDistance;
+    float WingStaysDistance <comment="Leg mount spacing, more=wider gap, usually between 0.4 and 1.0">;
     float unk6[45];
 } CustomSpoilerData <bgcolor=cBlack>;
 
