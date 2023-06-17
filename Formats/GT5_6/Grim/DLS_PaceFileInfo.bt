@@ -4,12 +4,14 @@
 //      File: PaceFileInfo_DLS.bt
 //   Authors: Nenkai
 //   Version: 
-//   Purpose: Sony Torrent File (Pace Info File) - GT5P has some as .dls files (NPEA00050, NPUA80075)
+//   Purpose: Sony libpace Pace File Info (Torrent/Tracker File) - GT5P has some as .dls files (NPEA00050, NPUA80075)
 //  Category: 
 // File Mask: 
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
+
+// Documentation at the bottom of the template
 
 BigEndian();
 BitfieldDisablePadding();
@@ -38,8 +40,8 @@ struct DLS
     
             if ((FieldType & 0x8000) != 0)
             {
-                int NumPieces <comment="For each 0x80000">;
-                PieceHash Pieces[NumPieces] <bgcolor=cDkGray>; // hash bytes must be present - stream reads just to check if they exist
+                int NumPieces <comment="In 0x80000 chunks of the target file (at least for GT5)">;
+                PieceHash Pieces[NumPieces] <bgcolor=cDkGray, comment="In GT5, hashes of chunks of the PAM which has ALREADY been salsa encrypted">; // hash bytes must be present - stream reads just to check if they exist
                 stop = true;
                 return;
             }
@@ -47,7 +49,7 @@ struct DLS
             switch (FieldType)
             {
                 case 1:
-                    int64 MovieFileSize <fgcolor=cGreen>;
+                    int64 TargetFileSize <fgcolor=cGreen>;
                     break;
 
                 case 2:
@@ -88,8 +90,8 @@ struct DLS
  * DLS files/Pace System are like torrent files, they allow peers and seeders 
  * to send files between each other - using a tracker URL. libpace is more or less a P2P file share/torrent client.
 
- * SOCOM 4 does uses it along with some other internal SCE libraries (under the SCEA namespace).
- * (there are some other libraries used like libcrashreport, libbinxml, libmovie (uses cellSurMixer) , libmalloc
+ * SOCOM 4 does use it along with some other internal SCE libraries (under the SCEA namespace).
+ * (there are some other libraries used like libcrashreport, libbinxml, scert, libmovie (uses cellSurMixer), libmalloc,
  * SCEA::PSArc::ArchiveParser, edgezlib (SPURS based zlib decompressor), SCEA::Recap)
 
  * List of Pace APIs:
