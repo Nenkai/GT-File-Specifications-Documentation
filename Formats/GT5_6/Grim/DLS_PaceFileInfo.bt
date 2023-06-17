@@ -2,9 +2,9 @@
 //--- 010 Editor v12.0 Binary Template
 //
 //      File: PaceFileInfo_DLS.bt
-//   Authors: Nenkai#9075
+//   Authors: Nenkai
 //   Version: 
-//   Purpose: Sony Torrent File (Pace Info File)
+//   Purpose: Sony Torrent File (Pace Info File) - GT5P has some as .dls files (NPEA00050, NPUA80075)
 //  Category: 
 // File Mask: 
 //  ID Bytes: 
@@ -12,33 +12,72 @@
 //------------------------------------------------
 
 BigEndian();
-
-int64 DLSSize;
+BitfieldDisablePadding();
 
 typedef struct PieceHash
 {
-    byte hashData[0x20];
+    byte hashData[0x20] <comment="SHA-256">;
 };
 
 struct DLS
 {
-    short VersionMajor;
-    short VersionMinor;
-    int64 MovieFileSize <fgcolor=cGreen>;
-    short unk1;
-    short fileIdLen;
-    char fileId[fileIdLen];
-    byte unk3;
-    byte unk4;
+    byte VersionMajor : 4 <comment="Must be 0 otherwise error 0x80008001 (metadata version)">;
+    byte VersionMinor : 4 <comment="Must be 0 otherwise error 0x80008001 (metadata version)">;
+    int              : 20;
+    int MetadataUnk : 4 <comment="Must be 0 otherwise error 0x80008007 (metadata not valid)">;
 
-    short trackerUrlLen;
-    char trackerUrl[trackerUrlLen];
+    int SizeToEndOfFileFromHere <format=hex>;
+    
+    local int stop = false;
+    while (!stop)
+    {
+        struct
+        {
+            int FieldType : 16 <format=hex, fgcolor=cPurple>;
+            int FieldSize : 16 <format=hex, fgcolor=cYellow>;
+    
+            if ((FieldType & 0x8000) != 0)
+            {
+                int NumPieces <comment="For each 0x80000">;
+                PieceHash Pieces[NumPieces] <bgcolor=cDkGray>; // hash bytes must be present - stream reads just to check if they exist
+                stop = true;
+                return;
+            }
 
-    uint unk <format=hex>;
-    uint numPieces <format=hex>; // 0x80000 each
+            switch (FieldType)
+            {
+                case 1:
+                    int64 MovieFileSize <fgcolor=cGreen>;
+                    break;
 
-    PieceHash pieces[numPieces];
-    PieceHash final;
+                case 2:
+                    char FileId[FieldSize] <comment="Max 63 chars (null terminator non included) in that context">;
+                    break;
+
+                case 3:
+                    char TrackerUrl[FieldSize] <comment="Max 511 chars (null terminator non included) in that context">;
+                    break;
+            
+                case 4:
+                    int64 Unk4;
+                    break;
+
+                case 0x4001:
+                    char Unk4001[FieldSize] <comment="Max 1023 chars (null terminator non included) in that context">;
+                    break;
+
+                case 0x4002:
+                    char Unk4002[FieldSize] <comment="Max 1023 chars (null terminator non included) in that context">;
+                    break;
+                    
+                case 0x4003:
+                    char Unk4003[FieldSize] <comment="Max 511 chars (null terminator non included) in that context">;
+                    break;
+            }
+        } FileInfoField;
+    }
+
+    PieceHash ThisFileInfoHash <bgcolor=cRed, comment="Calculated from offset 0 to (SizeToEndOfFileFromHere - 0x18)">;
 } dls;
 
 /*
@@ -184,6 +223,25 @@ struct DLS
    typedef unsigned int *CellPaceHttpClientId;
    typedef int32_t CellPaceClientId;
    
- * Cell Error Codes
-   <TODO (?) - Check SOCOM 4 Debug Symbols at zNetwork::DLSImpl::PrintDLSError>
+    // GT5 2.11 EU RE-ing Hints (symbols guessed):
+
+    0x761214 'Pace::ReadDLSFile'
+    0x7601c0 'Pace::CalculatePaceFileInfoHash'
+    0x754A24 'Pace::FileSeek(ctx, size, whence)'
+    0x754bd0 'Pace::FileRead(ctx, size, ?)
+    0x755164 'Pace::SHA256Matches'
+    0x78333c 'Pace::AllocateFileInfoPieces'
+    0x7879c8 'Pace::HashBlock'
+    0x78799c 'Pace::HashFinalBlock'
+    0x782aa0 'DLSFileInfo::GetNumPieces'
+    0x782cd0 'DLSFileInfo::GetPiece'
+    0x7537d8 'DLSFileInfo::DLSHashPiece'
+    0x180673c 'g_PaceMemAllocator'
+    
+    Error codes (from socom 4's Debug Symbols - zNetwork::DLSImpl::PrintDLSError) (debugging.games website for symbols)
+    - 0x80008001 - Metadata version error
+    - 0x80008003 - Metadata read error
+    - 0x80008004 - Metadata seek error
+    - 0x80008007 - Metadata not valid error
+    - 0x8000801e - Memory Error
 */
