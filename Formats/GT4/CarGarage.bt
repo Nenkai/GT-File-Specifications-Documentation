@@ -134,6 +134,9 @@ struct CarEquipments
   char Susp_RearSpringRateLevel;
   byte byte169;
   byte unk_empty[8];
+
+  if (IsGT4Online())
+     byte unkGT4OData[0x18];
 };
 
 struct CarGarage

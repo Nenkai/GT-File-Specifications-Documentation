@@ -97,7 +97,7 @@ typedef struct
     } BGMPlayData[128];
 } BGMPlaylist;
 
-typedef enum <byte> { _1st, _2nd, _3rd, _4th, _5th, _6th, _7th, _8th, abandon, gold, silver, bronze, red, failed, view } Result;
+typedef enum <byte> { _1st, _2nd, _3rd, _4th, _5th, _6th, _7th, _8th, abandon, gold, silver, bronze, red, failed, view, Result_NONE } Result;
 
 typedef struct (int unitCount)
 {
@@ -344,9 +344,9 @@ struct
             struct
             {
                 enum <byte> { none, license, event, mission, } EventType : 4;
-                Result EventRank : 4;
+                Result PermanentResult : 4;
                 Result UnkRank2 : 4;
-                int Unk : 4;
+                Result CurrentResult : 4;
                 ubyte Points : 8;
                 byte _pad_;
             } RaceRecordUnit[768] <optimize=false>;

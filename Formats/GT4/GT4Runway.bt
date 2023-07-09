@@ -128,4 +128,7 @@ struct GT4Runway
     FSeek(sectionsOffset);
     Section sections[sectionCount];
 
+    FSeek(traversalDataOffset);
+    byte unk : 6;
+    enum <byte> { X, Y, Z} Axis : 2;
 } RWY4;

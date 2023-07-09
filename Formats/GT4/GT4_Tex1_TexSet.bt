@@ -148,7 +148,7 @@ typedef struct
    short Width;
    short Height;
 
-} TextureBufferInfo <optimize=false, comment="Declares a buffer for textures or palettes to use">;
+} TransferInfo <optimize=false, comment="Declares a buffer for textures or palettes to use">;
 
 // GS's Users Manual - Page 161 to 170 are useful for understanding blocks and pages
 typedef struct Tex1
@@ -164,16 +164,16 @@ typedef struct Tex1
         short BaseTBPOffset <comment="Remapped at runtime, multiplied by 64 for absolute">;
         short TotalBlockSize <format=hex, comment="Total blocks taken by all textures">;
         short PGLUTextureCount <fgcolor=cGreen>;
-        short TextureBufferInfoCount <fgcolor=cGreen>;
+        short TransferCount <fgcolor=cGreen>;
         int PGLUTextureMapOffset <format=hex, fgcolor=cRed>;
-        int TextureBufferInfosOffset  <format=hex, fgcolor=cRed>;
+        int TransferInfosOffset  <format=hex, fgcolor=cRed>;
         int unkOffset3 <format=hex, fgcolor=cRed>;
         int clutAnimationOffset <format=hex, fgcolor=cRed>; // TODO - havent seen any texture that uses that yet
         int unkOffset4 <format=hex, fgcolor=cRed>;
     } Header <size=0x30 , bgcolor=cPurple>;
 
     PGLUTexture textures[Header.PGLUTextureCount];
-    TextureBufferInfo Buffers[Header.TextureBufferInfoCount];
+    TransferInfo Transfers[Header.TransferCount];
 }; 
 
 local int LastTexSetOffset;

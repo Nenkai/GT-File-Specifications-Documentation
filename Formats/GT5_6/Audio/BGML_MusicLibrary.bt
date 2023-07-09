@@ -27,14 +27,25 @@ typedef struct
     FSeek(IDStringOffset);
     string ID <bgcolor=0xAAAAAA>;
     
-    FSeek(TrackNameOffset);
-    string TrackName <bgcolor=0xAAAAAA>;
-    
-    FSeek(ArtistNameOffset);
-    string ArtistName <bgcolor=0xAAAAAA>;
+    if (TrackNameOffset != 0)
+    {
+        FSeek(TrackNameOffset);
+        string TrackName <bgcolor=0xAAAAAA>;
+    }
 
-    FSeek(GenreNameOffset);
-    string GenreName <bgcolor=0xAAAAAA>;
+    Printf("sound_gt/track/%s\n", ID);
+
+    if (ArtistNameOffset != 0)
+    {
+        FSeek(ArtistNameOffset);
+        string ArtistName <bgcolor=0xAAAAAA>;
+    }
+
+    if (GenreNameOffset != 0)
+    {   
+        FSeek(GenreNameOffset);
+        string GenreName <bgcolor=0xAAAAAA>;
+    }
 } BGMLTrack <bgcolor=0x00BBBB>;
 
 typedef struct (int arrSize, int offset)
