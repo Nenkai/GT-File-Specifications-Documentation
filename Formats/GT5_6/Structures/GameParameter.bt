@@ -52,6 +52,14 @@ typedef struct
 
 typedef struct
 {
+    int64 code;
+    short label;
+    short is_tuned_car;
+    int unk;
+
+} CarThinGT5;
+typedef struct
+{
     int code;
     short label;
     short is_tuned_car;
@@ -64,59 +72,130 @@ typedef struct
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 61 AB
     int RegulationVersion <fgcolor=cGreen>;
 
-    int limit_pp;
-    int need_pp;
-    int limit_tire_f;
-    int need_tire_f;
-    int limit_tire_r;
-    int need_tire_r;
-    HArray car_categories;
-
-    int cars_size;
-    if (cars_size > 0)
-        CarThin cars[cars_size];
-
-    int need_license;
-    int limit_power;
-    int need_power;
-    if (RegulationVersion < 101)
+    if (Magic == 0xE5E561AB)
     {
-        int unk;
-        int unk2;
+        int limit_pp;
+        int need_pp;
+        int limit_tire_f;
+        int need_tire_f;
+        int limit_tire_r;
+        int need_tire_r;
+        HArray car_categories;
+    
+        int cars_size;
+        if (cars_size > 0)
+            CarThinGT5 cars[cars_size];
+    
+        int need_license;
+        int limit_power;
+        int need_power;
+        if (RegulationVersion < 101)
+        {
+            int unk;
+            int unk2;
+        }
+    
+        if (RegulationVersion >= 106)
+        {
+            int limit_torque;
+            int need_torque;
+        }
+    
+        int limit_weight;
+        int need_weight;
+        int limit_length;
+        int need_length;
+    
+        if (RegulationVersion >= 101)
+        {
+            int need_drivetrain;
+            int need_aspiration;
+            int limit_year;
+            int need_year;
+            int limit_aspec_level;
+            int need_aspec_level;
+        }
+    
+        int limit_bspec_level;
+        int need_bspec_level;
+        int limit_bspec_driver_count;
+        int need_bspec_driver_count;
+        HArray tuners;
+        HArray countries;
+        AlignedString4 need_entitlement;
+    
+        int tuning;
+        if (RegulationVersion >= 101)
+            int NOS;
+    
+        if (RegulationVersion >= 102)
+            int kart_permitted;
+
+        byte Reserved[0x74];
+    }
+    else if (Magic == 0xE6E661AB)
+    {
+        int limit_pp;
+        int need_pp;
+        int limit_tire_f;
+        int need_tire_f;
+        int limit_tire_r;
+        int need_tire_r;
+        HArray car_categories;
+    
+        int cars_size;
+        if (cars_size > 0)
+            CarThin cars[cars_size];
+    
+        int need_license;
+        int limit_power;
+        int need_power;
+        if (RegulationVersion < 101)
+        {
+            int unk;
+            int unk2;
+        }
+    
+        int limit_weight;
+        int need_weight;
+        int limit_length;
+        int need_length;
+    
+        if (RegulationVersion >= 101)
+        {
+            int need_drivetrain;
+            int need_aspiration;
+            int limit_year;
+            int need_year;
+            int limit_aspec_level;
+            int need_aspec_level;
+        }
+    
+        int limit_bspec_level;
+        int need_bspec_level;
+        int limit_bspec_driver_count;
+        int need_bspec_driver_count;
+        HArray tuners;
+        HArray countries;
+        AlignedString4 need_entitlement;
+    
+        int tuning;
+        if (RegulationVersion >= 101)
+            int NOS;
+    
+        if (RegulationVersion >= 102)
+            int kart_permitted;
+
+        int ban_cars_size;
+        if (ban_cars_size > 0)
+            CarThinGT5 cars[ban_cars_size];
+    
+        if (RegulationVersion >= 103)
+            int car_tag_id;
+
+        int restrictor_limit;
     }
 
-    int limit_weight;
-    int need_weight;
-    int limit_length;
-    int need_length;
-    int need_drivetrain;
-    int need_aspiration;
-    int limit_year;
-    int need_year;
-    int limit_aspec_level;
-    int need_aspec_level;
-    int limit_bspec_level;
-    int need_bspec_level;
-    int limit_bspec_driver_count;
-    int need_bspec_driver_count;
-    HArray tuners;
-    HArray countries;
-    AlignedString4 need_entitlement;
-
-    int tuning;
-    if (RegulationVersion >= 101)
-        int NOS;
-
-    if (RegulationVersion >= 102)
-        int kart_permitted;
-
-    int ban_cars_size;
-    if (ban_cars_size > 0)
-        CarThin cars[ban_cars_size];
-
-    if (RegulationVersion >= 103)
-        int car_tag_id;
-    int restrictor_limit;
 } Regulations;
 
 typedef struct
@@ -124,27 +203,63 @@ typedef struct
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 F3 3D
     int ConstraintsVersion <fgcolor=cGreen>;
 
-    int transmission;
-    int driving_line;
-    int asm;
-    int tcs;
-    int unk;
-    int abs;
-    int limit_tire_f;
-    int need_tire_f;
-    int suggest_tire_f;
-    int limit_tire_r;
-    int need_tire_r;
-    int suggest_tire_r;
-    int simulation;
-    int active_steering;
-    HArray cars;
-    int drift_type;
-    int suggested_gear;
-    int in_car_view;
-    int enemy_tire;
-    if (ConstraintsVersion >= 101)
-        int restrictor_limit;
+    if (Magic == 0xE5E5F33D)
+    {
+        int transmission;
+        int driving_line;
+        int asm;
+        int tcs;
+
+        if (ConstraintsVersion >= 101)
+            int unk;
+
+        int abs;
+        int limit_tire_f;
+        int need_tire_f;
+        int suggest_tire_f;
+        int limit_tire_r;
+        int need_tire_r;
+        int suggest_tire_r;
+        int simulation;
+        int active_steering;
+        HArray cars;
+        int drift_type;
+
+        if (ConstraintsVersion >= 102)
+            int suggested_gear;
+
+        if (ConstraintsVersion >= 103)
+            int in_car_view;
+
+        if (ConstraintsVersion >= 104)
+            int enemy_tire;
+
+        byte Reserved[0x70];
+    }
+    else if (Magic == 0xE6E6F33D)
+    {
+        int transmission;
+        int driving_line;
+        int asm;
+        int tcs;
+        int unk;
+        int abs;
+        int limit_tire_f;
+        int need_tire_f;
+        int suggest_tire_f;
+        int limit_tire_r;
+        int need_tire_r;
+        int suggest_tire_r;
+        int simulation;
+        int active_steering;
+        HArray cars;
+        int drift_type;
+        int suggested_gear;
+        int in_car_view;
+        int enemy_tire;
+        if (ConstraintsVersion >= 101)
+            int restrictor_limit;
+    }
 } Constraints;
 
 typedef enum <byte> { FINAL, QUALIFY, PRACTICE } SessionType;
@@ -526,7 +641,7 @@ typedef struct
 typedef struct
 {
     local int cPos = FTell();
-    short RaceParameterBufferSize; // 0x410 GT6
+    short RaceParameterBufferSize; // 0x410 GT6, 0x240 GT5
     short RaceParameterVersion <fgcolor=cGreen>;
 
 
@@ -636,23 +751,34 @@ typedef struct
 {
     BigEndian();
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 16 A7
-    if (Magic != 0xE6E616A7)
-        return;
-
     int PlayStyleVersion <fgcolor=cGreen>;
+    
     if (PlayStyleVersion < 102)
     {
         enum <int> { BOTH_A_AND_B, ONLY_A, ONLY_B } bspec_style; // BSpecStyle
         enum <int> { RACE_ps, DEMO_ps, GAMBLE } play_type; // PlayType
+
+        if (Magic == 0xE5E516A7)
+            int Empty;
+
         byte no_quickmenu;
         byte no_instant_replay;
-        byte replay_record_enable;
+
+        if (Magic == 0xE5E516A7)
+            short _unk;
+        else
+            byte replay_record_enable;
+
         if (PlayStyleVersion == 101)
             byte rentcar_setting_enable;
         int window_num;
         int time_limit;
         int leave_limit;
     }
+
+    if (Magic == 0xE5E516A7)
+        byte Unused[0x40];
+    
 } PlayStyle;
 
 typedef struct (int gadgetVersion)
@@ -660,11 +786,21 @@ typedef struct (int gadgetVersion)
     float x;
     float y;
     float z;
-    if (gadgetVersion >= 101)
-        byte kind_db_id;
 
-    int posture_count;
-    float posture[4];
+    if (gadgetVersion == 0) // GT5
+    {
+        byte unk;
+        byte unk2;
+        short unk3;
+    }
+    else
+    {
+        if (gadgetVersion >= 101)
+            byte kind_db_id;
+    
+        int posture_count;
+        float posture[4];
+    }
 
 } Gadget <optimize=false>;
 
@@ -679,60 +815,110 @@ typedef struct
 {
     int trackMagic <format=hex, fgcolor=cPurple>; // E6 E6 C3 44
     int trackVersion <fgcolor=cGreen>;
-    if (trackVersion >= 101)
-        int gadgetVersion <fgcolor=cGreen>;
 
-    int64 course_code;
-
-    int edit_data_size;
-    if (edit_data_size > 0)
-        byte edit_data[edit_data_size];
-
-    int course_layout_no;
-
-    if (trackVersion <= 101)
-        int skip;
-
-    int gadget_count;
-    if (gadget_count > 0)
-        GadgetMap gadgets(gadget_count, gadgetVersion);
-
-    if (trackVersion >= 102)
+    if (trackMagic == 0xE5E5C344)
     {
-        short map_offset_world_x;
-        short map_offset_world_y;
-        short map_scale;
-        byte is_omodeto_difficulty;
-        byte unk_field0x3B;
-        if (trackVersion >= 103)
-            int64 generated_course_id;
+        uint64 course_code <format=hex>;
+        
+        if (trackVersion >= 101)
+        {
+            int unk;
+        }
+
+        int unk;
+        int unk;
+        int gadget_count;
+        if (gadget_count > 0)
+            GadgetMap gadgets(gadget_count, 0);
+
+        if (trackVersion >= 104)
+        {
+            struct
+            {
+                int a;
+                int b;
+                float c;
+                int d;
+                int e;
+                AlignedString4 unkName;
+                int unkCount;
+                local int i = 0;
+                for (i; i < unkCount; i++)
+                {
+                    float unk[4];
+                }
+
+                if (trackVersion >= 105)
+                    int f;
+
+            } UnkTrackStru;
+        }
+
+        // V106
+        short a;
+        short b;
+        short c;  
+        short d;
+
+        byte Reserved[0x38];
     }
     else
     {
-        // GT5 Stuff for sure, needs research eventually
-        int unk;
-        int unk;
-        float unk;
-        int unk;
-        int unk;
-        
-        int strLen;
-        if (strLen > 0)
-            char str[strLen];
+        if (trackVersion >= 101)
+            int gadgetVersion <fgcolor=cGreen>;
     
-        int unkCount;
-        local int i = 0;
-        for (i; i < unkCount; i++)
+        int64 course_code;
+    
+        int edit_data_size;
+        if (edit_data_size > 0)
+            byte edit_data[edit_data_size];
+    
+        int course_layout_no;
+    
+        if (trackVersion <= 101)
+            int skip;
+    
+        int gadget_count;
+        if (gadget_count > 0)
+            GadgetMap gadgets(gadget_count, gadgetVersion);
+    
+        if (trackVersion >= 102)
         {
-            float unk[4];
+            short map_offset_world_x;
+            short map_offset_world_y;
+            short map_scale;
+            byte is_omodeto_difficulty;
+            byte unk_field0x3B;
+            if (trackVersion >= 103)
+                int64 generated_course_id;
         }
-    
-        int unk;
-        short map_offset_world_x;
-        short map_offset_world_y;
-        short map_scale;
-        byte is_omodeto_difficulty;
-        byte unk_field0x3B;
+        else
+        {
+            // GT5 Stuff for sure, needs research eventually
+            int unk;
+            int unk;
+            float unk;
+            int unk;
+            int unk;
+            
+            int strLen;
+            if (strLen > 0)
+                char str[strLen];
+        
+            int unkCount;
+            local int i = 0;
+            for (i; i < unkCount; i++)
+            {
+                float unk[4];
+            }
+        
+            int unk;
+            short map_offset_world_x;
+            short map_offset_world_y;
+            short map_scale;
+            byte is_omodeto_difficulty;
+            byte unk_field0x3B;
+        }
     }
 } Track <optimize=false>;
 
@@ -820,47 +1006,78 @@ typedef struct
     int Magic <format=hex>; // E6 E6 25 EE
     int EntryVersion <fgcolor=cGreen>;
     
-    int player_no;
-    CarThin car;
-    MCarParameter car_parameter;
-    FSeek(FTell());
-
-    AlignedString4 driver_name;
-    AlignedString4 driver_region;
-
-    local int i = 0;
-    for (i; i < 4; i++)
-        MDriverParameter driver_parameter_list;
-
-    if (EntryVersion >= 108)
-        EntryBase entry_base;
-    
-    byte available_initial_position;
-    byte race_class_id;
-    byte proxy_driver_model;
-    byte pilot_id;
-    int initial_position;
-    int initial_velocity;
-    int start_type;
-    int delay;
-    byte no_suitable_tyre;
-    short initial_fuel100;
-
-    int boost_rate_count;
-    if (boost_rate_count > 0)
+    if (Magic == 0xE5E525EE)
     {
-        byte boost_rate[boost_rate_count]; 
-        byte boost_rate2[boost_rate_count]; 
-    }
+        int player_no;
+        CarThinGT5 car;
+        MCarParameter car_parameter;
+        AlignedString4 driver_name;
+        
+        local int i = 0;
+        for (i; i < 4; i++)
+            MDriverParameter driver_parameter_list;
 
-    short ai_skill_braking;
-    short ai_skill_cornering;
-    byte ai_skill_acceleratinh;
-    byte ai_skill_starting;
-    byte ai_roughness;
-    if (EntryVersion >= 107)
+        byte available_initial_position;
+        byte race_class_id;
+        byte proxy_driver_model; // Not used if version < 101
+        byte pilot_id;
+        int initial_position;
+        int initial_velocity;
+        int start_type;
+        int delay;
         byte unk;
+        byte unk2;
+        short unk3;
+        byte Reserved[0x3C];
+    }
+    else
+    {
+        int player_no;
+        CarThin car;
+        MCarParameter car_parameter;
+        FSeek(FTell());
+    
+        AlignedString4 driver_name;
+        AlignedString4 driver_region;
+    
+        local int i = 0;
+        for (i; i < 4; i++)
+            MDriverParameter driver_parameter_list;
+    
+        if (EntryVersion >= 108)
+            EntryBase entry_base;
+        
+        byte available_initial_position;
+        byte race_class_id;
+        byte proxy_driver_model;
+        byte pilot_id;
+        int initial_position;
+        int initial_velocity;
+        int start_type;
+        int delay;
+        byte no_suitable_tyre;
+        short initial_fuel100;
+    
+        int boost_rate_count;
+        if (boost_rate_count > 0)
+        {
+            byte boost_rate[boost_rate_count]; 
+            byte boost_rate2[boost_rate_count]; 
+        }
+    
+        short ai_skill_braking;
+        short ai_skill_cornering;
+        byte ai_skill_acceleratinh;
+        byte ai_skill_starting;
+        byte ai_roughness;
+        if (EntryVersion >= 107)
+            byte unk;
+    }
 } Entry <optimize=false>;
+
+typedef enum <int> { NONE_gt, SHUFFLE_gt, ONE_MAKE_gt, ENEMY_LIST, SPEC_DB, ORDER_gt, ENTRY_BASE_SHUFFLE,
+                ENTRY_BASE_ORDER_gt } GenerateType;
+typedef enum <int> { SAME_elt, MIX, ONLY_PREMIUM, ONLY_STANDARD } EnemyListType;
 
 typedef struct
 {
@@ -872,36 +1089,66 @@ typedef struct
         int Magic <format=hex, fgcolor=cPurple>;
         int EntryGenerateVersion <fgcolor=cGreen>;
 
-        int entry_num;
-        int player_num;
-        enum <int> { NONE_gt, SHUFFLE_gt, ONE_MAKE_gt, ENEMY_LIST, SPEC_DB, ORDER_gt, ENTRY_BASE_SHUFFLE,
-            ENTRY_BASE_ORDER_gt } generate_type;
-        enum <int> { SAME_elt, MIX, ONLY_PREMIUM, ONLY_STANDARD } enemy_list_type; // EnemyListType
-        uint64 race_code;
-        int ai_skill;
-        int ai_skill_braking;
-        int ai_skill_cornering;
-        byte ai_skill_accelerating;
-        byte ai_skill_starting;
-        byte ai_roughness;
-        int enemy_lv;
+        if (Magic == 0xE5E54114)
+        {
+            int entry_num;
+            int player_num;
+            GenerateType generate_type;
+            EnemyListType enemy_list_type; // EnemyListType
+            uint64 race_code <format=hex>;
+            int ai_skill;
+            int ai_skill_braking;
+            int ai_skill_cornering;
+            int enemy_lv;
+            int cars_count;
+            if (cars_count > 0)
+                CarThin cars[cars_count];
 
-        int cars_count;
-        if (cars_count > 0)
-            CarThin cars[cars_count];
+            int delay_count;
+            int delays[delay_count];
 
-        int entry_base_array_count;
-        if (entry_base_array_count > 0)
-            EntryBase entry_base_array[entry_base_array_count];
-        int delay_count;
-        int delays[delay_count];
+            byte enemy_bspec_lv;
+            byte bspec_lv_offset;
+            short gap_for_start_rolling_distance;
+            int unk;
+            byte unk;
+            byte rolling_start_param;
+            short unk;
 
-        byte enemy_bspec_lv;
-        byte bspec_lv_offset;
-        short gap_for_start_rolling_distance;
-        short rolling_start_v;
-        byte rolling_start_param;
-        enum <byte> { NONE_est, PP_ASCEND, PP_DESCEND } enemy_sort_type;
+            byte Reserved[0x34];
+        }
+        else
+        {
+            int entry_num;
+            int player_num;
+            GenerateType generate_type;
+            EnemyListType enemy_list_type; // EnemyListType
+            uint64 race_code <format=hex>;
+            int ai_skill;
+            int ai_skill_braking;
+            int ai_skill_cornering;
+            byte ai_skill_accelerating;
+            byte ai_skill_starting;
+            byte ai_roughness;
+            int enemy_lv;
+    
+            int cars_count;
+            if (cars_count > 0)
+                CarThin cars[cars_count];
+    
+            int entry_base_array_count;
+            if (entry_base_array_count > 0)
+                EntryBase entry_base_array[entry_base_array_count];
+            int delay_count;
+            int delays[delay_count];
+    
+            byte enemy_bspec_lv;
+            byte bspec_lv_offset;
+            short gap_for_start_rolling_distance;
+            short rolling_start_v;
+            byte rolling_start_param;
+            enum <byte> { NONE_est, PP_ASCEND, PP_DESCEND } enemy_sort_type;
+        }
     } entry_generate;
 
     int entry_count;
@@ -913,11 +1160,16 @@ typedef struct
 {
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 A1 00
     int EvalConditionVersion <fgcolor=cGreen>;
+
     enum <int> { NONE_et, TIME_et, ORDER_et, PYLON_et, DRIFT_et, VS_GHOST_et, DIST_et, FUEL_et, OVER_TAKE } type; // EvalType
     int gold;
     int silver;
     int bronze;
     AlignedString4 ghost_data_type;
+    
+    if (Magic == 0xE5E5A100)
+        byte Reserved[0x40];
+
 } EvalCondition;
 
 typedef struct
@@ -927,15 +1179,30 @@ typedef struct
     enum <int> { NONE_at, STOP_at, GOAL_V_at, TIME_at, ORDER_at, PYLON_at, SLIP_ANGLE, MORE_SPEED,
         MAX_GFORCE, OVERTAKE_NUM } type; // AchieveType
     int num;
+
+    if (Magic == 0xE5E5A100)
+        byte Reserved[0x40];
 } AchieveCondition;
 
 typedef struct
 {
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 DC CE
     int FailureConditionVersion <fgcolor=cGreen>;
-    HArray type_list;
-    HArray data_list;
-    byte no_failure_at_result;
+
+    if (Magic == 0xE5E5DCCE)
+    {
+        HArray type_list;
+        HArray data_list;
+
+        if (FailureConditionVersion >= 101)
+            byte no_failure_at_result;
+    }
+    else
+    {
+        HArray type_list;
+        HArray data_list;
+        byte no_failure_at_result;
+    }
 } FailureCondition;
 
 typedef struct
@@ -1013,45 +1280,73 @@ typedef struct
     int blob_size;
     if (blob_size > 0)
         byte blob[blob_size];
+
+    if (Magic == 0xE5E5D2B3)
+        byte Reserved[0x40];
+
 } GameItem <optimize=false>;
 
 typedef struct
 {
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 A1 07
     int RewardVersion <fgcolor=cGreen>;
-    HArray prize_table;
-    HArray point_table;
 
-    int star_table_size;
-    if (star_table_size > 0)
-        byte star_table[star_table_size];
-
-    int present_size;
-    if (present_size > 0)
-        GameItem present[present_size];
-    int special_reward_code;
-    short prize_type;
-    short pp_base;
-    short percent_at_pp100;
-    byte is_once;
-    byte unk;
-    if (RewardVersion >= 102)
+    if (Magic == 0xE5E5A107)
     {
-        int entry_present_size;
-        if (entry_present_size > 0)
-            GameItem entry_present[entry_present_size];
-        enum <byte> { FINISH_ept, ALL_ept, LAP_ept } entry_present_type; // EntryPresentType
+        HArray prize_table;
+        HArray point_table;
+    
+        int present_size;
+        if (present_size > 0)
+            GameItem present[present_size];
+        int special_reward_code;
+        short prize_type;
+        short pp_base;
+        short percent_at_pp100;
+        byte is_once;
+        byte unk;
+    
+        byte Reserved[0x38];
     }
-
-    if (RewardVersion >= 103)
-        EntryBase entry_base;
+    else
+    {
+        HArray prize_table;
+        HArray point_table;
+    
+        int star_table_size;
+        if (star_table_size > 0)
+            byte star_table[star_table_size];
+    
+        int present_size;
+        if (present_size > 0)
+            GameItem present[present_size];
+        int special_reward_code;
+        short prize_type;
+        short pp_base;
+        short percent_at_pp100;
+        byte is_once;
+        byte unk;
+        if (RewardVersion >= 102)
+        {
+            int entry_present_size;
+            if (entry_present_size > 0)
+                GameItem entry_present[entry_present_size];
+            enum <byte> { FINISH_ept, ALL_ept, LAP_ept } entry_present_type; // EntryPresentType
+        }
+    
+        if (RewardVersion >= 103)
+            EntryBase entry_base;
+    }
 } Reward;
+
+typedef enum <short> { TIME_rt, DRIFT_rt } RankingType;
 
 typedef struct
 {
     int Magic <format=hex, fgcolor=cPurple>; // E6 E6 6D E9
     int RankingVersion <fgcolor=cGreen>;
-    enum <short> { TIME_rt, DRIFT_rt } type; // RankingType
+
+    RankingType type; // RankingType
     short is_local;
     short replay_rank_limit;
     short display_rank_limit;
@@ -1059,11 +1354,14 @@ typedef struct
     int64 begin_date;
     int64 end_date;
     short registration;
-
+    
     if (RankingVersion >= 101)
         byte registration_type;
     else
         short skip;
+
+    byte Reserved[0x3C];
+    
 } Ranking;
 
 typedef struct
@@ -1210,7 +1508,7 @@ typedef struct
 
 typedef struct
 {
-    int Magic <format=hex, fgcolor=cPurple>; // E6 E8 DC CF
+    int Magic <format=hex, fgcolor=cPurple>; // E6E8DCCF (GT6) / E5E5043D (GT5)
     int EventVersion <fgcolor=cGreen>;
     int64 event_id <fgcolor=cRed>;
     enum <int> { SINGLE_RACE, TIME_ATTACK, DRIFT_ATTACK, FREE_RUN, EVENT_RACE, EVENT_RALLY,
@@ -1233,8 +1531,13 @@ typedef struct
     EvalCondition eval_condition <bgcolor=cBlue>;
     AchieveCondition achieve_condition <bgcolor=cAqua>;
     FailureCondition failure_condition;
-    LicenseCondition license_condition;
-    DriftCondition drift_condition;
+
+    if (Magic == 0xE6E8DCCF)
+        LicenseCondition license_condition;
+
+    if (EventVersion >= 103)
+        DriftCondition drift_condition;
+
     Reward reward <bgcolor=cPurple>;
     Ranking ranking;
     Replay replay;
@@ -1243,16 +1546,23 @@ typedef struct
     int64 begin_date;
     int64 end_date;
 
-    StageData stage_data;
-
-    AlignedString4 penalty_script <fgcolor=0x6699>;
-    AlignedString4 ai_script <fgcolor=0x00AAFF>;
-
-    if (EventVersion == 104)
-        uint unk;
+    if (Magic == 0xE6E8DCCF)
+    {
+        StageData stage_data;
     
-    if (EventVersion >= 106)
-        ArcadeStyleSetting arcade_style_setting;
+        AlignedString4 penalty_script <fgcolor=0x6699>;
+        AlignedString4 ai_script <fgcolor=0x00AAFF>;
+    
+        if (EventVersion == 104)
+            uint unk;
+        
+        if (EventVersion >= 106)
+            ArcadeStyleSetting arcade_style_setting;
+    }
+    else
+    {
+        byte Reserved[0x40];
+    }
 
 } Event <optimize=false>;
 
@@ -1313,6 +1623,92 @@ typedef struct
     byte freerun_penalty;
     byte freerun_collision;
     
+    if (Magic == 0xE5E5D845)
+    {
+        if (OnlineRoomVersion < 101)
+        {
+            byte Reserved[0x80];
+            return;
+        }
+
+        if (OnlineRoomVersion >= 104)
+        {
+            int quality_control_parameter_size;
+            byte quality_control_parameter[quality_control_parameter_size];
+
+            short shuffle_params[4]; // Shuffle Base, Shuffle Ratio
+            int shuffle_params2[2];
+        }
+        else
+        {
+            Skip(0x68);
+            if (OnlineRoomVersion >= 102)
+            {
+                Skip(8);
+                Skip(8);
+                if (OnlineRoomVersion == 102)
+                    Skip(0x6C);
+            }
+            return;
+        }
+
+        if (OnlineRoomVersion >= 106)
+            int unk;
+        else
+        {
+            byte Reserved[0x78];
+            return;
+        }
+
+        if (OnlineRoomVersion >= 107)
+            int unk2;
+        else
+        {
+            byte Reserved[0x74];
+            return;
+        }
+
+        if (OnlineRoomVersion >= 108)
+            AlignedString4 lounge_owner_id;
+        else
+        {
+            byte Reserved[0x58];
+            return;
+        }       
+ 
+        if (OnlineRoomVersion >= 109)
+            byte unk;
+        else
+        {
+            byte Reserved[0x03];
+            byte Reserved2[0x58];
+            return;
+        }
+
+        if (OnlineRoomVersion >= 110)
+        {
+            short unk;
+            byte unk2;
+            uint unk3;
+        }
+        else
+        {
+            byte Reserved[0x50];
+            return;
+        }
+
+        if (OnlineRoomVersion >= 111)
+        {
+            short unk;
+            byte unk3;
+            byte Reserved[0x01];
+            byte Reserved2[0x4C];
+        }
+        
+
+        return;
+    }
+
     int quality_control_parameter_size;
     byte quality_control_parameter[quality_control_parameter_size];
 
@@ -1428,10 +1824,8 @@ typedef struct
     int psp_mode;
 } EditorInfo;
 
-struct FGP
+typedef struct FGP
 {
-    //FSeek(0x12); // For FGP
-    FSeek(0); // Debug testing of a quickmatch replay
 
     // xx xx 4F 17 - Game Parameter File Main Magic. E5 means GT5, E6 means GT6
     uint Magic <format=hex, fgcolor=cPurple>;
@@ -1446,22 +1840,30 @@ struct FGP
     Information series_information;
     EditorInfo editor_info;
 
-    if (GameParameterVersion < 101)
+    if (Magic == 0xE5E54F17)
     {
         short championship;
         short arcade;
+        byte Reserved[0x3C];
     }
     else
     {
-        byte championship;
-        byte arcade;
-        byte keep_sequence;
-        byte launch_context;
+        if (GameParameterVersion < 101)
+        {
+            short championship;
+            short arcade;
+        }
+        else
+        {
+            byte championship;
+            byte arcade;
+            byte keep_sequence;
+            byte launch_context;
+        }
     }
-
     int MagicTerminator <format=hex, fgcolor=cPurple>; // E6 E6 4F 18
-    if (MagicTerminator != 0xE6E64F18) // May be notted? GT6 1.22 EU at 0x34bb9c - xoris
-        Printf("Magic terminator did not finish with 0xE6E64F18, file may be invalid\n");
+    if (MagicTerminator != 0xE6E64F18 && MagicTerminator != 0xE5E54F18)
+        Printf("Magic terminator did not finish with 0xE6E64F18 (GT6) or 0xE5E54F18 (GT5), file may be invalid\n");
     else
     {
         Printf("Magic terminator is correct.\n");

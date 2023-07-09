@@ -168,9 +168,13 @@ typedef struct
         else // GT6
         {
             int PartsVersion;
+            byte unk;
+            byte unk2;
             short frontWheelEx;
             short rearWheelEx;
-            int wheelInchupRelated;
+            
+            byte unk3;
+            byte unk4;
             int wheel_sp;
             int car_code;
             int garage_id;
@@ -220,7 +224,7 @@ typedef struct
         int unk;
         int ridigityImprovement;
         int nitroKit;
-    
+
         short GearReverse;
         short Gear1;
         short Gear2;
@@ -234,6 +238,7 @@ typedef struct
         short Gear10;
         short Gear11;
         short FinalGearRatio;
+        
         byte MaxSpeed_10;
         short GearLastFinal;
         byte Param4WDMaybe;
@@ -319,22 +324,10 @@ typedef struct
         byte RearBrakeBalanceLevel;
         byte ABSCorneringControlLevel;
 
-        if (MainHeader.CarParameterVersion >= 110) // GT5
-            short unk;
-        else
-            byte unk;
-
         short unk;
-
-        if (MainHeader.CarParameterVersion >= 110) // GT5
-            byte GasCapacity;
-        else
-            short GasCapacity; // GT6
-
-        if (MainHeader.CarParameterVersion >= 110 && PartsVersion >= 0x104) // GT5
-            short PowerLimiter;
-        else if (MainHeader.CarParameterVersion < 109)
-            short PowerLimiter; 
+        short unk;
+        byte GasCapacity;
+        short PowerLimiter; 
             
         int horn_sound_id : 32;
         if (MainHeader.CarParameterVersion >= 110)
@@ -431,14 +424,14 @@ typedef struct
             byte backlightColorG : 8;
             byte backlightColorB : 8;
             byte backlightColorA : 8;
+
+            if (PartsVersion >= 118)
+            {
+                short frontToe : 16;
+                short rearToe : 16;
+            }
         }        
         
-        if (PartsVersion >= 118)
-        {
-            short frontToe : 16;
-            short rearToe : 16;
-        }
-
         local int alignedBlobSize = (FTell() + (0xf - cpBaseOffset)) & 0xFFFFFFF0; // 0x10 Align
         FSeek(cpBaseOffset + alignedBlobSize);
 
@@ -446,19 +439,24 @@ typedef struct
     
     if (MainHeader.CarParameterVersion >= 110)
     {
-        FSeek(MainHeader.MainHeaderSize + 0x40 + Settings.PartsSize);
         short obtain_id;
         short PowerScratch;
         short PPScratch;
         short unk;
+
+        local int purchaseBitsSize = MainHeader.CarParameterVersion >= 109 ? 0x40 : 0x0C;
+        local int size = (MainHeader.MainHeaderSize + purchaseBitsSize + 0x1F8); // 0x200 if not pack_small?
+        local int alignedBlobSize = (size + 0xF) & 0xFFFFFFF0;
+        FSeek(cpBaseOffset + alignedBlobSize);
+        
     }
     else
     {
         // GT6 Purchase bits are at the bottom
-        byte PurchasedBits[0x20];
+        if (MainHeader.CarParameterVersion < 109)
+            byte PurchasedBits[0x40];
+        else
+            byte PurchasedBits[0x20];
     }
-
-    local int alignedBlobSize = (FTell() + (0xf - cpBaseOffset)) & 0xFFFFFFF0; // 0x10 Align
-    FSeek(cpBaseOffset + alignedBlobSize);
 
 } MCarParameter;
