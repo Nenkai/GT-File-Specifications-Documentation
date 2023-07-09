@@ -1,4 +1,4 @@
-//------------------------------------------------
+ //------------------------------------------------
 //--- 010 Editor v10.0.2 Binary Template
 //
 //      File: GameParameter
@@ -329,33 +329,40 @@ typedef struct
     byte unk : 8;
     byte race_initial_laps : 8;
     byte keep_load_ghost : 8;
-    int course_code : 32;
-    byte line_ghost_play_max : 8;
-    byte goal_time_use_lap_total : 1;
-
-    if (RaceParameterVersion < 117) 
-    {
-        int unkPad : 23;
-    }
+    if (RaceParameterVersion == 105)
+        int64 course_code <format=hex>;
     else
+        int course_code : 32;
+
+    if (RaceParameterVersion > 105)
     {
-        byte unk : 2;
-        if (RaceParameterVersion < 119)
+        byte line_ghost_play_max : 8;
+        byte goal_time_use_lap_total : 1;
+    
+        if (RaceParameterVersion < 117) 
         {
-            int unkPad : 21;
+            int unkPad : 23;
         }
         else
         {
-            byte force_pitcrew_off : 1;
-            int unkPad : 20;
+            byte unk : 2;
+            if (RaceParameterVersion < 119)
+            {
+                int unkPad : 21;
+            }
+            else
+            {
+                byte force_pitcrew_off : 1;
+                int unkPad : 20;
+            }
         }
-    }
-
-    if (RaceParameterVersion >= 121)
-    {
-        int scenery_code;
-        int unk;
-        int64 unk;
+    
+        if (RaceParameterVersion >= 121)
+        {
+            int scenery_code;
+            int unk;
+            int64 unk;
+        }
     }
 
     short packet_timeout_inverval : 16;
@@ -363,30 +370,46 @@ typedef struct
     short packet_timeout_lag : 16;
     short racers_max : 16;
     int unk : 32;
+
     byte skipped : 7;
     byte autostart_pitout : 1;
+
     byte start_time_offset : 5;
     byte unk : 3;
+
     byte auto_standing_delay : 8;
+
     byte unk : 3;
     StartSignalType start_signal_type : 2;
     byte skipped : 2;
     byte unk : 1;
-    byte bench_test : 1;
-    byte mu_ratio_100 : 8;
-    byte unk : 1;
-    byte enable_damage : 1;
-    LowMuType low_mu_type : 2;
-    BehaviorDamageType behavior_damage : 2; 
-    byte gps : 1;
-    byte penalty_no_reset : 1;
-    BehaviorSlipStreamType behavior_slipstream_type : 2;
-    byte pit_constraint : 4;
-    byte need_tire_change : 1;
-    byte after_race_penalty_sec5 : 4;
-    byte is_speedtest_milemode : 1;
-    LineGhostRecordType line_ghost_record_type : 2;
-    AttackSeperateType attack_seperate_type : 2;
+
+    if (RaceParameterVersion < 105)
+    {
+        // mu_ratio_100 100 by default
+        byte unk;
+        byte unk;
+        short unk;
+    }
+    else
+    {
+        // byte bench_test : 1;
+        byte mu_ratio_100 : 8;
+        byte unk : 1;
+        byte enable_damage : 1;
+        LowMuType low_mu_type : 2;
+        BehaviorDamageType behavior_damage : 2; 
+        byte gps : 1;
+        byte penalty_no_reset : 1;
+        BehaviorSlipStreamType behavior_slipstream_type : 2;
+        byte pit_constraint : 4;
+        byte need_tire_change : 1;
+        byte after_race_penalty_sec5 : 4;
+        byte is_speedtest_milemode : 1;
+        LineGhostRecordType line_ghost_record_type : 2;
+        AttackSeperateType attack_seperate_type : 2;
+    }
+
     byte penalty_level : 8;
     byte auto_start_with_session : 8;
     byte auto_end_session_with_finish : 8;
@@ -434,15 +457,56 @@ typedef struct
 
     if (RaceParameterVersion >= 113)
         int event_start_v : 32;
-    int event_goal_v : 32;
-    byte event_goal_width : 8;
-    
-    byte fixed_retention : 1;
-    ubyte initial_retention10 : 4;
-    enum <byte> { NONE_dw, SUNNY, RAINY, SNOWY } decisive_weather : 3;
-    short weather_total_sec : 16;
-    WeatherData weather;
 
+    if (RaceParameterVersion >= 106)
+    {
+        int event_goal_v : 32;
+        byte event_goal_width : 8;
+    
+        byte fixed_retention : 1;
+        ubyte initial_retention10 : 4;
+        enum <byte> { NONE_dw, SUNNY, RAINY, SNOWY } decisive_weather : 3;
+
+        short weather_total_sec : 16;
+        WeatherData weather;
+    }
+    else
+    {
+        // GT5 Weather data
+        short unk : 16;
+        byte unk : 8;
+        byte unk : 1;
+        byte unk : 4;
+        byte unk : 3;
+        byte unk : 4;
+
+        byte unk : 4;
+        byte unk : 8;
+
+        byte unk : 4;
+        byte unk : 8;
+
+        byte unk : 4;
+        byte unk : 8;
+
+        byte unk : 6;
+        byte unk : 6;
+        byte unk : 6;
+        byte unk : 6;
+
+        int unk : 32;
+        byte unk : 1;
+        byte unk : 1;
+        byte unk : 1;
+        byte unk : 1;
+        byte unk : 1;
+        byte unk : 1;
+        byte unk : 1;
+        short unk : 10;
+        byte unk : 7;
+        byte unk : 4;
+        byte unk : 4;
+    }
 } RaceParameterDataOld;
 
 typedef struct
@@ -632,18 +696,21 @@ typedef struct
     byte side_speed1_steering : 8;
     byte side_speed_steering_score0 : 8;
     byte side_speed_steering_score1 : 8;
-    byte shortcut_type : 8;
-    ubyte pena_speed_ratio1 : 8;
-    ubyte pena_speed_ratio2 : 8;
-    ubyte pena_speed_ratio3 : 8;
+
+    if (RaceParameterVersion >= 106)
+    {
+        byte shortcut_type : 8;
+        ubyte pena_speed_ratio1 : 8;
+        ubyte pena_speed_ratio2 : 8;
+        ubyte pena_speed_ratio3 : 8;
+    }
 } PenaltyParameter;
 
 typedef struct
 {
     local int cPos = FTell();
     short RaceParameterBufferSize; // 0x410 GT6, 0x240 GT5
-    short RaceParameterVersion <fgcolor=cGreen>;
-
+    short RaceParameterVersion <fgcolor=cGreen>; // Assuming 106 >= is GT6, under is GT5
 
     if (RaceParameterVersion < 122)
         RaceParameterDataOld rp;
@@ -670,39 +737,55 @@ typedef struct
             short start_type_slot : 16;
     } start_type_slot_list <optimize=false>;
 
-    struct BoostStuff
+    
+    if (RaceParameterVersion >= 106)
     {
-        local int j = 0;
-        struct BoostTable
+        struct BoostStuff
         {
-            for (i = 0; i < 2; i++)
+            local int j = 0;
+            struct BoostTable
             {
-                for (j = 0; j < 4; j++)
-                    byte front : 8;
-                for (j = 0; j < 4; j++)
-                    byte rear : 8;
-                byte boost_reference_rank : 8;
-                byte unk : 8;
-            }
-        } table <optimize=false>;
-
-        struct BoostParams
-        {
-            for (i = 0; i < 32; i++)
+                for (i = 0; i < 2; i++)
+                {
+                    for (j = 0; j < 4; j++)
+                        byte front : 8;
+                    for (j = 0; j < 4; j++)
+                        byte rear : 8;
+                    byte boost_reference_rank : 8;
+                    byte unk : 8;
+                }
+            } table <optimize=false>;
+    
+            struct BoostParams
             {
-                for (j = 0; j < 6; j++)
-                    byte front : 8;
-                for (j = 0; j < 6; j++)
-                    byte rear : 8;
-            }
-        } params <optimize=false>;
-    } boost <optimize=false>;
+                for (i = 0; i < 32; i++)
+                {
+                    for (j = 0; j < 6; j++)
+                        byte front : 8;
+                    for (j = 0; j < 6; j++)
+                        byte rear : 8;
+                }
+            } params <optimize=false>;
+        } boost <optimize=false>;
 
-    byte boost_level : 8;
-    byte rooling_player_grid : 8;
-    byte unk : 8;
-    byte boost_flag : 8;
-    byte boost_type : 8;
+        byte boost_level : 8;
+        byte rooling_player_grid : 8;
+        byte unk : 8;
+        byte boost_flag : 8;
+        byte boost_type : 8;
+    }
+    else
+    {
+        byte unkBoost : 8;
+        byte unkBoost2 : 8;
+        byte unkBoost3 : 8;
+        byte rolling_player_grid : 8;
+        byte unkBoost : 8;
+        byte unkBoost2 : 8;
+        byte unkBoost3 : 8;
+        byte boost_type : 8;
+    }
+    
     byte disable_recording_replay : 8;
     enum <byte> { NORMAL_gpt, REAL_gpt } ghost_presence_type : 8; // GhostPresenceType
     
@@ -714,16 +797,35 @@ typedef struct
     
     PenaltyParameter penaltyParameter;
     
-    short unk : 8;
-    struct Unk_
+    if (RaceParameterVersion >= 106)
     {
-        for (i = 0; i < 4; i++)
-            byte unk : 8;
-    } unk;
-
-    byte unk : 8;
-    byte large_entry_max : 8;
+        short unk : 8;
+        struct Unk_
+        {
+            for (i = 0; i < 4; i++)
+                byte unk : 8;
+        } unk;
     
+        byte unk : 8;
+        byte large_entry_max : 8;
+    }
+    else
+    {
+        struct Unk__
+        {
+            for (i = 0; i < 3; i++)
+                short unk : 16;
+        } unk;
+
+        struct Unk__2
+        {
+            for (i = 0; i < 4; i++)
+                byte unk : 8;
+        } unk2;
+        
+        byte unk;
+    }
+
     if (RaceParameterVersion >= 114)
         byte pitstage_revision : 8;
 
@@ -1869,4 +1971,4 @@ typedef struct FGP
         Printf("Magic terminator is correct.\n");
         Printf("FGP parsed correctly.");
     }
-} fgp <optimize=false>;
+};
