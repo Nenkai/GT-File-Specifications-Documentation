@@ -1,0 +1,399 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Gran Turismo 3 Game Config (.gcf)
+//   Authors: Nenkai & pez2k
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .gcf
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+// Replays
+typedef struct
+{
+    local int basePos = FTell();
+    int NameOffset <format=hex, fgcolor=cRed>;
+    uint UnkIndex; // GT3 EU: 0x21ED68
+    
+    FSeek(basePos + NameOffset);
+    string Name;
+} Replay <comment=Name>;
+
+typedef struct
+{
+    local int basePos = FTell();
+    int EntryCount <fgcolor=cGreen>;
+    int RelativeIndicesOffset <format=hex, fgcolor=cRed>;  
+     
+    FSeek(basePos + RelativeIndicesOffset);   
+    int EntryOffsets[EntryCount] <format=hex, fgcolor=cRed>;
+        
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(basePos + EntryOffsets[i]);
+        Replay replay;
+    }
+} Replays;
+
+// Courses
+typedef struct
+{
+    local int basePos = FTell();
+    int NameOffset <format=hex, fgcolor=cRed>;
+
+    FSeek(basePos + NameOffset);
+    string Name;
+} Course <comment=Name>;
+
+typedef struct
+{
+    local int basePos = FTell();
+    int EntryCount <fgcolor=cGreen>;
+    int RelativeIndicesOffset <format=hex, fgcolor=cRed>;  
+     
+    FSeek(basePos + RelativeIndicesOffset);   
+    int EntryOffsets[EntryCount] <format=hex, fgcolor=cRed>;
+        
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(basePos + EntryOffsets[i]);
+        Course course;
+    }
+} Courses;
+
+// Prizes
+typedef struct
+{
+    local int basePos = FTell();
+    int PrizeID;
+    int CarLabelOffset <format=hex, fgcolor=cRed>;
+    int PaintID;
+    int Unk;
+    
+    FSeek(basePos + CarLabelOffset);
+    string Name;
+} EventPrizeCar <comment=Name>;
+
+typedef struct
+{
+    local int basePos = FTell();
+    int RelativeNameOffset <format=hex, fgcolor=cRed>;
+    int PrizeTableSize <fgcolor=cGreen>;
+    int RelativePrizeTableOffset <format=hex, fgcolor=cRed>;
+    
+    FSeek(basePos + RelativeNameOffset);
+    string Name;
+    
+    FSeek(basePos + RelativePrizeTableOffset);   
+    int EntryOffsets[PrizeTableSize] <format=hex, fgcolor=cRed>;
+    
+    local int i = 0;
+    for (i = 0; i < PrizeTableSize; i++)
+    {
+        FSeek(basePos + EntryOffsets[i]);
+        EventPrizeCar car;
+    }
+} EventPrizePool <comment=Name>;
+
+typedef struct
+{
+    local int basePos = FTell();
+    int EntryCount <fgcolor=cGreen>;
+    int RelativeIndicesOffset <format=hex, fgcolor=cRed>;  
+     
+    FSeek(basePos + RelativeIndicesOffset);   
+    int EntryOffsets[EntryCount] <format=hex, fgcolor=cRed>;
+        
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(basePos + EntryOffsets[i]);
+        EventPrizePool eventPrizePool;
+    }
+} EventPrizes;
+
+// GT Auto
+typedef struct
+{
+    local int basePos = FTell();
+    int RelativeNameOffset <format=hex, fgcolor=cRed>;
+    int Price;
+    
+    FSeek(basePos + RelativeNameOffset);
+    string Name;
+} GTAutoActionPrice <comment=Name>;
+
+typedef struct
+{
+    local int basePos = FTell();
+    int EntryCount <fgcolor=cGreen>;
+    int RelativeIndicesOffset <format=hex, fgcolor=cRed>;  
+     
+    FSeek(basePos + RelativeIndicesOffset);   
+    int EntryOffsets[EntryCount] <format=hex, fgcolor=cRed>;
+        
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(basePos + EntryOffsets[i]);
+        GTAutoActionPrice price;
+    }
+} GTAutoPrices;
+
+// Auto Demo
+typedef struct
+{
+    local int basePos = FTell();
+    
+    // GT3 EU: 0x21E2C0
+    int IdleSecondsToStart <comment="Number of seconds before autodemo starts when the current menu is 'root' (main menu)">;
+    int MaybeNotUsed; // fetched, but not used? GT3 EU: 0x21E2D0
+} AutoDemoConfig;
+
+// Events
+typedef struct
+{
+    local int basePos = FTell();
+    int RelativeNameOffset <format=hex, fgcolor=cRed>;
+    int IsLocked;
+    
+    FSeek(basePos + RelativeNameOffset);
+    string Name;
+} Event <comment=Name>;
+
+typedef struct
+{
+    local int basePos = FTell();
+    int EntryCount <fgcolor=cGreen>;
+    int RelativeIndicesOffset <format=hex, fgcolor=cRed>;  
+     
+    FSeek(basePos + RelativeIndicesOffset);   
+    int EntryOffsets[EntryCount] <format=hex, fgcolor=cRed>;
+        
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(basePos + EntryOffsets[i]);
+        Event event;
+    }
+} Events;
+
+// Demos
+typedef struct
+{
+    local int basePos = FTell();
+    int RelativeNameOffset <format=hex, fgcolor=cRed>;
+    int RelativeCourseNameOffset <format=hex, fgcolor=cRed>; // GT3 EU: 0x21E718
+    int UnkNameOffset <format=hex, fgcolor=cRed>;
+    uint Unk; // GT3 EU: 0x21E758
+    int IsLocked;
+    
+    FSeek(basePos + RelativeNameOffset);
+    string Name;
+    
+    FSeek(basePos + RelativeCourseNameOffset);
+    string CourseName;
+    
+    FSeek(basePos + UnkNameOffset);
+    string UnkName;
+} Demo <comment=Name>;
+
+typedef struct 
+{
+    local int basePos = FTell();
+    int EntryCount <fgcolor=cGreen>;
+    int RelativeIndicesOffset <format=hex, fgcolor=cRed>;  
+     
+    FSeek(basePos + RelativeIndicesOffset);   
+    int EntryOffsets[EntryCount] <format=hex, fgcolor=cRed>;
+        
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(basePos + EntryOffsets[i]);
+        Demo demo;
+    }
+} Demos;
+
+
+// Arcade
+typedef struct
+{
+    local int basePos = FTell();
+    int RelativeNameOffset <format=hex, fgcolor=cRed>; // GT3 EU: 0x21E528
+    byte UnkBool; // This is used. (0x21E628 in GT3 EU)
+    byte UnusedBool; // has a function for it, but no xref (0x21E548 in GT3 EU)
+    short UnlockLevel;
+    int CourseLength; // GT3 EU: 0x21E608
+
+    FSeek(basePos + RelativeNameOffset);
+    string Name;
+} ArcadeModeCourseSelection <comment=Name>;
+
+typedef struct
+{
+    local int basePos = FTell();
+    
+    // GT3 has:
+    // SINGLE_RACE
+    // COMPULSORY
+    // TIME_ATTACK
+    // TWO_PLAYER
+    // GOODIES
+    // LOAD_GUEST_GARAGE
+    // I_LINK
+    
+    int NameOffset <format=hex, fgcolor=cRed>;
+    uint EntryCount <fgcolor=cGreen>; // GT3 EU: 0x21E508
+    uint RelativeIndicesOffset <format=hex, fgcolor=cRed>;
+
+    FSeek(basePos + NameOffset);
+    string Name;
+    
+    FSeek(basePos + RelativeIndicesOffset);   
+    int EntryOffsets[EntryCount] <format=hex, fgcolor=cRed>;
+    
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(basePos + EntryOffsets[i]);
+        ArcadeModeCourseSelection course;
+    }
+    
+} ArcadeModeCourseSelections <comment=Name>;
+
+typedef struct
+{
+    local int basePos = FTell();
+    int EntryCount <fgcolor=cGreen>;
+    int RelativeIndicesOffset <format=hex, fgcolor=cRed>;  
+     
+    FSeek(basePos + RelativeIndicesOffset);   
+    int EntryOffsets[EntryCount] <format=hex, fgcolor=cRed>;
+    
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(basePos + EntryOffsets[i]);
+        ArcadeModeCourseSelections mode;
+    }
+    
+} ArcadeCourseSelection;
+
+// CarClasses
+typedef struct
+{
+    local int basePos = FTell();
+    
+    int NameOffset <format=hex, fgcolor=cRed>; // GT3 EU: 0x21E300
+    int ArcadeEventLabelNameOffset <format=hex, fgcolor=cRed>; // GT3 EU: 0x21E320 - something like "ATAF0001"?
+    byte unkBool; // GT3 EU: 0x21E400
+    byte unk2;
+    short UnlockLevel;
+    int OpponentGroup; // GT3 EU: 0x21E360
+    
+    FSeek(basePos + NameOffset);
+    string Name;
+    
+    FSeek(basePos + ArcadeEventLabelNameOffset);
+    string ArcadeEventLabel;
+} CarData <comment=Name>;
+
+typedef struct
+{
+    local int basePos = FTell();
+    
+    int RelativeNameOffset <format=hex, fgcolor=cRed>;
+    int EntryCount <fgcolor=cGreen>; // GT3 EU: 0x21E2E0
+    int RelativeCarDataOffsetsOffset <format=hex, fgcolor=cRed>;
+    
+    FSeek(basePos + RelativeNameOffset);
+    string ClassName;
+    
+    FSeek(basePos + RelativeCarDataOffsetsOffset);
+    int DataOffsets[EntryCount] <format=hex, fgcolor=cRed>;
+    
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(basePos + DataOffsets[i]);
+        CarData data;
+    }
+    
+} CarClass <comment=ClassName>;
+
+typedef struct 
+{
+    local int basePos = FTell();
+    int EntryCount <fgcolor=cGreen>;
+    int RelativeIndicesOffset <format=hex, fgcolor=cRed>;  
+     
+    FSeek(basePos + RelativeIndicesOffset);   
+    int EntryOffsets[EntryCount] <fgcolor=cRed>;
+        
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(basePos + EntryOffsets[i]);
+        CarClass class;
+    }
+} CarClasses;
+
+struct
+{
+    struct
+    {
+        int ListCount <fgcolor=cGreen>;
+        int ListsOffset <format=hex, fgcolor=cRed>;
+    } Header <bgcolor=cPurple>;
+    
+    local int i = 0;
+    for (i = 0; i < Header.ListCount; i++)
+    {
+        FSeek(Header.ListsOffset + (i * 0x08));
+        struct
+        {
+            local int cpos;
+            int Type <format=hex, fgcolor=cRed>;
+            int DataOffset <format=hex, fgcolor=cRed>;
+            
+            FSeek(DataOffset);
+            switch (Type)
+            {
+                // All of these used by retail GT3
+                case 0x00:
+                    AutoDemoConfig autoDemo;
+                    break;
+                case 0x04:
+                    Events events;
+                    break;
+                case 0x06:
+                    Courses courses;
+                    break;
+                case 0x08:
+                    ArcadeCourseSelection arcadeModes;
+                    break;
+                case 0x0A:
+                    GTAutoPrices gtAuto;
+                    break;
+                case 0x0C:
+                    Demos demos;
+                    break;
+                case 0x0D:
+                    Replays replays;
+                    break;
+                case 0x0E:
+                   CarClasses carClasses;
+                   break;
+                case 0x0F:
+                   EventPrizes eventPrizes;
+                   break;
+            }
+        } ListOffset <optimize=false>;
+    }
+} GameConfig;
