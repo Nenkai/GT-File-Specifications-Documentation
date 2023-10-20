@@ -1,0 +1,32 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include <CarGarage.bt>
+
+struct
+{
+    uint money_hi;
+    uint money_lo;
+    int unused[9];
+    int Key1;
+    int Key2;
+    int LastSystemTimeMicrosecond <format=hex>;
+    int UniqueID <format=hex>;
+    int SystemTimeMicrosecond <format=hex>;
+} GarageFileHeader;
+
+int rand;
+int crc;
+
+CarGarage car;
+

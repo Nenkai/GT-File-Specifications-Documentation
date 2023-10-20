@@ -1,0 +1,177 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    int Code;
+    int TableId;
+} DbCode;
+
+struct CarEquipments
+{
+  DbCode CarCode;
+  DbCode TunedCarCode;
+  DbCode Variation;
+  byte VariationOrder;
+  byte gap19[7];
+  DbCode Brake;
+  DbCode BrakeController;
+  DbCode Chassis;
+  DbCode Engine;
+  DbCode Drivetrain;
+  DbCode Gear;
+  DbCode Suspension;
+  DbCode LSD;
+  DbCode FrontTire;
+  DbCode RearTire;
+  DbCode Steer;
+  DbCode Lightweight;
+  DbCode RacingModify;
+  DbCode Portpolish;
+  DbCode EngineBalance;
+  DbCode Displacement;
+  DbCode Computer;
+  DbCode Natune;
+  DbCode TurbineKit;
+  DbCode Flywheel;
+  DbCode Clutch;
+  DbCode PropellerShaft;
+  DbCode Muffler;
+  DbCode Intercooler;
+  DbCode ASCC;
+  DbCode TCSC;
+  DbCode Wheel;
+  DbCode NOS;
+  DbCode Wing;
+  DbCode SuperCharger;
+  short GearReverse;
+  short GearRatio1;
+  short GearRatio2;
+  short GearRatio3;
+  short GearRatio4;
+  short GearRatio5;
+  short GearRatio6;
+  short GearRatio7;
+  short GearRatio8;
+  short GearRatio9;
+  short GearRatio10;
+  short GearRatio11;
+  short FinalGearRatio;
+  short MaxSpeed;
+  short LastFinalGearRatio;
+  byte Param4WD;
+  byte FrontABS;
+  char RearABS;
+  char SettingClF;
+  char SettingClR;
+  char Boost1;
+  char PeakRPM1;
+  char Response1;
+  char Boost2;
+  char PeakRPM2;
+  char Response2;
+  char field_136;
+  char field_137;
+  char field_138;
+  short Susp_RideHeightF;
+  short Susp_RideHeightR;
+  uchar FrontToe;
+  uchar RearToe;
+  uchar FrontSpringRate;
+  uchar RearSpringRate;
+  uchar leverRatioF;
+  uchar leverRatioR;
+  uchar FrontDamperF1B;
+  uchar FrontDamperF2B;
+  uchar FrontDamperF1R;
+  uchar FrontDamperF2R;
+  uchar RearDamperF1B;
+  uchar RearDamperF2B;
+  uchar RearDamperF1R;
+  uchar RearDamperF2R;
+  char FrontStabilizer;
+  char RearStabilizer;
+  char FrontLSDparam;
+  char FrontLSDparam2;
+  char FrontLSDparam3;
+  char RearLSDparam;
+  char RearLSDparam2;
+  char RearLSDpara3;
+  char TCSC_Value;
+  char ASCC_VSC1;
+  char ASCC_VSC2;
+  char ASCC_VUC1;
+  char ASCC_VUC2;
+  char BallastWeight;
+  char BallastPosition;
+
+  
+  char unk;
+  short unk;
+  char unk;
+  char unk;
+  char unk;
+  char field_15D;
+  short word15E;
+  byte IsStangeCar;
+  byte NOSTorqueVolume; // 0x16F
+  byte TireSize_StiffnessCategory;
+  byte byte163;
+  byte Gear_WeightRoller; // 0x172
+  byte Susp_FrontPreLoadLevel;
+  byte Susp_RearPreLoadLevel;
+  byte Susp_FrontSpringRateLevel;
+  char Susp_RearSpringRateLevel;
+  byte byte169;
+  byte unk_empty[8];
+
+  if (IsGT4Online())
+     byte unkGT4OData[0x18];
+};
+
+struct CarGarage
+{
+    CarEquipments Sheet1;
+    CarEquipments Sheet2;
+    CarEquipments Sheet3;
+    byte PurchaseFlags[0x20];
+    int unk;
+    byte Unk2[0x0C];
+    
+    struct
+    {
+        uint Odometer;
+        float EngineLife;
+        float OilLife;
+        float Dirtiness;
+        float BodyLife;
+        byte Everlasting;
+        byte _pad_[0x0B];
+    } AutomobileAccumulatedStatus;
+};
+
+/*
+struct
+{
+    if (IsGT4Retail())
+        byte CurrentCarParameterMaybe[0x468];
+    else
+        byte CurrentCarParameterMaybe[0x4B0];
+
+    byte b[0x20];
+    int c;
+    byte d[0x0C];
+    byte e[0x20];
+    SerializeAlign();
+} CarGarage <optimize=false>;
+*/

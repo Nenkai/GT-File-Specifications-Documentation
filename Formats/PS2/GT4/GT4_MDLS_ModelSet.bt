@@ -1,0 +1,228 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Gran Turismo PS2 - Model Set
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BitfieldDisablePadding();
+
+#include "../PS2ModelCommon.bt"
+#include "../../Shared/ModelSetupCommands.bt"
+
+typedef struct
+{
+    local int firstByte = ReadByte();
+    if (firstByte & 0x80)
+    {
+        if (firstByte & 0x40)
+        {
+            byte values[4];
+        }
+        else
+        {
+            byte values[2];
+        }
+    }
+    else
+    {
+        byte value;
+    }
+} _7bitInt <optimize=false>;
+typedef struct
+{
+    byte nextSize;
+
+    /* 800000 = Unk
+     * 800001 = Model Namen or "useOldLOD" for MultiSkinModel
+     * 800002 = Brake Offset as float
+    */
+    int ID : 24 <format=hex>;
+        
+    if (nextSize == 0xFF || ID == 0)
+    {
+        stop = true;
+        return;
+    }   
+
+    local int dataLen = nextSize * 4;
+    byte data[nextSize * sizeof(int)];
+} ExtensionData <optimize=false>;
+
+typedef struct
+{
+    while (true)
+    {
+        ExtensionData ext;
+        if (stop)
+            break;
+    }
+
+} ExtensionMap;
+
+uint AlignValue(uint x, uint alignment)
+{
+      local uint mask = ~(alignment - 1);
+      return (x + (alignment - 1)) & mask;
+}
+
+typedef struct 
+{
+    byte unk;
+    byte BoundCount;
+    byte unk;
+    byte unk;
+    int BoundsOffset <format=hex, fgcolor=cRed>;
+    float usedToComputeModelLODWidth;
+    float usedToComputeBounds;
+    float e;
+    int f;
+    int SetupOpcodesOffset <format=hex>;
+    int h;
+    int j;
+    int k;
+
+    FSeek(BasePos + SetupOpcodesOffset);
+    PGLCommands Commands;
+    
+
+} Model;
+
+
+struct GT4_ModelSet
+{   
+
+    local int BasePos = FTell();
+    struct
+    {
+        
+        char Magic[4];
+        int RelocatorDataOffset <format=hex>;
+        int RelocatorDataSize <format=hex>;
+        int RelocationBase;
+
+        FSeek(BasePos + 0x10);
+        int fileSize <format=hex>;
+        byte Unk;
+        byte HasInstanceAt0x7C <format=hex>;
+
+        short ModelsCount;
+        short ShapeCount;
+        short Unk;
+        short texSetArrayWidth;
+        short texSetArrayHeight;
+        short countFor0x4C;
+        short empty;
+        short hostMethodInfoCount;
+        short registerDataCount;
+        short outRegisterInfoCount;
+    
+        FSeek(BasePos + 0x2a);
+        short modelSetSymbols;
+        byte unkColorIndex;
+        byte unkColorIndex2;
+        short bindMatrixCount;
+        
+        FSeek(BasePos + 0x36);
+        short unkCount; // Negative, intentional
+        int ModelsOffset <format=hex>; // Strides of 0x28, count at 0x16
+        int ShapesOffset <format=hex>; // Strides of 0x4 - offsets
+    
+        FSeek(BasePos + 0x40);
+        int matTable <format=hex>;
+        int texSetsOffset <format=hex>;
+        int bindMatrixMapOffset <format=hex>;
+        int hostMethodInfoOffset <format=hex>; // strides of 0x08
+    
+        FSeek(BasePos + 0x50);
+        int registerInfoOffset <format=hex>;
+        int outRegisterInfoOffset <format=hex>;
+        int modelSetSymbolsOffset <format=hex>; // 0x08 toc - offset then index?
+        
+        FSeek(BasePos + 0x60);
+        int unkColorsArrayOffset;
+    
+        FSeek(BasePos + 0x68);
+        int ExtensionDataOffset <format=hex>;
+    } Header;
+
+    FSeek(BasePos + Header.ModelsOffset);
+    Model models[Header.ModelsCount];
+
+    FSeek(BasePos + Header.ShapesOffset);
+    struct
+    {
+        int ShapesOffset[Header.ShapeCount] <format=hex, fgcolor=cRed>;
+
+        local int i = 0;
+        for (i = 0; i < Header.ShapeCount; i++)
+        {
+            FSeek(BasePos + ShapesOffset[i]);
+            pgluShape shape;   
+        }
+    } Shapes;
+
+    FSeek(BasePos + Header.ExtensionDataOffset);
+    ExtensionMap extensionMap;
+
+    FSeek(BasePos + Header.RelocatorDataOffset);
+    struct
+    {
+        int OffsetToUserData;
+        uint SymbolsPtr <comment="This is not read">;
+        _7bitInt OffsetType; // 0 = SetRelocationBase, 1 = update1/byte, 2 = update2/short, 3 = update4/int
+        _7bitInt SymbolIndex;
+        _7bitInt TotalNumberOfOffsetsToRelocate;
+        _7bitInt StartOffsetForGroup;
+
+        local int stop = false;
+        while (!stop)
+        {
+            struct
+            {
+                ubyte CountAndFlag <format=hex>;
+                if (CountAndFlag == 0)
+                {
+                    stop = true;
+                    break;
+                }
+
+                if (CountAndFlag >= 0x80) // Array, all in a row
+                {
+                    // Array, all in a row
+                    local int i = 0;
+                    local int OffsetCount = CountAndFlag - 0x80;
+                    _7bitInt OffsetsToUpdateNext[OffsetCount - 1];
+                    break;
+                }
+                else // Array with provided offsets
+                {
+                    _7bitInt NextOffsets[CountAndFlag + 1];
+                    break;
+                }
+            } RelocateOffsetGroup;
+            
+        }
+
+        // Child offsets
+        
+        FSeek(Header.RelocatorDataOffset + OffsetToUserData);
+        int SymbolCount1 <comment="Debug or stripped">;
+
+        int SymbolCount2 <comment="Debug or stripped">;
+        if (SymbolCount1 && SymbolCount2)
+        {
+            // readUserChunks(i, count1, count2) - stripped in release
+            ushort unkCount;
+
+            // Masked strings are xorred by 0xAA
+            // string uint masked_symbols_string_offsets[unkCount]
+        }
+    } RelocatorData;
+} ModelSet2 <optimize=false>;

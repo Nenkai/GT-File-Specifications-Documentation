@@ -1,0 +1,187 @@
+ //------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "../PS2ModelCommon.bt"
+#include "../../Shared/ModelSetupCommands.bt"
+#include "../Tex1_TextureSet1.bt"
+
+BitfieldDisablePadding();
+
+typedef struct
+{
+    local int basePos = FTell();
+    
+    uint Magic <format=hex>;
+    uint RelocPtr;
+    
+    uint unk[14];
+    
+    uint Count <fgcolor=cGreen>;
+    uint Offset <format=hex, fgcolor=cRed>;
+    uint Count <fgcolor=cGreen>;
+    uint Offset <format=hex, fgcolor=cRed>;
+    uint Count <fgcolor=cGreen>;
+    uint Offset <format=hex, fgcolor=cRed>;
+    uint Count <fgcolor=cGreen>;
+    uint Offset <format=hex, fgcolor=cRed>;
+    uint Count <fgcolor=cGreen>;
+    uint Offset <format=hex, fgcolor=cRed>;
+    uint Count <fgcolor=cGreen>;
+    uint Offset <format=hex, fgcolor=cRed>;
+    int UnkOffset <format=hex, fgcolor=cRed>;
+} CarInfo;
+
+typedef struct
+{
+    PGLCommands SetupCommands;
+} Model;
+
+uint AlignValue(uint x, uint alignment)
+{
+      local uint mask = ~(alignment - 1);
+      return (x + (alignment - 1)) & mask;
+}
+
+typedef struct
+{
+    float Unk[16];
+    int unk2[2];
+    int UnkOffset;
+    int Unk;
+} Material;
+
+typedef struct
+{
+    local int basePos = FTell();
+    
+    struct
+    {
+        uint Magic <format=hex>;
+        uint RelocPtr;
+        int Empty;
+        int Empty2;
+        short ModelCount <fgcolor=cGreen>;
+        short ShapeCount <fgcolor=cGreen>;
+        short MaterialCount <fgcolor=cGreen>;
+        short TexSetCount <fgcolor=cGreen>;
+        short UnkCount0x34 <fgcolor=cGreen>;
+        short UnkCount0x38 <fgcolor=cGreen>;
+        int Empty;
+        uint ModelTableOffset <format=hex, fgcolor=cRed>;
+        uint ShapeTableOffset <format=hex, fgcolor=cRed>;
+        uint MaterialsOffset <format=hex, fgcolor=cRed>;
+        uint TexSetTableOffset <format=hex, fgcolor=cRed>;
+        uint BoundingsOffset <format=hex, fgcolor=cRed>;
+        uint Offset0x38 <format=hex, fgcolor=cRed>;    
+        uint Offset0x3C <format=hex, fgcolor=cRed>;
+    } Header;
+    
+    if (Header.MaterialCount > 0 && Header.MaterialsOffset != 0)
+    {
+        struct
+        {
+            FSeek(basePos + Header.MaterialsOffset);
+            Material material[Header.MaterialCount];
+        } Materials;
+    }
+    
+    if (Header.ModelCount > 0 && Header.ModelTableOffset != 0)
+    {
+        struct
+        {
+            FSeek(basePos + Header.ModelTableOffset);
+            int ModelTable[Header.ModelCount] <format=hex, fgcolor=cRed>;
+            
+            local int i = 0;
+            for (i = 0; i < Header.ModelCount; i++)
+            {
+                FSeek(basePos + ModelTable[i]); 
+                Model model;
+            }
+        } Models;
+    }
+    
+    if (Header.ShapeCount > 0 && Header.ShapeTableOffset != 0)
+    {
+        struct
+        {
+            FSeek(basePos + Header.ShapeTableOffset);
+            int ShapeTable[Header.ShapeCount] <format=hex, fgcolor=cRed>;
+            
+            local int i = 0;
+            for (i = 0; i < Header.ShapeCount; i++)
+            {
+                FSeek(basePos + ShapeTable[i]); 
+                pgluShape shape;
+            }
+        } Shapes;
+    }
+   
+    if (Header.BoundingsOffset != 0)
+    {
+        struct
+        {
+            FSeek(basePos + Header.BoundingsOffset);
+            struct
+            {
+                float unk;
+                Vector3 pos;
+            } Bounding[Header.ModelCount];
+            
+            FSeek(FileSize()); // Fix 010 bug
+        } Boundings;  
+    }
+    
+    if (Header.TexSetTableOffset != 0)
+    {
+        struct
+        {
+            FSeek(basePos + Header.TexSetTableOffset);
+            int TexTable[Header.TexSetCount] <format=hex, fgcolor=cRed>;
+            
+            local int i = 0;
+            for (i = 0; i < Header.TexSetCount; i++)
+            {
+                FSeek(basePos + TexTable[i]); 
+                TextureSet1 TextureSet;
+            }
+            
+            FSeek(FileSize()); // Fix 010 bug
+        } TexSetTable;
+    }
+    
+} ModelSet;
+
+typedef struct
+{
+    struct
+    {
+        int RelocPtr;
+        uint CarInfoOffset <format=hex, fgcolor=cRed>;
+        uint MainModelSetOffset <format=hex, fgcolor=cRed>;
+        uint WheelModelOffset <format=hex, fgcolor=cRed>;
+        uint WheelModel2Offset <format=hex, fgcolor=cRed>;
+        uint ModelSet1Offset <format=hex, fgcolor=cRed>;
+    } Header <bgcolor=cPurple, size=0x40>;
+    
+    FSeek(Header.CarInfoOffset);
+    CarInfo Info;
+    
+    FSeek(Header.MainModelSetOffset);
+    ModelSet MainModelSet;
+} CarModel;
+
+if (ReadUInt() == 0x314D5447)
+    ModelSet ModelSet_;
+else
+    CarModel CarModel_;

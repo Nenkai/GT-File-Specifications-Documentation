@@ -1,0 +1,156 @@
+ //------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+local byte stop = false;
+typedef struct
+{
+    enum<byte> 
+    {
+        End = 0,
+
+        RenderModel_1ub = 2,
+        RenderModel_1us = 3,
+        pgluCallShape = 4,
+        Unk = 6,
+        LODData = 7,
+        Jump = 8,
+        Unk9 = 9,
+        pglUnk_Enable17_WithMatrix = 10,
+        pglUnk_Enable17 = 11,
+        pglPushMatrix = 12,
+        pglPopMatrix = 13,
+        pglMatrixMode = 14,
+        pglScale = 18,
+        pglEnable_4 = 0x1A,
+        pglDisable_4 = 0x1b,
+        pglAlphaFunc_1ub = 28,
+        pglEnable_3 = 29,
+        pglDisable_3 = 30,
+        pglDestinationAlphaFunc = 31,
+        pglBlendFunc1ub = 32,
+        pglFogColor1ui = 33,
+        pgluColor = 34,
+        pglFogColor1ui2 = 35,
+        pglDepthMask_0Disable = 37,
+        pglDepthMask_1Enable = 38,
+        pgluTexTable_1ub = 43,
+        pglAlphaFail = 47,
+        externalTexSet = 0x50,
+    }cmd;
+    
+    switch (cmd)
+    {
+        case 0x00:
+            stop = true;
+            break;
+            
+        case 0x04: // Shape Index byte
+            byte ShapeIndex;
+            break;
+            
+        case 0x05: // Shape Index short
+            short ShapeIndex;
+            break;
+            
+        case 0x06:
+            short unk;
+            byte unkCount;
+            short indices[unkCount];
+            break;
+        case 0x07:
+            Vector3 unk0x07;
+            float Unk0x07_2;
+            byte lodCount;
+            short unkOffsets[lodCount] <format=hex>;
+            break;
+            
+        case 0x08: // Jump byte
+            byte RelativeJumpOffset;
+            break;
+        case 0x09: // Jump short
+            short RelativeJumpOffset;
+            break;
+            
+        case 0x0B:
+        case 0x0C:
+        case 0x0D:
+            break;
+            
+        case 0x0A:
+            byte num;
+            Vector3 vecs[num];
+            short OffsetMaybe;
+            break;
+        case 0x10:
+            float matrices_0x10[4 * 4];
+            break;
+        case 0x1A:
+        case 0x1B:
+            break;
+        case 0x1C:
+            short unk_0x1C;
+            break;
+        case 0x1D:
+        case 0x1E:
+            break;
+        case 0x1F:
+            byte unk;
+            break;
+        case 0x20:
+            byte unk;
+            byte unk2;
+            break;
+        case 0x21:
+            int unk;
+            break;
+        case 0x22:
+        case 0x23:
+            break;
+        case 0x24:
+            uint unk <format=hex>;
+            break;
+        case 0x25:
+        case 0x26:
+            break;
+        case 0x2B:
+            byte unkIndex;
+            break;
+        case 0x2C:
+            short unkIndex;
+            break;
+        case 0x2D:
+        case 0x2E:
+            break;
+        case 0x32:
+            float unk_0x32;
+            break;
+        case 0x33:
+            float unk[4];
+            break;
+        default:
+            stop = true;  
+            break;
+    }
+} PGLCommand <optimize=false, comment=cmd>;
+
+typedef struct
+{
+    stop = false;
+    while (true)
+    {
+        PGLCommand cmd;
+        if (stop)
+            break;
+    }
+
+} PGLCommands;

@@ -1,0 +1,261 @@
+ //------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vector3;
+
+typedef enum<int> SCE_GS_PRIM
+{
+    SCE_GS_PRIM_POINT		= (0x00),
+    SCE_GS_PRIM_LINE		= (0x01),
+    SCE_GS_PRIM_LINESTRIP   = (0x02),
+    SCE_GS_PRIM_TRI			= (0x03),
+    SCE_GS_PRIM_TRISTRIP	= (0x04),
+    SCE_GS_PRIM_TRIFAN		= (0x05),
+    SCE_GS_PRIM_SPRITE		= (0x06),
+    SCE_GS_PRIM_IIP			= (1<<3), // Gouraud
+    SCE_GS_PRIM_TME			= (1<<4), // Textured
+    SCE_GS_PRIM_FGE			= (1<<5), // Fogging
+    SCE_GS_PRIM_ABE			= (1<<6), // Alpha Blending
+    SCE_GS_PRIM_AA1			= (1<<7), // Anti-Aliasing
+    SCE_GS_PRIM_FST			= (1<<8), // Use ST for texture coords
+    SCE_GS_PRIM_CTXT1		= (0),    // Context
+    SCE_GS_PRIM_CTXT2		= (1<<9),
+    SCE_GS_PRIM_FIX			= (1<<10), // Fragment Control
+} SceGsPrim;
+
+typedef enum<byte> SCE_GIF_FLAGS
+{
+   SCE_GIF_PACKED      = 0,
+   SCE_GIF_REGLIST     = 1,
+   SCE_GIF_IMAGE       = 2,
+   // Maybe more
+} SceGsFlags;
+
+string PrintPrimInfo(SCE_GS_PRIM& as)
+{
+   local string s;
+   if ((as & 0b111) == 1)
+      s += "SCE_GS_PRIM_LINE | ";
+   else if ((as & 0b111) == 2)
+      s += "SCE_GS_PRIM_LINESTRIP | ";
+   else if ((as & 0b111) == 3)
+      s += "SCE_GS_PRIM_TRI | ";   
+   else if ((as & 0b111) == 4)
+      s += "SCE_GS_PRIM_TRISTRIP | ";
+   else if ((as & 0b111) == 5)
+      s += "SCE_GS_PRIM_TRIFAN | ";
+   else if ((as & 0b111) == 6)
+      s += "SCE_GS_PRIM_SPRITE | ";
+   else
+      s += "SCE_GS_PRIM_POINT | ";
+
+   if ((as >> 3) & 1)
+      s += "SCE_GS_PRIM_IIP (Gouraud) | ";
+
+   if ((as >> 4) & 1)
+      s += "SCE_GS_PRIM_TME (Textured) | ";
+   
+   if ((as >> 5) & 1)
+      s += "SCE_GS_PRIM_FGE (Fogging) | ";
+
+   if ((as >> 6) & 1)
+      s += "SCE_GS_PRIM_ABE (Alpha Blending) | ";
+  
+   if ((as >> 7) & 1)
+      s += "SCE_GS_PRIM_AA1 (Anti-Aliasing) | ";
+
+   if ((as >> 8) & 1)
+      s += "SCE_GS_PRIM_FST (Use ST for texture coords) | ";
+
+   if ((as >> 9) & 1)
+      s += "SCE_GS_PRIM_CTXT2 | ";
+
+   if ((as >> 10) & 1)
+      s += "SCE_GS_PRIM_FIX (Fragment Control) | ";
+
+   return s;
+}
+
+typedef enum
+{
+    SCE_GS_PRIM_ = 0x00,
+    SCE_GS_RGBAQ = 0x01,
+    SCE_GS_ST    = 0x02,
+    SCE_GS_UV    = 0x03,
+    SCE_GS_XYZF2 = 0x04,
+    SCE_GS_XYZ2  = 0x05,
+    SCE_GS_FOG   = 0x0a,
+    SCE_GS_XYZF3 = 0x0c,
+    SCE_GS_XYZ3  = 0x0d
+} SCE_GS_REG;
+
+// PS2 Graphics Primer - GIF-GS Presentation.pdf
+
+typedef struct
+{
+    // 0xC0C0 - GIFTag? Second value = SCE_GIF_SET_TAG
+    // 0x8000 = Vertices
+    // 0x8040 = UVs
+    // 0x8080 = Normals
+    
+    // Anything else doesn't seem related to faces
+
+    ushort vuaddr <format=hex>;
+    byte num : 8;
+    enum <byte>
+    {
+        NOP = 0x00,
+        STCYCL = 0x01,
+        OFFSET = 0x02,
+        BASE = 0x03,
+        ITOP = 0x04,
+        STMOD = 0x05,
+        MSKPATH3 = 0x06,
+        MARK = 0x07,
+        FLUSHE = 0x10,
+        FLUSH = 0x11,
+        FLUSHA = 0x13,
+        MSCAL = 0x14,
+        MSCALF = 0x15,
+        MSCNT = 0x17,
+        STMASK = 0x20,
+        STROW = 0x30,
+        STCOL = 0x31,
+        MPG = 0x4A,
+        DIRECT = 0x50,
+        DIRECTHL = 0x51,
+        UNPACK = 0x60,
+    } cmd : 7 <format=hex>;
+
+    // MSCAL is always appended to the end (engine side)
+
+    byte irq : 1;
+
+    if (vuaddr == 0xC0C0)
+    {
+        struct
+        {
+            int nloop : 15 <comment="Data per register to transfer">;
+            int eop : 1 <comment="End of packet">;
+            int pad16 : 16;
+            int id : 14;
+            int pre : 1 <comment="Primitive setting enable">;
+            SceGsPrim prim : 11 <comment=PrintPrimInfo>;
+            SCE_GIF_FLAGS flg : 2;
+            int nreg : 4 <comment="Number of gs registers">;
+        } sceGifTag;
+        
+        struct 
+        {
+            local int i = 0;
+            for (i = 0; i < sceGifTag.nreg; i++)
+                SCE_GS_REG reg : 4; // Refer to https://psi-rockin.github.io/ps2tek/#gifdataformats
+        } GSRegisterList <comment="Reverse order!">;
+        FSeek(AlignValue(FTell(), 4));
+    }
+    else if ((cmd >= 0x60))
+    {
+        struct
+        {
+            local int field_type = cmd & 0x03;
+            local int elem_count = ((cmd >> 2) & 0x03) + 1;
+
+            switch (field_type)
+            {
+                case 0:
+                    int val[elem_count] <optimize=false>;
+                    break;
+    
+                case 1:
+                    short val[elem_count] <optimize=false>;
+                    break;
+    
+                case 2:
+                    byte val[elem_count] <optimize=false>;
+                    break;
+    
+                //case 3:
+                //    int val : 5;
+                //    break;
+            }
+
+            
+ 
+        } PACKED_DATA[num] <optimize=false>;
+    }
+    else if (cmd == STMASK)
+    {
+        uint mask <format=hex>;
+    }
+    else if (cmd == STROW)
+    {
+        uint strow[4];
+    }
+    FSeek(AlignValue(FTell(), 4));
+
+} VifCommand <optimize=false>;
+
+
+typedef struct(int quadwordSize)
+{
+    local int count = 0;
+    local int basePos = FTell();
+    while (FTell() < basePos + (quadwordSize * 0x10))
+    {
+        VifCommand cmd;
+    }
+
+} VifData <optimize=false, bgcolor=cBlack>;
+
+typedef struct 
+{
+    local int baseShapePos = FTell();
+    int RelocPtr;
+    float Size;
+    byte unk0 : 5; // 2 to 6 are handled specifically
+    byte unk1 : 3;
+
+    byte unkFlags <format=hex>;
+    short VifPartCount;
+    short TotalVertCount;
+    short TriangleCount;
+
+    struct
+    {
+        int VifDataOffset <format=hex, fgcolor=cRed>;
+        short DMATagQuadwordCount;
+
+        // GT4O 0x59A7E8 -> 0x599DB8
+        short pgluMaterialFunc_TextureIndex : 9; // 511 max
+        short pgluMaterialFuncValue2 : 7; // 127 max
+    } ShapeDataInfo[VifPartCount];
+
+    local int j = 0;
+    for (j = 0; j < VifPartCount; j++)
+    {
+        FSeek(baseShapePos + ShapeDataInfo[j].VifDataOffset);
+        VifData Strips(ShapeDataInfo[j].DMATagQuadwordCount);
+    }
+
+    if (unkFlags & 0x80)
+    {
+        float unk;
+        ubyte VertCount;
+        ubyte VUAddrQWord <format=hex>;
+    }
+} pgluShape <optimize=false>;

@@ -1,0 +1,462 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: MCarParameter structure for GT6
+//   Authors: Nenkai#9075
+//   Version: 
+//   Purpose: Used to transmit car information in events (i.e prize cars with installed parts), saved in saves aswell
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+BigEndian();
+BitfieldDisablePadding();
+
+// Credits Razerman; Logic originally found used in ghidra, seen used in the custom tracks bts
+string OutputDateTime( uint s )
+{
+    uint rawDateTime = s;
+    uint Year = (((rawDateTime >> 0x1a)) + 1970);
+    uint Month = (((rawDateTime >> 0x16)) & 15); 
+    uint Day = (((rawDateTime >> 0x11)) & 0x1f);
+    uint Hour = (((rawDateTime >> 12)) & 0x1f);
+    uint Minute = (((rawDateTime >> 6)) & 0x3f);
+    uint Second = ((rawDateTime) & 0x3f);
+    string Year_s;
+    string Month_s;
+    string Day_s;
+    string Hour_s;
+    string Minute_s;
+    string Second_s;
+    string Formatted_DateTime;
+    SPrintf ( Year_s, "%d", Year );
+    SPrintf ( Month_s, "%02d", Month );
+    SPrintf ( Day_s, "%02d", Day );
+    SPrintf ( Hour_s, "%02d", Hour );
+    SPrintf ( Minute_s, "%02d", Minute );
+    SPrintf ( Second_s, "%02d", Second );
+    return Day_s+"/"+Month_s+"/"+Year_s+" "+Hour_s+":"+Minute_s;
+}
+
+typedef struct
+{   
+    /* 110 is GT5
+       109 and under GT6
+       It's weird */
+
+    local int cpBaseOffset = FTell();
+
+    struct
+    {
+        int CarParameterVersion;
+        if (CarParameterVersion >= 110)
+        {
+            int MainHeaderSize <format=hex>;
+            byte unk;
+            byte target;
+            byte team_id;
+            byte race_class_id;
+        }
+        else
+        {
+            byte unkCondBits1 : 1;
+            byte unkCondBits2 : 6;
+            byte unkCondBits3 : 6;
+            short unkCondBits4Skipped : 12;
+            byte unkCondBits5 : 1;
+            byte unkCondBits6 : 5;
+            byte unkCondBits7 : 1;
+        }
+
+        struct CarCondition
+        {
+            int odometer;
+    
+            // Cleared by "Overhall Engine"
+            int engine_life;
+    
+            // Cleared by "Overhall Engine"
+            float oil_life;
+            int body_life;
+            byte dirtiness100;
+            byte rainX; // Goes away when custom one is set
+            byte body_coating;
+            byte unk;
+
+            byte everlasting : 1;
+            int dirtinessRelatedBits : 31;
+
+            if (CarParameterVersion >= 110) // GT5 Ends here
+                return;
+
+            short unk;
+            byte wheelDirtFront;
+            byte wheelDirtRear;
+            int unk;
+            int unk;
+            int unk;
+            int scratch;
+            int scratchBits32;
+    
+            byte unk;
+            byte unk;
+            byte unk;
+            byte unk;
+    
+            short unk;
+            short unk;
+        } condition;
+
+        if (MainHeader.CarParameterVersion >= 110)
+        {
+            int garage_id;
+            short ride_count;
+            short win_count;
+            byte special_gas_ratio_100;
+            byte special_gas_liter;
+            byte nos_ratio_100;
+            byte nos_duration_sec;
+            short unk;
+            byte pack_small;
+            byte unk : 1;
+            byte unk : 5;
+            byte unk : 2;
+            byte unk : 6;
+            short unk : 13;
+            short unk : 13;
+            byte decken_type;
+            byte decken_number;
+            short _pad_to_0x3C_;
+        }
+        else
+        {
+            int obtain_date <comment=OutputDateTime>;
+            short win_count;
+            short unk;
+            if (MainHeader.CarParameterVersion >= 108)
+            {
+                short unk;
+                short unk;
+            }
+
+            // GT6 Main Header size is 0x50
+            byte _pad_[(cpBaseOffset + 0x50) - FTell()];
+            return;
+        }
+
+    } MainHeader <bgcolor=cPurple>;
+
+    if (MainHeader.CarParameterVersion >= 110) // GT5
+        byte PurchaseBits[0x40] <bgcolor=cYellow>;
+
+    local int carPartsOffset = FTell();
+    struct CarParts
+    {
+        if (MainHeader.CarParameterVersion >= 110) // GT5
+        {
+            short PartsVersion <format=hex>;
+            short PartsSize <format=hex, comment="Should be 0x140">;
+            int64 NormalCarCode; // SpecDB::CarEquipments::buildNormalCar
+            int64 TunedCarCode; // SpecDB::CarEquipments::buildTunedCar - TUNED_CARS table
+            byte color;
+            int FrRim;
+            int RrRim;
+            int64 FrTyre;
+            int64 RrTyre;
+        }
+        else // GT6
+        {
+            int PartsVersion;
+            byte unk;
+            byte unk2;
+            short frontWheelEx;
+            short rearWheelEx;
+            
+            byte unk3;
+            byte unk4;
+            int wheel_sp;
+            int car_code;
+            int garage_id;
+            int frontTireComp;
+            int fronttire;
+            int rearTireComp;
+            int reartire;
+        }
+
+        int brake;
+        int brakeController;
+        int chassis;
+        int engine;
+        int drivetrain;
+        int gear;
+        int suspension;
+        int lsd;
+        int steer;
+        int lightweight;
+        int racingmodify;
+        int displacement;
+        int computer;
+        int natune;
+        int turbineKit;
+        int flywheel;
+        int clutch;
+        int propellerShaft;
+        int muffler;
+        int intercooler;
+        int ascc;
+        int tcsc;
+        if ((MainHeader.CarParameterVersion >= 110 && PartsVersion >= 0x103) || // GT5
+                PartsVersion < 106) // GT6
+            int unk;
+        int supercharger;
+        int intake_manifold;
+        int exhaust_manifold;
+        int catalyst;
+        int air_cleaner;
+        int NOS;
+        int windowReduction;
+        int carbonBonnet;
+        int bodyKit;
+        int flat_floors;
+        int aero_other;
+        int wing;
+        int unk;
+        int ridigityImprovement;
+        int nitroKit;
+
+        short GearReverse;
+        short Gear1;
+        short Gear2;
+        short Gear3;
+        short Gear4;
+        short Gear5;
+        short Gear6;
+        short Gear7;
+        short Gear8;
+        short Gear9;
+        short Gear10;
+        short Gear11;
+        short FinalGearRatio;
+        
+        byte MaxSpeed_10;
+        short GearLastFinal;
+        byte Param4WDMaybe;
+        byte FrontABSMaybe;
+        byte RearABSMaybe;
+
+        if (MainHeader.CarParameterVersion >= 110) // GT5
+        {
+            byte downforceFront;
+            byte downforceRear;
+        }
+        else // GT6
+        {
+            short downforceFront;
+            short downforceRear;
+        }
+
+        ubyte turbo_boost1;
+        ubyte turbo_peakRpm1;
+        ubyte turbo_response1;
+        ubyte turbo_boost2;
+        ubyte turbo_peakRmp2;
+        ubyte turbo_response2;
+        byte FrontCamber;
+        byte RearCamber;
+        short FrontRideheight;
+        short RearRideheight;
+        signed byte FrontToe;
+        signed byte RearToe;
+
+        if (MainHeader.CarParameterVersion >= 110) // GT5
+        {
+            byte FrontSpringRate;
+            byte RearSpringRate;
+            byte leverratioF;
+            byte leverratioR;
+        }
+        else // GT6
+        {
+            short FrontSpringRate;
+            short RearSpringRate;
+            short leverratioF;
+            short leverratioR;
+        }     
+   
+        byte FrontDamperF1B;
+        byte FrontDamperF2B;
+        byte FrontDamperF1R;
+        byte FrontDamperF2R;
+        byte RearDamperF1B;
+        byte RearDamperF2B;
+        byte RearDamperF1R;
+        byte RearDamperF2R;
+        byte FrontStabilizer;
+        byte RearStabilizer;
+        byte FrontLSDParam;
+        byte RearLSDParam;
+        byte FrontLSDParam2;
+        byte RearLSDParam2;
+        byte FrontLSDParam3;
+        byte RearLSDParam3;
+        byte tcsc_UserValueDF;
+        byte ascc_VSCParamLevel;
+        byte ascc_VSCParam1DF;
+        byte ascc_VUCParamLevel;
+        byte ascc_VUCParam1DF;
+        unsigned byte ballastWeight;
+        byte ballastPosition;
+        byte steerlimit;
+        short unk;
+        short weightModifyRatio;
+        short powerModifyRatio;
+        
+        if (MainHeader.CarParameterVersion >= 110) // GT5
+        {
+            byte unk;
+            byte unk;
+        }
+
+        byte nosTorqueVolume;
+        byte gripMultiplier;
+        byte FrontBrakeBalanceLevel;
+        byte RearBrakeBalanceLevel;
+        byte ABSCorneringControlLevel;
+
+        short unk;
+        short unk;
+        byte GasCapacity;
+        short PowerLimiter; 
+            
+        int horn_sound_id : 32;
+        if (MainHeader.CarParameterVersion >= 110)
+        {
+            byte _pad_[(carPartsOffset + PartsSize) - FTell()];
+            return;
+        }
+
+        // Main parts version < 109 - GT6 continues on
+
+        byte wheel_color : 8; // ?
+       
+        short bodyPaintID : 16;
+        short wheelPaintID : 16;
+        short brakePaintID : 16;
+    
+        if (PartsVersion >= 117)
+            short customRearWingPaintID : 16;
+    
+        short front_wheel_width : 16;
+        short front_wheel_diameter : 16;
+        short rear_wheel_width : 16;
+        short rear_wheel_diameter : 16;
+    
+        byte wheel_inchup : 8;
+        byte decken_preface : 8;
+        byte decken_number : 8;
+    
+        if (PartsVersion < 116)
+        {
+            byte field_0x139 : 8;
+            byte decken_custom_type : 8;
+            byte window_sticker_custom_type : 8;
+            int64 unk : 64;
+            int64 decken_custom_id : 64;
+            int64 window_sticker_custom_id : 64;
+            byte wingCustomized : 8;
+        }
+        else 
+        {
+            byte unk : 2;
+            byte decken_custom_type : 2;
+            byte window_sticker_custom_type : 2;
+    
+            int64 unk;
+            int64 decken_custom_id;
+            int64 window_sticker_custom_id;
+            byte wingCustomized : 1;
+        }
+        
+        byte wingFlapType : 8;
+        byte wingEndPlateType : 8;
+        byte wingStayType : 8;
+        byte wingMountType : 8;
+        short wingWidthOffset : 16;
+        short wingHeightOffset : 16;
+        short wingAngleOffset : 16;
+        short unk : 16;
+        short unk2 : 16;
+    
+        byte unkWingBits : 3;
+        byte unkWingBits2 : 1;
+        byte unkWingBits3 : 4;
+        byte unkWingBits4 : 4;
+        byte unkWingBits5 : 2;
+        byte unkWingBits6 : 2;
+        byte unkWingBits7 : 3;
+        byte unkWingBits8 : 2;
+        byte unkWingBits9 : 1;
+        byte unkWingBits10 : 2;
+        if (PartsVersion == 115)
+        {
+            byte meterBits1 : 8;
+            byte meterBits2 : 8;
+            
+            short meterBits3 : 16;
+            short meterBits4 : 16;
+            short meterBits5 : 16;
+    
+            short backlightColorR;
+            short backlightColorG;
+            short backlightColorB;
+            short backlightColorA;
+        }
+        else if (PartsVersion >= 116)
+        {
+            byte meterBits1 : 2;
+            byte meterBits2 : 2;
+            short meterBits3 : 10;
+            short meterBits4 : 10;
+            short meterBits5 : 10;
+            
+            byte backlightColorR : 8;
+            byte backlightColorG : 8;
+            byte backlightColorB : 8;
+            byte backlightColorA : 8;
+
+            if (PartsVersion >= 118)
+            {
+                short frontToe : 16;
+                short rearToe : 16;
+            }
+        }        
+        
+        local int alignedBlobSize = (FTell() + (0xf - cpBaseOffset)) & 0xFFFFFFF0; // 0x10 Align
+        FSeek(cpBaseOffset + alignedBlobSize);
+
+    } Settings <bgcolor=cRed>;
+    
+    if (MainHeader.CarParameterVersion >= 110)
+    {
+        short obtain_id;
+        short PowerScratch;
+        short PPScratch;
+        short unk;
+
+        local int purchaseBitsSize = MainHeader.CarParameterVersion >= 109 ? 0x40 : 0x0C;
+        local int size = (MainHeader.MainHeaderSize + purchaseBitsSize + 0x1F8); // 0x200 if not pack_small?
+        local int alignedBlobSize = (size + 0xF) & 0xFFFFFFF0;
+        FSeek(cpBaseOffset + alignedBlobSize);
+        
+    }
+    else
+    {
+        // GT6 Purchase bits are at the bottom
+        if (MainHeader.CarParameterVersion < 109)
+            byte PurchasedBits[0x40];
+        else
+            byte PurchasedBits[0x20];
+    }
+
+} MCarParameter;
