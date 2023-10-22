@@ -243,11 +243,6 @@ typedef struct
         // GT4O 0x59A7E8 -> 0x599DB8
         short pgluMaterialFunc_TextureIndex : 9; // 511 max
         short pgluMaterialFuncValue2 : 7; // 127 max
-        
-        if (pgluMaterialFunc_TextureIndex == 22)
-            Printf("AAA %d\n", i);
-            
-        //Printf("%d\n", pgluMaterialFunc_TextureIndex);
     } ShapeDataInfo[VifPartCount] <optimize=false>;
 
     local int j = 0;
