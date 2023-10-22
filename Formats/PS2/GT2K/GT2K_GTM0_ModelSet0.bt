@@ -1,0 +1,90 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: ModelSet0 (GT2K)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    local int mdlBasePos = FTell();
+    
+    struct
+    {
+        uint Magic <format=hex>;
+        uint RelocPtr;
+        short ModelCount;
+        short MaterialCount;
+        int ModelsOffset <format=hex>;
+        int MaterialsOffset <format=hex>;
+    } Header <size=0x40>;
+    
+    local int i = 0;
+    for (i = 0; i < Header.ModelCount; i++)
+    {
+        FSeek(mdlBasePos + Header.ModelsOffset + (i * 0x80));
+        struct
+        {
+            int Empty;
+            int Unk;
+            int UnkOffset1;
+            int ShapesOffset <format=hex, fgcolor=cRed>;
+            int UnkOffset3 <format=hex, fgcolor=cRed>;
+            int UnkOffset4 <format=hex, fgcolor=cRed>;
+            int UnkOffset5 <format=hex, fgcolor=cRed>;
+            int empty;
+            
+            float BBox[3 * 8];
+
+            FSeek(FileSize());
+        } Model;
+    }
+    
+} ModelSet0;
+
+typedef struct
+{
+    struct
+    {
+        int RelocPtr <comment="Should be 0">;
+        int CarOffsets[6];
+    } Header;
+    
+    local int i = 0;
+    for (i = 0; i < 6; i++)
+    {
+        FSeek(Header.CarOffsets[i]);
+        struct
+        {
+            local int basePos = FTell();
+            struct
+            {
+                int RelocPtr;
+                int MainModelInfo <format=hex, fgcolor=cRed>;
+                int UnkOffset <format=hex, fgcolor=cRed>;
+                int UnkOffset2 <format=hex, fgcolor=cRed>;
+                int UnkOffset3 <format=hex, fgcolor=cRed>;
+                int UnkOffset4 <format=hex, fgcolor=cRed>;
+                int UnkOffset5 <format=hex, fgcolor=cRed>;
+            } Header <size=0x20>;
+            
+            FSeek(basePos + Header.MainModelInfo);
+            ModelSet0 MainModelSet;
+            
+            //FSeek(FileSize()); // Fix 010 bug
+        } CarInfo;
+    }
+} CarData;
+
+if (ReadInt() == 0x304D5447) // GTM0
+    ModelSet0 ModelSet;
+else if (ReadInt(0x40) == 0x304D5447)
+    CarData CarData_;
+else
+    Printf("Not a valid model set or car data (car.dat) file");

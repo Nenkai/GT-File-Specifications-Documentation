@@ -291,7 +291,7 @@ typedef struct
         case 10:
             byte num;
             Vector3 vecs[num];
-            short OffsetMaybe;
+            short OffsetMaybe <format=hex>;
             break;
             
         case 11:
