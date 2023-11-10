@@ -56,6 +56,7 @@ typedef enum <byte>
     SCE_GS_REGION_REPEAT = 3,
 } SCE_GS_CLAMP_PARAMS;
 
+typedef enum <byte> { CSM1, CSM2 } SCE_GS_CSM;
 
 typedef struct
 {
@@ -70,7 +71,7 @@ typedef struct
         int64 TFX_TextureFunction : 2 <comment="Texture function">;
         int64 CBP_CLUTBufferBasePointer : 14 <format=hex, comment="Base address of CLUT data (actual address will be cbp x 64)">;
         SCE_GS_PSM CPSM_ClutPixelStorageFormat : 4 <comment="Format in which CLUT entries are saved">;
-        enum <byte> { CSM1, CSM2 } CSM_ClutStorageMode : 1 <comment="CLUT storage mode">;
+        SCE_GS_CSM CSM_ClutStorageMode : 1 <comment="CLUT storage mode">;
         int64 CSA_ClutEntryOffset : 5 <comment="CLUT entry offset - CSA = Offset / 16, In CSM2, CSA must be 0">;
         // 0 = Temporary buffer contents not changed
         // 1 = Load performed to CSA position of buffer
@@ -129,8 +130,10 @@ typedef struct
         unsigned long MAXU:10 <comment="Clamp U Direction - Upper Limit">;
         unsigned long MINV:10 <comment="Clamp Y Direction - Lower Limit">;
         unsigned long MAXV:10 <comment="Clamp Y Direction - Upper Limit">;
+        
+        Printf("%dx%d (%s, %s)\n", MAXU+1, MAXV+1, EnumToString(WMS_WrapModeS), EnumToString(WMT_VrapModeT));
         unsigned long pad44:20;
-    } sceGsClamp;
+    } sceGsClamp <optimize=false>;
 
 } PGLUTexture <optimize=false>;
 
@@ -167,18 +170,48 @@ typedef struct TextureSet1
         short TransferCount <fgcolor=cGreen>;
         int PGLUTextureMapOffset <format=hex, fgcolor=cRed>;
         int TransferInfosOffset  <format=hex, fgcolor=cRed>;
-        int unkOffset3 <format=hex, fgcolor=cRed>;
+        int ClutPatchesOffset <format=hex, fgcolor=cRed, comment="Used for cars">;
         int clutAnimationOffset <format=hex, fgcolor=cRed>; // TODO - havent seen any texture that uses that yet
         int unkOffset4 <format=hex, fgcolor=cRed>;
     } Header <size=0x30 , bgcolor=cPurple>;
 
-    PGLUTexture textures[Header.PGLUTextureCount];
+    FSeek(BasePos + Header.PGLUTextureMapOffset);
+    PGLUTexture Textures[Header.PGLUTextureCount];
+    
+    FSeek(BasePos + Header.TransferInfosOffset);
     TransferInfo Transfers[Header.TransferCount];
+    
+    if (Header.ClutPatchesOffset != 0)
+    {
+        FSeek(BasePos + Header.ClutPatchesOffset);
+        struct
+        {
+            int ClutPatchCount;
+            int ClutPatchOffsets[ClutPatchCount] <format=hex>;
+            
+            local int i = 0;
+            for (i = 0; i < ClutPatchCount; i++)
+            {
+                FSeek(BasePos + ClutPatchOffsets[i]);
+                
+                struct
+                {
+                    int NumPGLUTexturesToPatch;
+                    struct
+                    {
+                        int CSA_ClutEntryOffset : 5;
+                        int CBP_CLUTBufferBasePointer : 14 <format=hex>;
+                        SCE_GS_PSM Format : 4;
+                        int PGLUTextureIndex : 9;
+                    } PGLUTex0TexturePatch[NumPGLUTexturesToPatch] <optimize=false>;
+                } ClutPatch;
+            }
+        } ClutPatches;
+    }
 }; 
 
 local int LastTexSetOffset;
 
-    
 typedef struct Images
 {
     char Magic[4];

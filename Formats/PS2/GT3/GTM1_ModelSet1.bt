@@ -15,30 +15,111 @@
 #include "../../Shared/ModelSetupCommands.bt"
 #include "../Tex1_TextureSet1.bt"
 
+LittleEndian();
 BitfieldDisablePadding();
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+    float W;
+} Vector4;
+
+typedef struct
+{
+    float data[8];
+    
+    Vector4 Intensities;
+    Vector4 FlarePosition;
+    float UnkMin;
+    float UnkMax;
+    Vector4 Unk;
+    float FlareColor[4];
+    uint Unk;
+} LightFlare <size=0x80>;
+    
+typedef struct
+{
+    int a;
+} OnboardCameraData;
 
 typedef struct
 {
     local int basePos = FTell();
     
-    uint Magic <format=hex>;
-    uint RelocPtr;
+    struct
+    {
+        uint Magic <format=hex>;
+        uint RelocPtr;
+        uint Empty;
+        uint UnusedFileSize <format=hex>;
+        uint Always1_VersionMaybe;
+        
+        struct
+        {
+            uint BrakeTextureIndex;
+            uint t2;
+            float BrakesTextureSize;
+            float BrakesOffsetFromCenter;
+            float BrakeTextureOrientation;
+        } BrakeTextureParameters[2] <comment="Front and Rear">;
     
-    uint unk[14];
     
-    uint Count <fgcolor=cGreen>;
-    uint Offset <format=hex, fgcolor=cRed>;
-    uint Count <fgcolor=cGreen>;
-    uint Offset <format=hex, fgcolor=cRed>;
-    uint Count <fgcolor=cGreen>;
-    uint Offset <format=hex, fgcolor=cRed>;
-    uint Count <fgcolor=cGreen>;
-    uint Offset <format=hex, fgcolor=cRed>;
-    uint Count <fgcolor=cGreen>;
-    uint Offset <format=hex, fgcolor=cRed>;
-    uint Count <fgcolor=cGreen>;
-    uint Offset <format=hex, fgcolor=cRed>;
-    int UnkOffset <format=hex, fgcolor=cRed>;
+        uint DefaultTireIndex <comment="Used if tire indices offset is empty">;
+        
+        uint FrontLightCount <fgcolor=cGreen>;
+        uint FrontLightsTableOffset <format=hex, fgcolor=cRed>;
+        uint NightBrakeLightsCount <fgcolor=cGreen>;
+        uint NightBrakeLightsTableOffset <format=hex, fgcolor=cRed>;
+        uint NightBrakeLightFlareCount <fgcolor=cGreen>;
+        uint NightBrakeLightFlareTableOffset <format=hex, fgcolor=cRed>;
+        uint CarSparkPosCount <fgcolor=cGreen>;
+        uint CarSparkPosTableOffset <format=hex, fgcolor=cRed>;
+        uint UNUSED_ExhaustCount <fgcolor=cGreen>;
+        uint UNUSED_ExhaustDataTableOffset <format=hex, fgcolor=cRed>;
+        uint OnboardCameraCount <fgcolor=cGreen>;
+        uint OnboardCamerasOffset <format=hex, fgcolor=cRed>;
+        int TireIndexTableOffset <format=hex, fgcolor=cRed>;
+    } Header <size=0x94, bgcolor=cDkPurple>;
+    
+    FSeek(basePos + Header.FrontLightsTableOffset);
+    LightFlare FrontLights[Header.FrontLightCount] <size=0x80>;
+    
+    FSeek(basePos + Header.NightBrakeLightsTableOffset);
+    LightFlare NightBrakeLights[Header.NightBrakeLightsCount] <size=0x80>;
+    
+    FSeek(basePos + Header.NightBrakeLightFlareTableOffset);
+    LightFlare NightBrakeLightFlares[Header.NightBrakeLightFlareCount] <size=0x80>;
+    
+    FSeek(basePos + Header.CarSparkPosTableOffset);
+    struct
+    {
+        Vector3 Position;
+    } CarSparks[Header.CarSparkPosCount] <size=0x10>;
+    
+    FSeek(basePos + Header.OnboardCamerasOffset);
+    struct
+    {
+        Vector3 Position;
+        float Pitch;
+        float Yaw;
+        float Roll;
+        float FoV;
+        int Unk;
+    } OnboardCameras[Header.OnboardCameraCount] <size=0x40>;
+    
+    if (Header.TireIndexTableOffset != 0)
+    {
+        // Note: 0x1AAAB0 buffer max for a tire
+        FSeek(basePos + Header.TireIndexTableOffset);
+        struct
+        {
+            int MenuTireIndices[8] <comment="menu/tire/n%d">;
+            int RaceTireIndices[8] <comment="tire/n%d">;
+        } TireIndexTable;
+    }
+    
 } CarInfo;
 
 typedef struct
@@ -52,13 +133,30 @@ uint AlignValue(uint x, uint alignment)
       return (x + (alignment - 1)) & mask;
 }
 
+// GT4O US: 59ABD0
 typedef struct
 {
-    float Unk[16];
-    int unk2[2];
-    int UnkOffset;
-    int Unk;
-} Material;
+    float AmbientR;
+    float AmbientG;
+    float AmbientB;
+    float AmbientA;
+    float DiffuseR;
+    float DiffuseG;
+    float DiffuseB;
+    float DiffuseA;
+    float SpecularR;
+    float SpecularG;
+    float SpecularB;
+    float SpecularA;
+    float UnkR;
+    float UnkG;
+    float UnkB;
+    float UnkA;
+    float unk;
+    uint UnkFlags <comment="Valid flags are 1, 2">;
+    float Unk_Unused;
+    float Unk_Unused <comment="Appears unused. Doesn't do anything?">;
+} PGLUmaterial;
 
 typedef struct
 {
@@ -74,8 +172,8 @@ typedef struct
         short ShapeCount <fgcolor=cGreen>;
         short MaterialCount <fgcolor=cGreen>;
         short TexSetCount <fgcolor=cGreen>;
-        short UnkCount0x34 <fgcolor=cGreen>;
         short UnkCount0x38 <fgcolor=cGreen>;
+        short VariationMaterialCount <fgcolor=cGreen>;
         int Empty;
         uint ModelTableOffset <format=hex, fgcolor=cRed>;
         uint ShapeTableOffset <format=hex, fgcolor=cRed>;
@@ -83,7 +181,7 @@ typedef struct
         uint TexSetTableOffset <format=hex, fgcolor=cRed>;
         uint BoundingsOffset <format=hex, fgcolor=cRed>;
         uint Offset0x38 <format=hex, fgcolor=cRed>;    
-        uint Offset0x3C <format=hex, fgcolor=cRed>;
+        uint VariationMaterialsOffset <format=hex, fgcolor=cRed>;
     } Header;
     
     if (Header.MaterialCount > 0 && Header.MaterialsOffset != 0)
@@ -91,7 +189,7 @@ typedef struct
         struct
         {
             FSeek(basePos + Header.MaterialsOffset);
-            Material material[Header.MaterialCount];
+            PGLUmaterial material[Header.MaterialCount];
         } Materials;
     }
     
@@ -160,6 +258,53 @@ typedef struct
         } TexSetTable;
     }
     
+    if (Header.Offset0x38 != 0)
+    {
+        FSeek(basePos + Header.Offset0x38);
+        struct
+        {
+            FSeek(basePos + Header.Offset0x38);
+            int VariationTexSetOffsets[Header.UnkCount0x38] <format=hex, fgcolor=cRed>;
+            
+            local int i = 0;
+            for (i = 0; i < Header.UnkCount0x38; i++)
+            {
+                FSeek(basePos + VariationTexSetOffsets[i]); 
+                struct
+                {
+                    int TexSetsOffset[Header.TexSetCount] <format=hex, fgcolor=cRed>;
+                    local int j = 0;
+                    for (j = 0; j < Header.TexSetCount; j++)
+                    {
+                        FSeek(basePos + TexSetsOffset[j]);
+                        TextureSet1 texSet;   
+                    }
+                    
+                    FSeek(FileSize()); // Fix 010 bug
+                } VariationTexSet;
+            }
+            
+            FSeek(FileSize()); // Fix 010 bug
+        } VariationTexSets;
+    }
+    if (Header.VariationMaterialsOffset != 0)
+    {
+        struct
+        {
+            FSeek(basePos + Header.VariationMaterialsOffset);
+            int VariationMaterialTable[Header.VariationMaterialCount] <format=hex, fgcolor=cRed>;
+            
+            local int i = 0;
+            for (i = 0; i < Header.VariationMaterialCount; i++)
+            {
+                FSeek(basePos + VariationMaterialTable[i]); 
+                PGLUmaterial VariationMaterials;
+            }
+            
+            FSeek(FileSize()); // Fix 010 bug
+        } VariationMaterialTable;
+    }
+    
 } ModelSet;
 
 typedef struct
@@ -169,8 +314,8 @@ typedef struct
         int RelocPtr;
         uint CarInfoOffset <format=hex, fgcolor=cRed>;
         uint MainModelSetOffset <format=hex, fgcolor=cRed>;
-        uint WheelModelOffset <format=hex, fgcolor=cRed>;
-        uint WheelModel2Offset <format=hex, fgcolor=cRed>;
+        uint TireFileOffset <format=hex, fgcolor=cRed>;
+        uint WheelFileOffset <format=hex, fgcolor=cRed>;
         uint ModelSet1Offset <format=hex, fgcolor=cRed>;
     } Header <bgcolor=cPurple, size=0x40>;
     
@@ -179,7 +324,54 @@ typedef struct
     
     FSeek(Header.MainModelSetOffset);
     ModelSet MainModelSet;
+    
+    FSeek(Header.TireFileOffset);
+    struct
+    {
+        struct
+        {
+            uint Magic <format=hex>;
+            int RelocPtr;
+            int Empty;
+            uint FileSize <format=hex>;
+            int Unk <comment="This is used - bit 0 and 1">;
+            int TriStripFlags <comment="This is used - bit 0 and 1">;
+            float Unk <comment="Not sure if used">;
+            uint TireTextureSetOffset <format=hex>;
+        } TireFileHeader;
+        
+        FSeek(Header.TireFileOffset + TireFileHeader.TireTextureSetOffset);
+        TextureSet1 TexSet;
+    } TireFile;
+    
+    FSeek(Header.WheelFileOffset);
+    struct
+    {
+        struct
+        {
+            uint Magic <format=hex>;
+            int RelocPtr;
+            int Empty;
+            uint FileSize <format=hex>;
+            int Unk <comment="This is used - bit 0 and 1">;
+            int TriStripFlags <comment="This is used - bit 0 and 1">;
+            float Unk <comment="Not sure if used">;
+            uint WheelModelSetOffset <format=hex>;
+        } WheelFileHeader;
+        
+        FSeek(Header.WheelFileOffset + WheelFileHeader.WheelModelSetOffset);
+        ModelSet WheelModelSet;
+        
+    } WheelFile;
 } CarModel;
+
+if (ReadUInt() == 0x305A5250)
+{
+     local uint mdl = ReadUInt(0x2C);
+     FSeek(mdl);
+     ModelSet a;
+     return;
+}
 
 if (ReadUInt() == 0x314D5447)
     ModelSet ModelSet_;

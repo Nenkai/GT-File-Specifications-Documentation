@@ -226,10 +226,9 @@ typedef struct
 {
     local int baseShapePos = FTell();
     int RelocPtr;
-    float Size;
-    byte unk0 : 5; // 2 to 6 are handled specifically
+    uint Size <format=hex>;
+    byte unk0 : 5; // 1 to 6 are handled
     byte unk1 : 3;
-
     byte unkFlags <format=hex>;
     short VifPartCount;
     short TotalVertCount;
@@ -241,8 +240,9 @@ typedef struct
         short DMATagQuadwordCount;
 
         // GT4O 0x59A7E8 -> 0x599DB8
-        short pgluMaterialFunc_TextureIndex : 9; // 511 max
-        short pgluMaterialFuncValue2 : 7; // 127 max
+        short TextureIndexPlus1 : 9; // 511 max
+        short MaterialIndexPlus1 : 7; // 127 max
+            
     } ShapeDataInfo[VifPartCount] <optimize=false>;
 
     local int j = 0;

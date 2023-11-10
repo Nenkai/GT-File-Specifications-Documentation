@@ -11,6 +11,8 @@
 //   History: 
 //------------------------------------------------
 
+LittleEndian();
+
 typedef struct
 {
     int TimeMS;

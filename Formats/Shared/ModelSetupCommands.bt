@@ -186,6 +186,9 @@ typedef struct
         // Unknown. Used only in GT3, otherwise skips 1 float
         pgl_54 = 54,
         
+        // Unknown. Used only in GT3, otherwise skips 4 floats
+        pgl_55 = 55,
+        
         // Calls pglGetCullFace, and pglCullFace
         pglCullFace = 64,
         
@@ -260,6 +263,10 @@ typedef struct
             stop = true;
             break;
             
+        case 2:
+            byte ModelIndex;
+            break;
+            
         case 4: // Shape Index byte
             byte ShapeIndex;
             break;
@@ -270,9 +277,32 @@ typedef struct
             
         case 6:
             // Passed to the callback
-            short Parameter;
+            enum <ushort> 
+            { 
+                CarCallback_GetTailLampActive = 0,
+                
+                CarCallback_SetWheelSpeed = 1,
+                // 2 same
+                // 3 same
+                // 4 same
+                
+                CarCallback_SetSteering = 5,
+                CarCallback_SetUnk = 6,
+                CarCallback_GetTimezone = 7,
+                CarCallback_RotateZ = 8,
+                
+                CarCallback_RenderTire = 15,
+                // 16 same
+                // 17 same
+                // 18 same
+                
+                CarCallback_RenderWheel = 36,
+                // 37 same
+                // 38 same
+                // 39 same
+            } Parameter;
             byte BranchCount;
-            short RelativeBranchOffsets[BranchCount];
+            short RelativeBranchOffsets[BranchCount] <format=hex>;
             break;
         case 7:
             Vector3 unk0x07;
@@ -416,6 +446,9 @@ typedef struct
         case 54:
             float value;
             break;
+        case 55:
+            float values[4];
+            break;
             
         case 64:
             break;
@@ -477,7 +510,12 @@ typedef struct
             stop = true;  
             break;
     }
-} PGLCommand <optimize=false, comment=cmd>;
+} PGLCommand <optimize=false, comment=CommentCommand>;
+
+string CommentCommand(PGLCommand& cmd)
+{
+    return EnumToString(cmd.cmd);
+}
 
 typedef struct
 {
