@@ -46,7 +46,7 @@ struct
     {
         int Flag <comment="0 or 1">;
         int Unused[3];
-    } DiscParameters[Header.BrakeCaliperuTextureStartIndex - Header.BrakeDiscTextureStartIndex];
+    } DiscParameters[Header.BrakeCaliperTextureStartIndex - Header.BrakeDiscTextureStartIndex];
     
     FSeek(Header.CaliperParametersOffset);
     struct
