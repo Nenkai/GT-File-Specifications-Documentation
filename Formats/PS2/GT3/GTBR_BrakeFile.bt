@@ -1,0 +1,57 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: GTBR - GT Brake File
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: Holds textures for brakes - discs, calipers, glow & parameters
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+
+#include "../Tex1_TextureSet1.bt"
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vector3;
+
+struct
+{
+    struct
+    {
+        uint Magic <format=hex>;
+        uint RelocPtr;
+        uint Empty;
+        uint FileSize <format=hex>;
+        uint TexSetOffset <format=hex, fgcolor=cRed>;
+        uint BrakeDiscTextureStartIndex;
+        uint BrakeCaliperTextureStartIndex;
+        uint BrakeGlowTextureIndex;
+        uint DiscParameterOffset <format=hex, fgcolor=cRed>;
+        uint CaliperParametersOffset <format=hex, fgcolor=cRed>;
+    } Header <bgcolor=cPurple, size=0x30>;
+    
+    FSeek(Header.TexSetOffset);
+    TextureSet1 TexSet;
+    
+    FSeek(Header.DiscParameterOffset);
+    struct
+    {
+        int Flag <comment="0 or 1">;
+        int Unused[3];
+    } DiscParameters[Header.BrakeCaliperTextureStartIndex - Header.BrakeDiscTextureStartIndex];
+    
+    FSeek(Header.CaliperParametersOffset);
+    struct
+    {
+        Vector3 Pos;
+        int Unused[5];
+    } CaliperParameters[TexSet.Header.PGLUTextureCount - Header.BrakeCaliperTextureStartIndex];
+} GTBrakeFile;
