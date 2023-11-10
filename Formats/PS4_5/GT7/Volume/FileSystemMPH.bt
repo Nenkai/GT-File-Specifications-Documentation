@@ -11,6 +11,7 @@
 //   History: 
 //------------------------------------------------
 
+FSeek(0);
 LittleEndian();
 BitfieldDisablePadding();
 
@@ -33,7 +34,7 @@ struct FileSystemMPHIndex
 {
     struct SuperintendentBlock
     {
-        int magic <comment="Must match 0x5B745163">;
+        int magic <comment="Must match 0x5B745163 or 0x122BB8F2">;
         uint Unk <format=hex>;
         int64 timestamp <comment="Julian Time">;
         int64 serial_number;
@@ -70,17 +71,53 @@ struct FileSystemMPHIndex
     FSeek(header.index_data_offset);
     struct IndexerMPH
     {
-        int node_count <comment="Number of files">;
-        int64 exists_count;
-        int _exists[exists_count];
-        int64 exists_acm256_count;
-        int _exists_acm256[exists_acm256_count];
-        int64 exists_acm32_count;
-        byte _exists_acm32[exists_acm32_count];
-        int vertex_count;
-        int seeds[3];
-        int64 g_value_count;
-        byte g_values[g_value_count];
+        if (header.serial_number >= 720066420)
+        {
+            int VertexCount;
+            int Seeds[3];
+            uint64 OffsetToAfterGValues <format=hex>;
+            
+            FSeek(header.index_data_offset + OffsetToAfterGValues);
+            byte UnusedMaybe[0x18];
+            int node_count;
+            uint64 ExistsCount <comment="Multiply by 32">;
+            int Exists[ExistsCount];
+            
+            /*
+            for (var i = 0; i < Exists.Length; i++)
+            Exists[i] = bs.ReadInt32();
+
+            ExistsACM256 = new int[(ExistsCount / 256) + 1];
+            ExistsACM32 = new byte[(ExistsCount / 32) + 1];
+            
+            long val = 0;
+            for (int i = 0; i < (int)ExistsCount; i++)
+            {
+                if (i % 256 == 0)
+                    ExistsACM256[i / 256] = (int)val;
+            
+                if (i % 32 == 0)
+                {
+                    ExistsACM32[i / 32] = (byte)(val - (byte)ExistsACM256[i / 256]);
+                    val += System.Numerics.BitOperations.PopCount((uint)Exists[i / 32]);
+                }
+            }
+            */
+        }
+        else
+        {
+            int node_count <comment="Number of files">;
+            int64 exists_count;
+            int _exists[exists_count];
+            int64 exists_acm256_count;
+            int _exists_acm256[exists_acm256_count];
+            int64 exists_acm32_count;
+            byte _exists_acm32[exists_acm32_count];
+            int vertex_count;
+            int seeds[3];
+            int64 g_value_count;
+            byte g_values[g_value_count];
+        }
     } indexer <bgcolor=cYellow>;
 
     FSeek(header.node_table_offset);
