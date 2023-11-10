@@ -58,11 +58,11 @@ typedef struct
         
         struct
         {
-            uint BrakeTextureIndex;
-            uint t2;
+            uint BrakeCaliperTextureIndex;
+            uint BrakeDiscTextureIndex;
             float BrakesTextureSize;
             float BrakesOffsetFromCenter;
-            float BrakeTextureOrientation;
+            float BrakeTextureOrientationDeg;
         } BrakeTextureParameters[2] <comment="Front and Rear">;
     
     
