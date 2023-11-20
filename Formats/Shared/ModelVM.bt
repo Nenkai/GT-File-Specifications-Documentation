@@ -22,7 +22,7 @@ typedef enum <ubyte>
     JumpToByte = 0x20,
     JumpUnk0x21 = 0x21,
     JumpToShort = 0x22,
-    JumpIfFalse = 0x23,
+    JumpIfFalseOrReturnIfStackEmpty = 0x23,
     JumpUnk0x24 = 0x24,
     JumpUnk0x25 = 0x25,
     JumpIfFalse0x26 = 0x26,
@@ -105,7 +105,11 @@ typedef struct
         case 0x11:
             struct
             {
-                int Value;
+                union
+                {
+                    int Value;
+                    float Value;
+                } Val;
             } InsIntConst17;
             break;
 
@@ -185,11 +189,14 @@ typedef struct
             } InsUnk0xC1;
             break;
     }
-} VMInstruction;
+} VMInstruction <comment=EnumToString(opcode)>;
 
 typedef struct
 {
-    LittleEndian();
+    local int isBigEndian = IsBigEndian();
+    if (isBigEndian)
+        LittleEndian();
+        
     while (true)
     {
         VMInstruction instruction;
@@ -197,6 +204,8 @@ typedef struct
             break;
 
     }
-    SetEndian();
+    
+    if (isBigEndian)
+        BigEndian();
 
 } VMCommands;

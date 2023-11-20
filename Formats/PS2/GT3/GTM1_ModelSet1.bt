@@ -133,31 +133,6 @@ uint AlignValue(uint x, uint alignment)
       return (x + (alignment - 1)) & mask;
 }
 
-// GT4O US: 59ABD0
-typedef struct
-{
-    float AmbientR;
-    float AmbientG;
-    float AmbientB;
-    float AmbientA;
-    float DiffuseR;
-    float DiffuseG;
-    float DiffuseB;
-    float DiffuseA;
-    float SpecularR;
-    float SpecularG;
-    float SpecularB;
-    float SpecularA;
-    float UnkR;
-    float UnkG;
-    float UnkB;
-    float UnkA;
-    float unk;
-    uint UnkFlags <comment="Valid flags are 1, 2">;
-    float Unk_Unused;
-    float Unk_Unused <comment="Appears unused. Doesn't do anything?">;
-} PGLUmaterial;
-
 typedef struct
 {
     local int basePos = FTell();
@@ -238,6 +213,7 @@ typedef struct
             
             FSeek(FileSize()); // Fix 010 bug
         } Boundings;  
+        
     }
     
     if (Header.TexSetTableOffset != 0)
@@ -287,7 +263,8 @@ typedef struct
             FSeek(FileSize()); // Fix 010 bug
         } VariationTexSets;
     }
-    if (Header.VariationMaterialsOffset != 0)
+    
+    if (Header.VariationMaterialCount > 0)
     {
         struct
         {

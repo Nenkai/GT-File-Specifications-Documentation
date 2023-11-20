@@ -15,6 +15,7 @@ BitfieldDisablePadding();
 
 #include "../PS2ModelCommon.bt"
 #include "../../Shared/ModelSetupCommands.bt"
+#include "../../Shared/ModelVM.bt"
 #include "../Tex1_TextureSet1.bt"
 
 typedef struct
@@ -67,6 +68,18 @@ typedef struct
 
 } ExtensionMap;
 
+typedef struct
+{
+    int NamePtr <format=hex, fgcolor=cRed>;
+    short DwordSize;
+    short InstanceStorageIndex;
+    
+    FSeek(BasePos + NamePtr);
+    string Name;
+    
+    FSeek(FileSize());
+} RegisterInfo <comment=Name>;
+
 uint AlignValue(uint x, uint alignment)
 {
       local uint mask = ~(alignment - 1);
@@ -80,23 +93,22 @@ typedef struct
     byte unk;
     byte unk;
     int BoundsOffset <format=hex, fgcolor=cRed>;
-    float usedToComputeModelLODWidth;
-    float usedToComputeBounds;
-    float e;
-    int f;
+    float Unk;
+    Vector3 Origin;
     int SetupOpcodesOffset <format=hex>;
-    int h;
-    int j;
-    int k;
+    int VMInitBytecodeOffset;
+    int VMUpdateBytecodeOffset;
+    int VMUnkCallbackBytecodeOffset;
 
+    FSeek(BasePos + BoundsOffset);
+    Vector3 Bounds[BoundCount];
     FSeek(BasePos + SetupOpcodesOffset);
     PGLCommands Commands;
     
-
 } Model;
 
 
-struct GT4_ModelSet
+typedef struct
 {   
 
     local int BasePos = FTell();
@@ -107,55 +119,67 @@ struct GT4_ModelSet
         int RelocatorDataOffset <format=hex>;
         int RelocatorDataSize <format=hex>;
         int RelocationBase;
-
-        FSeek(BasePos + 0x10);
-        int fileSize <format=hex>;
+        int FileSize <format=hex>;
         byte Unk;
-        byte HasInstanceAt0x7C <format=hex>;
+        enum <byte> { ExternalInstance = 0, InstanceAt0x7C = 1 } InstanceFlags <format=hex>;
 
-        short ModelsCount;
+        short ModelCount;
         short ShapeCount;
-        short Unk;
-        short TexSetListCount;
-        short TexSetEntryCount;
-        short countFor0x4C;
-        short empty;
-        short hostMethodInfoCount;
-        short registerDataCount;
-        short outRegisterInfoCount;
+        short MaterialCount;
+        short TexSetCount <comment="Per color">;
+        short ColorCount;
+        short InstanceOutRegisterDwordSize <comment="Used for creating the instance register storage">;
+        short InstanceUnkRegisterDwordSize;
+        short HostMethodInfoCount;
+        short ExternalInfoCount;
+        short OutRegisterInfoCount;
     
         FSeek(BasePos + 0x2a);
         short modelSetSymbols;
-        byte unkColorIndex;
-        byte unkColorIndex2;
+        byte NumColors;
+        byte CurrentColorIndex;
         short bindMatrixCount;
         
         FSeek(BasePos + 0x36);
-        short unkCount; // Negative, intentional
+        short InstanceSize <format=hex, comment="under 0 = bundled instance size, above = external instance size (to be allocated)">;
         int ModelsOffset <format=hex>; // Strides of 0x28, count at 0x16
         int ShapesOffset <format=hex>; // Strides of 0x4 - offsets
-    
-        FSeek(BasePos + 0x40);
-        int matTable <format=hex>;
-        int TexSetTableOffset <format=hex>;
-        int bindMatrixMapOffset <format=hex>;
-        int hostMethodInfoOffset <format=hex>; // strides of 0x08
+        int MaterialsOffset <format=hex, fgcolor=cRed>;
+        int TexSetTableOffset <format=hex, fgcolor=cRed>;
+        int bindMatrixMapOffset <format=hex, fgcolor=cRed>;
+        int HostMethodInfoOffset <format=hex, fgcolor=cRed>; // strides of 0x08
     
         FSeek(BasePos + 0x50);
-        int registerInfoOffset <format=hex>;
-        int outRegisterInfoOffset <format=hex>;
-        int modelSetSymbolsOffset <format=hex>; // 0x08 toc - offset then index?
-        
-        FSeek(BasePos + 0x60);
-        int unkColorsArrayOffset;
+        int ExternalInfoOffset <format=hex, fgcolor=cRed>;
+        int OutRegisterInfoOffset <format=hex, fgcolor=cRed>;
+        int modelSetSymbolsOffset <format=hex, fgcolor=cRed>; // 0x08 toc - offset then index?
+        int VMBytecodeOffset <format=hex, fgcolor=cRed>;
+        int VariationMaterialsOffset <format=hex, fgcolor=cRed>;
     
         FSeek(BasePos + 0x68);
-        int ExtensionDataOffset <format=hex>;
+        int ExtensionDataOffset <format=hex, fgcolor=cRed>;
     } Header;
 
-    FSeek(BasePos + Header.ModelsOffset);
-    Model models[Header.ModelsCount];
-
+    FSeek(BasePos + Header.MaterialsOffset);
+    if (Header.MaterialCount > 0 && Header.MaterialsOffset != 0)
+    {
+        struct
+        {
+            FSeek(BasePos + Header.MaterialsOffset);
+            PGLUmaterial material[Header.MaterialCount];
+        } Materials;
+    }
+    
+    FSeek(BasePos + Header.MaterialsOffset);
+    if (Header.MaterialCount > 0 && Header.VariationMaterialsOffset != 0)
+    {
+        struct
+        {
+            FSeek(BasePos + Header.VariationMaterialsOffset);
+            PGLUmaterial material[Header.MaterialCount];
+        } VariationMaterials;
+    }
+    
     FSeek(BasePos + Header.ShapesOffset);
     struct
     {
@@ -168,33 +192,82 @@ struct GT4_ModelSet
             pgluShape shape;   
         }
     } Shapes;
+    
+    FSeek(BasePos + Header.ModelsOffset);
+    struct
+    {
+        local int i = 0;
+        for (i = 0; i < Header.ModelCount; i++)
+        {
+            FSeek(BasePos + Header.ModelsOffset + (i * 0x28));
+            Model model;   
+        }
+    } Models;
 
-    FSeek(BasePos + Header.ExtensionDataOffset);
-    ExtensionMap extensionMap;
-
+    if (Header.ExtensionDataOffset > 0)
+    {
+        FSeek(BasePos + Header.ExtensionDataOffset);
+        ExtensionMap extensionMap;
+    }
+    
     FSeek(BasePos + Header.TexSetTableOffset);
     struct
     {
-        int ListOffsets[Header.TexSetListCount] <format=hex, fgcolor=cRed>;
+        int TexSetColorsOffset[Header.ColorCount] <format=hex, fgcolor=cRed>;
         
         local int i = 0;
-        for (i = 0; i < Header.TexSetListCount; i++)
+        for (i = 0; i < Header.ColorCount; i++)
         {
             struct
             {
-                FSeek(BasePos + ListOffsets[i]);
-                int TexSetOffsets[Header.TexSetEntryCount] <format=hex, fgcolor=cRed>;
+                FSeek(BasePos + TexSetColorsOffset[i]);
+                int TexSetOffsets[Header.TexSetCount] <format=hex, fgcolor=cRed>;
                 
                 local int j = 0;
-                for (j = 0; j < Header.TexSetEntryCount; j++)
+                for (j = 0; j < Header.TexSetCount; j++)
                 {
                     FSeek(BasePos + TexSetOffsets[j]);
                     TextureSet1 TexSet;   
                 }
             } TexSetTable;
         }
-    } TexSetTables;
+    } TexSetColors;
 
+    if (Header.HostMethodInfoCount > 0)
+    {
+        struct
+        {
+            local int i = 0;
+            for (i = 0; i < Header.HostMethodInfoCount; i++)
+            {
+                FSeek(BasePos + Header.HostMethodInfoOffset + (i * 0x08));
+                RegisterInfo HostMethodInfo;
+            }
+            
+            FSeek(FileSize()); // Fix bug
+        } HostMethodInfos;
+    }
+    
+    if (Header.OutRegisterInfoOffset > 0)
+    {
+        struct
+        {
+            local int i = 0;
+            for (i = 0; i < Header.OutRegisterInfoCount; i++)
+            {
+                FSeek(BasePos + Header.OutRegisterInfoOffset + (i * 0x08));
+                RegisterInfo OutRegisterInfo;
+            }
+            
+            FSeek(FileSize()); // Fix bug
+        } OutRegisterInfos;
+    }
+    
+    if (Header.VMBytecodeOffset > 0)
+    {
+        FSeek(BasePos + Header.VMBytecodeOffset);
+        VMCommands VMBytecode;
+    }
     
     FSeek(BasePos + Header.RelocatorDataOffset);
     struct
@@ -249,5 +322,10 @@ struct GT4_ModelSet
             // Masked strings are xorred by 0xAA
             // string uint masked_symbols_string_offsets[unkCount]
         }
+        
+        FSeek(FileSize());
     } RelocatorData;
 } ModelSet2 <optimize=false>;
+
+if (ReadInt(0) == 0x534C444D)
+    ModelSet2 ModelSet;

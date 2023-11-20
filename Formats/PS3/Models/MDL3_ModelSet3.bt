@@ -47,11 +47,11 @@ typedef struct
 #include "MDL3MaterialMap.bt"
 #include "MDL3FVFDefinitions.bt"
 #include "MDL3VM.bt"
-#include "MDL3VMCommands.bt"
 #include "MDL3ShapeStreaming.bt"
 #include "MDL3SeparateCarData.bt"
 #include "SHDS_Shaders.bt"
 #include "PackedMesh.bt"
+#include "../../Shared/ModelVM.bt"
 
 typedef struct
 {

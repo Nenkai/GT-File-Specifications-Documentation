@@ -27,14 +27,14 @@ typedef struct
         // End of setup commands.
         End = 0,
 
-        RenderModel_1ub = 2,
-        RenderModel_1us = 3,
+        RenderModel_Byte = 2,
+        RenderModel_UShort = 3,
         
         // Calls a shape (mesh) to use (1 unsigned byte)
-        pgluCallShape_1ub = 4,
+        pgluCallShape_Byte = 4,
         
         // Calls a shape (mesh) to use (1 unsigned short)
-        pgluCallShape_1us = 5,
+        pgluCallShape_UShort = 5,
         
         // Calls the model's callback, passes parameter to it, returns value
         // Will be used for which branch to jump to
@@ -44,7 +44,8 @@ typedef struct
         //       It will always return 0
         CallModelCallback = 6,
         
-        LODData = 7,
+        // Jumps to lod command data based on the current lod.
+        LODSelect = 7,
         
         // Jumps to a relative offset (byte)
         JumpByte = 8,
@@ -52,33 +53,35 @@ typedef struct
         // Jumps to a relative offset (short)
         JumpShort = 9,
         
-        pglUnk_Enable17_WithMatrix = 10,
+        // Render commands, takes a bbox.
+        BBoxRender = 10,
         
-        // Calls pglEnable(17)
-        pglEnable17_ = 11,
+        // Calls pglEnable(17) - Not entirely figured out, it may be just enabling rendering
+        // It's always at the bottom of commands, so probably it?
+        pglEnableRendering = 11,
         
-        // Pushes a matrix. similar to glPushMatrix
+        // Pushes the current matrix stack down by one, duplicating the current matrix. Similar to glPushMatrix
         pglPushMatrix = 12,
         
-        // Pops a matrix. similar to glPopMatrix
+        // Pops the current matrix stack, replacing the current matrix with the one below it on the stack. Similar to glPopMatrix
         pglPopMatrix = 13,
         
         // Sets the matrix mode. Similar to glMatrixMode
         pglMatrixMode = 14,
         
-        // Calls pglInverse with a matrix
+        // Calls pglLoadMatrix, same as glLoadMatrix. Replaces the current matrix with the one whose elements are specified by m. 
         pglInverse = 15,
         
-        // Calls a pgl command with a matrix. Could be similar in operation to command 15
-        pglUnk16 = 16,
+        // Calls pglMultMatrix, same as glMultMatrix. Multiplies the current matrix with the one specified using m, and replaces the current matrix with the product.
+        pglMultMatrix = 16,
         
-        // Calls pglTranslate. Similar to glTranslate
+        // Calls pglTranslate, same as glTranslate. Multiplies the current matrix by the specified translation vector
         pglTranslate = 17,
         
-        // Calls pglScale. Similar to glScale
+        // Calls pglScale, same as glScale. Multiplies the current matrix by the specified scale vector.
         pglScale = 18,
         
-        // Calls pglRotate. Similar to glRotate
+        // Calls pglRotate, same as glRotate. Multiplies the current matrix by the specified rotation vector.
         pglRotate = 19,
         
         // Calls pglRotateX. Custom, rotates on X axis
@@ -90,47 +93,47 @@ typedef struct
         // Calls pglRotateX. Custom, rotates on Z axis
         pglRotateZ = 22,
         
-        // Presumably enables depth test, pglEnable(5) is called.
+        // Enables Depth Test by calling pglEnable(5), which sets GS ZBUF's ZMSK (Z Value Drawing Mask) & GS TEST's ZTE (Depth Test) bits
         pglEnableDepthTest = 23,
         
-        // Presumably disables depth test, pglDisable(5) is called.
+        // Disables Depth Test by calling pglDisable(5), which unsets GS ZBUF's ZMSK (Z Value Drawing Mask) & GS TEST's ZTE (Depth Test) bits
         pglDisableDepthTest = 24,
         
-        // Sets the depth func to use. Similar to glDepthFunc
+        // Sets the depth func to use. Sets GS TEST's ZTST value
         pglDepthFunc = 25,
         
-        // Presumably enables alpha test. Calls pglEnable(4)
+        // Enables Alpha Test by calling pglEnable(4), which sets GS TEST's ATE (Alpha Test) bit
         pglEnableAlphaTest = 26,
         
-        // Presumably disables alpha test. Calls pglDisable(4)
+        // Disables Alpha Test by calling pglDisable(4), which unsets GS TEST's ATE (Alpha Test) bit
         pglDisableAlphaTest = 27,
         
-        // Sets the alpha function to use (1 unsigned byte) - similar to glAlphaFunc
-        pglAlphaFunc_1ub = 28,
+        // Sets the alpha function to use by setting GS TEST's ATST (Alpha Test Method) value
+        pglAlphaFunc = 28,
         
-        // Presumably enables destination alpha testing. Calls pglEnable(3)
+        // Enables Destination Alpha Test by calling pglEnable(3), which toggles on GS TEST register bit 14 (DATE).
         pglEnableDestinationAlphaTest = 29,
         
-        // Presumably enables destination alpha testing. Calls pglDisable(3)
+        // Disables Destination Alpha Test by calling pglDisable(3), which untoggles GS TEST register bit 14 (DATE).
         pglDisableDestinationAlphaTest = 30,
         
-        // Calls pglDestinationAlphaFunc(value) - 1 unsigned byte - should be 2 or 5
+        // Calls pglDestinationAlphaFunc(value) - 1 unsigned byte - 2 unsets GS TEST register bit 15 (DATM), 5 sets it
         pglDestinationAlphaFunc = 31,
         
-        // Sets the blend function to use - similar to glBlendFunc
-        pglBlendFunc1ub = 32,
+        // Sets the blend function to use by setting GS ALPHA_1 & ALPHA_2 (FIX)
+        pglBlendFunc = 32,
         
-        // Sets the fog color. 1 unsigned int
-        pglFogColor1ui = 33,
+        //  Sets the fog color. 1 unsigned int to GS FOGCOL register
+        pglSetFogColor = 33,
         
-        // Gets the fog color, to be used with command 35 later
-        pglGetFogColor = 34,
+        // Stores the fog color from current FOGCOL register
+        pglStoreFogColor = 34,
         
         // Sets fog color to default value
-        pglFogColor1ui_default = 35,
+        pglCopyFogColor = 35,
         
         // Sets the color mask with pglColorMask1ui(~value) (1 unsigned int)
-        pglColorMask1ui = 36,
+        pglColorMask = 36,
         
         // Disables depth mask
         pglDisableDepthMask = 37,
@@ -144,27 +147,25 @@ typedef struct
         // Does something with 4 float. Not used above GT3. Other games's code skips 4 floats.
         pglGT3_Unk40 = 40,
         
-        // Calls pgluExternalTexIndex
+        // Sets the current external texture to use. Calls pgluExternalTexIndex
         pglExternalTexIndex = 41,
         
         // Calls pgluExternalMatIndex
         pglExternalMatIndex = 42,
         
         // Sets the tex table to use (1 unsigned byte)
-        // Calls: 
-        // - pgluCacheTexSetPath3(PGLUTexture*)
-        // - pgluTexTable(v55->PGLUTextureMapOffset_0x18)
-        pgluTexTable_1ub = 43,
+        pgluSetTexTable_Byte = 43,
         
-        // Same as command 43, but index is a short.
-        pgluTexTable_1us = 44,
+        // Sets the tex table to use (1 unsigned short)
+        pgluTexTable_UShort = 44,
         
-        // Calls pglEnable(17), may be related to alpha fail
-        pglEnable17 = 45,
+        // Calls glEnable(15). Enables face culling
+        pglEnableCullFace = 45,
         
-        // Calls pglDisable(17), may be related to alpha fail
-        pglDisable17 = 46,
+        // Calls pglDisable(15). Disables face culling
+        pglDisableCullFace = 46,
          
+        // Calls pglAlphaFail. Sets the alpha fail by setting GS TEST's AFAIL value.
         pglAlphaFail = 47,
         
         // Calls pglCylinderMapHint - 3 floats
@@ -199,21 +200,34 @@ typedef struct
         Unk_66 = 66,
         
         // GT4 and above. Calls model set VM.
-        ModelSetVM_callVM = 67,
+        CallVM = 67,
         
-        // GT4 and above.
-        Unk_68 = 68,
+        // GT4 and above. Calls pglMultMatrix using VM output registers.
+        VM_MultMatrix = 68,
         
-        // GT4 and above. Calls these with a short (rescale?) - VM Instance related?
-        pglTranslate2 = 69,
-        pglScale2 = 70,
-        pglRotate2 = 72,
-        pglRotateX2 = 73,
-        pglRotateY2 = 74,
-        pglRotateZ2 = 75,
-        pgluShapeTweenRatio2 = 76,
+        // GT4 and above. Calls pglTranslate using VM output registers.
+        VM_pglTranslate = 69,
         
-        UnkBranch = 77,
+        // GT4 and above. Calls pglScale using VM output registers.
+        VM_pglScale = 70,
+        
+        // GT4 and above. Calls pglRotate using VM output registers.
+        VM_pglRotate = 72,
+        
+        // GT4 and above. Calls pglRotateX using VM output registers.
+        VM_pglRotateX = 73,
+        
+        // GT4 and above. Calls pglRotateY using VM output registers.
+        VM_pglRotateY = 74,
+        
+        // GT4 and above. Calls pglRotateZ using VM output registers.
+        VM_pglRotateZ = 75,
+        
+        // GT4 and above. Calls pgluShapeTweenRatio using VM output registers.
+        VM_pgluShapeTweenRatio = 76,
+        
+        // GT4 and above. Branches depending on parameter.
+        VM_Branch = 77,
         
         // GT4 and above. Calls pglCullFace(2)
         pglCullFace_2 = 78,
@@ -222,10 +236,10 @@ typedef struct
         pglCullFace_1 = 79,
         
         // GT4 and above. Calls pgluTexSet using external tex set (up to 16). Uses 1 unsigned byte as index
-        pgluTexTableFromExternalTexSet1ub = 80,
+        pgluTexTableFromExternalTexSetByte = 80,
         
         // GT4 and above. Calls pgluTexSet using external tex set (up to 16). Uses 1 unsigned short as index
-        pgluTexTableFromExternalTexSet1us = 81,
+        pgluTexTableFromExternalTexSetUShort = 81,
         
         // GT4 and above. Calls pglVariableColorScale
         pglVariableColorScale = 82,
@@ -233,11 +247,11 @@ typedef struct
         // GT4 and above. Calls pglVariableColorOffset
         pglVariableColorOffset = 83,
         
-        // GT4 and above. Calls pglVariableColorScale using shorts (vm instance related?)
-        pglVariableColorScale_Shorts = 84,
+        // GT4 and above. Calls pglVariableColorScale using VM output registers.
+        VM_pglVariableColorScale = 84,
         
-        // GT4 and above. Calls pglVariableColorOffset using shorts (vm instance related?)
-        pglVariableColorOffset_Shorts = 85,
+        // GT4 and above. Calls pglVariableColorOffset using VM output registers.
+        VM_pglVariableColorOffset = 85,
 
         // GT4 and above. Calls pglTexGenf(3, facing_attenuation_) and pglTexGenf(2, facing_bias_)
         // Both of these globals are set through ModelSet2::setFacingAttenuation and ModelSet2::setFacingBias
@@ -251,10 +265,10 @@ typedef struct
         pglDisable19_14 = 88,
         
         // GT4 and above. Calls modelset callback. takes unsigned byte parameter
-        ModelSetCallback_89_1ub = 89,
+        VMCallback_Byte = 89,
         
         // GT4 and above. Same as 89, with unsigned short index
-        ModelSetCallback_90_1us = 90,
+        VMCallback_UShort = 90,
     }cmd;
     
     switch (cmd)
@@ -263,19 +277,23 @@ typedef struct
             stop = true;
             break;
             
-        case 2:
+        case RenderModel_Byte:
             byte ModelIndex;
             break;
             
-        case 4: // Shape Index byte
+        case RenderModel_UShort:
+            ushort ModelIndex;
+            break;
+            
+        case pgluCallShape_Byte: // Shape Index byte
             byte ShapeIndex;
             break;
             
-        case 5: // Shape Index short
+        case pgluCallShape_UShort: // Shape Index short
             short ShapeIndex;
             break;
             
-        case 6:
+        case CallModelCallback:
             // Passed to the callback
             enum <ushort> 
             { 
@@ -301,208 +319,232 @@ typedef struct
                 // 38 same
                 // 39 same
             } Parameter;
+            Printf("%d\n", Parameter);
             byte BranchCount;
             short RelativeBranchOffsets[BranchCount] <format=hex>;
             break;
-        case 7:
+            
+        case LODSelect:
             Vector3 unk0x07;
             float Unk0x07_2;
             byte lodCount;
             short RelativeBranchOffsets[lodCount] <format=hex>;
             break;
             
-        case 8: // Jump byte
+        case JumpByte:
             byte RelativeJumpOffset;
             break;
-        case 9: // Jump short
+            
+        case JumpShort:
             short RelativeJumpOffset;
             break;
             
-        case 10:
+        case BBoxRender:
             byte num;
             Vector3 vecs[num];
             short OffsetMaybe <format=hex>;
             break;
             
-        case 11:
-        case 12:
-        case 13:
+        case pglEnableRendering:
+        case pglPushMatrix:
+        case pglPopMatrix:
             break;
             
-        case 15:
+        case pglMatrixMode:
+            byte Mode;
+            break;
+            
+        case pglInverse:
             float matrix_15[4 * 4];
             break;
-        case 16:
+        case pglMultMatrix:
             float matrix_16[4 * 4];
             break;
         
-        case 17:
+        case pglTranslate:            
+        case pglScale:
             float x;
             float y;
             float z;
             break;
             
-        case 18:
-            float x;
-            float y;
-            float z;
-            break;
-            
-        case 19:
+        case pglRotate:
             float angle;
             float x;
             float y;
             float z;
             break;
             
-        case 20:
-            float x;
-            break;
-            
-        case 21:
-            float y;
-            break;
-            
-        case 22:
+        case pglRotateX:
+        case pglRotateY:
+        case pglRotateZ:
             float z;
             break;
            
-        case 23:
-        case 24:
+        case pglEnableDepthTest:
+        case pglDisableDepthTest:
             break;
             
-        case 25:
+        case pglDepthFunc:
             byte func;
             break;
             
-        case 26:
-        case 27:
+        case pglEnableAlphaTest:
+        case pglDisableAlphaTest:
             break;
-        case 28:
+            
+        case pglAlphaFunc:
             byte func;
             byte ref;
             break;
-        case 0x1D:
-        case 0x1E:
+            
+        case pglEnableDestinationAlphaTest:
+        case pglDisableDestinationAlphaTest:
             break;
-        case 0x1F:
+            
+        case pglDestinationAlphaFunc:
             byte unk;
             break;
-        case 32:
-            byte sfactor;
-            byte dfactor;
+            
+        case pglBlendFunc:
+            byte ALPHA1_A : 2;
+            byte ALPHA1_B : 2;
+            byte ALPHA1_C : 2;
+            byte ALPHA1_D : 2;
+            byte ALPHA1_FIX;
             break;
-        case 0x21:
+            
+        case pglSetFogColor:
             int unk;
             break;
-        case 0x22:
-        case 0x23:
+            
+        case pglStoreFogColor:
+        case pglCopyFogColor:
             break;
-        case 36:
+            
+        case pglColorMask:
             uint ColorMask <format=hex>;
             break;
-        case 37:
-        case 38:
+            
+        case pglDisableDepthMask:
+        case pglEnableDepthMask:
             break;
-        case 39:
+            
+        case pglDepthBias:
             float bias;
             break;
-        case 41:
+            
+        case pglGT3_Unk40:
+            float UnkGT3[4];
+            break;
+            
+        case pglExternalTexIndex:
             byte TexIndex;
             break;
-        case 42:
+        case pglExternalMatIndex:
             byte MatIndex;
             break;
-        case 43:
+        case pgluSetTexTable_Byte:
             byte TexTableIndex;
             break;
-        case 44:
+        case pgluTexTable_UShort:
             short TexTableIndex;
             break;
-        case 45:
-        case 46:
+        case pglEnableCullFace:
+        case pglDisableCullFace:
             break;
-        case 47:
+            
+        case pglAlphaFail:
             byte AlphaFail;
             break;
-        case 49:
+            
+        case pglCylinderMapHint:
             float a;
             float b;
             float c;
             break;
             
-        case 50:
+        case pglGT3_1Int:
             float Unk_50;
             break;
-        case 51:
+        case pglGT3_4Float:
             float Unk_51[4];
             break;
-        case 52:
+        case ModelSet_setShapeTweenRatio:
             float value;
             break;
-        case 53:
+        case pgl_53:
+            short ShapeIndex;
+            short TweenRatio;
+            break;
+        case pgl_54:
             float value;
             break;
-        case 54:
-            float value;
-            break;
-        case 55:
+        case pgl_55:
             float values[4];
             break;
             
-        case 64:
+        case pglCullFace:
             break;
             
-        case 68:
-            byte unk;
-            byte unk2;
+        case Unk_65:
+        case Unk_66:
+            byte Unk[3];
             break;
             
-        case 69:
-        case 70:
-        case 72:
-        case 73:
-        case 74:
-        case 75:
-        case 76:
-            byte unk;
-            byte unk2;
+        case CallVM:
+            break;
+            
+        case VM_MultMatrix:
+        case VM_pglTranslate:
+        case VM_pglScale:
+        case VM_pglRotate:
+        case VM_pglRotateX:
+        case VM_pglRotateY:
+        case VM_pglRotateZ:
+        case VM_pgluShapeTweenRatio:
+            ushort VMOutputRegisterIndex;
             break;
         
-        case 77:
-            short UnkInstanceIndex;
+        case VM_Branch:
+            ushort VMOutputRegisterIndex;
             byte Count;
             short Offsets[Count];
             break;
             
-        case 80:
+        case pglCullFace_2:
+        case pglCullFace_1:
+            break;
+            
+        case pgluTexTableFromExternalTexSetByte:
             byte ExternalTexSetIndex;
             break;
             
-        case 81:
+        case pgluTexTableFromExternalTexSetUShort:
             short ExternalTexSetIndex;
             break;
            
-        case 82:
-        case 83:
+        case pglVariableColorScale:
+        case pglVariableColorOffset:
             float a;
             float b;
             float c;
             float d;
             break;
             
-        case 84:
-        case 85:
-            short a;
-            short b;
-            short c;
-            short d;
+        case VM_pglVariableColorScale:
+        case VM_pglVariableColorOffset:
+            ushort VMOutputRegisterIndex;
+            break;
             
-        case 89:
+        case pglDisable19_14:
+            break;
+            
+        case VMCallback_Byte:
             byte UnkParam;
             break;
             
-        case 90:
+        case VMCallback_UShort:
             short UnkParam;
             break;
             

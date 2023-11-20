@@ -259,3 +259,28 @@ typedef struct
         ubyte VUAddrQWord <format=hex>;
     }
 } pgluShape <optimize=false>;
+
+// GT4O US: 59ABD0
+typedef struct
+{
+    float AmbientR;
+    float AmbientG;
+    float AmbientB;
+    float AmbientA;
+    float DiffuseR;
+    float DiffuseG;
+    float DiffuseB;
+    float DiffuseA;
+    float SpecularR;
+    float SpecularG;
+    float SpecularB;
+    float SpecularA;
+    float UnkR;
+    float UnkG;
+    float UnkB;
+    float UnkA;
+    float unk;
+    uint UnkFlags <comment="Valid flags are 1, 2">;
+    float Unk_Unused;
+    float Unk_Unused <comment="Appears unused. Doesn't do anything?">;
+} PGLUmaterial;

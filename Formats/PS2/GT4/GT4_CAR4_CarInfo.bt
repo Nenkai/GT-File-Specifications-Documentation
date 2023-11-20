@@ -13,6 +13,8 @@
 
 LittleEndian();
 
+#include "GT4_MDLS_ModelSet.bt"
+
 typedef struct
 {
     float X;
@@ -188,4 +190,7 @@ struct GT4CarData
 
     FSeek(Header.CarCollisionModel);
     CollisionModel Collision;
+    
+    FSeek(Header.MainModelSetOffset);
+    ModelSet2 MainModel;
 } CarData;
