@@ -95,15 +95,16 @@ typedef struct
     int BoundsOffset <format=hex, fgcolor=cRed>;
     float Unk;
     Vector3 Origin;
-    int SetupOpcodesOffset <format=hex>;
-    int VMInitBytecodeOffset;
-    int VMUpdateBytecodeOffset;
-    int VMUnkCallbackBytecodeOffset;
+    int RenderCommandsOffset <format=hex>;
+    int VMConstructor_BytecodeOffset;
+    int VMUpdate_BytecodeOffset;
+    int VMCallback_BytecodeOffset;
 
     FSeek(BasePos + BoundsOffset);
     Vector3 Bounds[BoundCount];
-    FSeek(BasePos + SetupOpcodesOffset);
-    PGLCommands Commands;
+    
+    FSeek(BasePos + RenderCommandsOffset);
+    PGLCommands RenderCommands;
     
 } Model;
 
@@ -136,7 +137,7 @@ typedef struct
     
         FSeek(BasePos + 0x2a);
         short modelSetSymbols;
-        byte NumColors;
+        byte NumVariationMaterials;
         byte CurrentColorIndex;
         short bindMatrixCount;
         
@@ -158,6 +159,9 @@ typedef struct
     
         FSeek(BasePos + 0x68);
         int ExtensionDataOffset <format=hex, fgcolor=cRed>;
+        
+        FSeek(BasePos + 0x7C);
+        int InstanceOffset <format=hex, fgcolor=cRed>;
     } Header;
 
     FSeek(BasePos + Header.MaterialsOffset);
@@ -170,13 +174,22 @@ typedef struct
         } Materials;
     }
     
-    FSeek(BasePos + Header.MaterialsOffset);
+    FSeek(BasePos + Header.VariationMaterialsOffset);
     if (Header.MaterialCount > 0 && Header.VariationMaterialsOffset != 0)
     {
         struct
         {
-            FSeek(BasePos + Header.VariationMaterialsOffset);
-            PGLUmaterial material[Header.MaterialCount];
+            int TableOffsets[Header.NumVariationMaterials];
+            local int i = 0;
+            for (i = 0; i < Header.NumVariationMaterials; i++)
+            {
+                struct
+                {
+                    FSeek(BasePos + TableOffsets[i]);
+                    PGLUmaterial material[Header.MaterialCount];
+                } VariationMaterial;   
+            }
+            
         } VariationMaterials;
     }
     
@@ -311,6 +324,7 @@ typedef struct
         // Child offsets
         
         FSeek(Header.RelocatorDataOffset + OffsetToUserData);
+
         int SymbolCount1 <comment="Debug or stripped">;
 
         int SymbolCount2 <comment="Debug or stripped">;
