@@ -1,0 +1,62 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: Car Color database file (carcolor.db)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 47 54 32 4B
+//   History: 
+//------------------------------------------------
+
+struct
+{
+    struct
+    {
+        uint Magic;
+        uint empty;
+        uint CarCount <fgcolor=cGreen>;
+        uint CarToColorsMapOffset <format=hex, fgcolor=cRed>;
+        uint ColorListOffset <format=hex, fgcolor=cRed>;
+        uint FileSize <format=hex, fgcolor=cRed>;
+    } Header;
+    
+    struct
+    {
+        local int i = 0;
+        for (i = 0; i < Header.CarCount; i++)
+        {
+            FSeek(0x18 + (i * 0x10));
+            struct
+            {
+                uint64 ModelNameHash;
+                uint CarColorCount <fgcolor=cGreen>;
+                uint ColorMapOffset <format=hex, fgcolor=cRed>;
+                
+                FSeek(Header.CarToColorsMapOffset + ColorMapOffset);
+                uint ColorIDs[CarColorCount];
+            } Car;
+        }
+    } CarToColors;
+    
+    struct
+    {
+        FSeek(Header.ColorListOffset);
+        uint ColorCount;
+        
+        local int j = 0;        
+        for (j = 0; j < ColorCount; j++)
+        {
+            struct
+            {
+                uint ColorID;
+                uint LatinNameIndex;
+                uint JapaneseNameIndex;
+                uint ThumbnailColor <format=hex>;
+            } Color <bgcolor=ThumbnailColor>;
+        }
+    } Colors;
+       
+} CarColor;

@@ -1,0 +1,140 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    float X;
+    float Y;
+    float Z;
+} Vector3;
+
+typedef struct ModelSet
+{
+    struct
+    {
+        
+        char Magic[4];
+        int Version;
+        int Unk;
+        int Unk2;
+        uint64 RelocPtr;
+        uint64 Unk;
+        
+        FSeek(0x20);
+        byte Flag1;
+        byte Flag2;
+        short __0x22;
+        int unk_0x24;
+        int unk_0x28;
+        
+        int ModelCount;
+        FSeek(0x34);
+        uint Count_0xE8;
+        uint Count_0xF8;
+        uint UnkCount;
+        uint UnkCount;
+        uint UnkCount;
+        uint UnkCount;
+        uint UnkCount;
+        uint Count_0x118;
+        uint Count_0x120;
+        uint UnkCount;
+        uint UnkCount;
+        uint UnkCount;
+        uint Count_0x140;
+        uint UnkCount;
+        uint UnkCount;
+        uint UnkCount;
+        uint Count_0x190;
+        uint Count_0x198;
+        uint UnkCount;
+        uint UnkCount;
+        uint UnkCount;
+        uint Count_0x1B8;
+        uint Count_0x1C0;
+        uint Count_0x1C8;
+        
+        FSeek(0xC8);
+        uint64 Offset_0xC8 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0xD0 <format=hex, fgcolor=cRed>;
+        uint64 ModelsOffset <format=hex, fgcolor=cRed, comment="Stride 0x58">;
+        uint64 Offset_0xE0 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0xE8 <format=hex, fgcolor=cRed, comment="Stride 0x80">;
+        uint64 Offset_0xF0 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0xF8 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x100 <format=hex, fgcolor=cRed>;
+        uint64 TextureSetOffset <format=hex, fgcolor=cRed>;
+        uint64 ShadersOffset <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x118 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x120 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x128 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x130 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x138 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x140 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x148 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x150 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x158 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x160 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x168 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x170 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x178 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x180 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x188 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x190 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x198 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x1A0 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x1A8 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x1B0 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x1B8 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x1C0 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x1C8 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x1D0 <format=hex, fgcolor=cRed>;
+        uint64 Offset_0x1D8 <format=hex, fgcolor=cRed>;
+    } Header <size=0x280>;
+    
+    FSeek(Header.ModelsOffset);
+    struct
+    {
+        struct
+        {
+            uint Flags <format=hex>;
+            Vector3 Unk;
+            float Unk;
+            short Unk;
+            short Unk;
+            int Unk;
+            int VMEntries[3];
+            int a;
+            int a;
+            Vector3 UnkVec;
+            int a;
+            uint64 RenderCommandsOffset <format=hex, fgcolor=cRed>;
+            uint64 BoundaryBoxOffset <format=hex, fgcolor=cRed>;
+            uint64 UnkOffset <format=hex, fgcolor=cRed>;
+            int a;
+        } Model <size=0x58>;
+    } Models[Header.ModelCount];
+    
+    FSeek(Header.Offset_0xE8);
+    struct
+    {
+        char Data[0x80];
+    } Unk0xE8[Header.Count_0xE8];
+    
+    FSeek(Header.Offset_0x150);
+};
+
+if (ReadUInt(0) == 0x354C444D)
+    ModelSet ModelSet5;
+else if (ReadUInt(0) == 0x4D444C34)
+    ModelSet ModelSet4;
