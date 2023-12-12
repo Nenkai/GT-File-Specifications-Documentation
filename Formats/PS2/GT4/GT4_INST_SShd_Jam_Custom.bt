@@ -53,6 +53,29 @@ typedef struct
         byte v;
 } _7bitVariable;
 
+typedef struct
+{
+    byte NoteMin;
+    byte NoteMax;
+    byte SsaSize <comment="In strides of 0x10">;
+    byte unk;
+    enum <ubyte> 
+    {
+      SetNoiseShiftFrequency = 0x02, // SE only
+      PitchModulateSpeedAndDepth = 0x20,
+      Reverb = 0x80,   
+    } Flags <format=hex>;
+    
+    int SsaOffset_hi : 8 <comment="upper 8 bits of offset to data. In stride of 0x10", format=hex>;
+    int SsaOffset_lo : 16 <comment="lower 16 bits of offset to data. In stride of 0x10", format=hex>;
+    
+    short unk;
+    short unk;
+    short unk;
+    byte unk;
+    byte LfoTableIndex <comment="None if 0x7F?", format=hex>;
+} JamSplitChunk;
+                        
 struct GTSOUNDINSTRUMENT
 {
     struct
@@ -80,7 +103,7 @@ struct GTSOUNDINSTRUMENT
         int _empty_;
         char Magic[4] <comment="Presumably Se Sequence Header">;
 
-        int ProgDataPhysicalOffset <format=hex, fgcolor=cRed>;
+        int ProgramChunkPhysicalOffset <format=hex, fgcolor=cRed>;
         int VelocityChunkPhysicalOffset <format=hex, fgcolor=cRed>;
         int LfoTableChunkPhysicalOffset <format=hex, fgcolor=cRed>;
         int SeSeqChunkPhysicalOffset <format=hex, fgcolor=cRed>;
@@ -88,10 +111,10 @@ struct GTSOUNDINSTRUMENT
         int SeProgChunkPhysicalOffset <format=hex, fgcolor=cRed>;
         int reserved_physoffsets[2];
 
-        int ProgDataMemoryOffset <format=hex, fgcolor=cLtRed>;
+        int ProgramChunkMemoryOffset <format=hex, fgcolor=cLtRed>;
         int VelocityChunkMemoryOffset <format=hex, fgcolor=cLtRed>;
         int LfoTableChunkMemoryOffset <format=hex, fgcolor=cLtRed>;
-        int SeSeqChunkMemoryOffset <format=hex, fgcolor=cLtRed>;
+        int SeSeqChunkMemoryOffset <format=hex, fgcolor=cLtRed, comment="NOTE: Assigned at runtime">;
         int UnkChunkMemoryOffset <format=hex, fgcolor=cLtRed>;
         int SeProgChunkMemoryOffset <format=hex, fgcolor=cLtRed>;
         int reserved_memoffsets[2];
@@ -101,46 +124,46 @@ struct GTSOUNDINSTRUMENT
         
     } JamHeader;
 
-    if (JamHeader.ProgDataPhysicalOffset != -1)
+    if (JamHeader.ProgramChunkPhysicalOffset != -1)
     {
-        FSeek(jamHeaderPos + JamHeader.ProgDataPhysicalOffset);
+        FSeek(jamHeaderPos + JamHeader.ProgramChunkPhysicalOffset);
         struct
         {
             short EntryCount;
             short Offsets[EntryCount + 1] <format=hex>;
     
             local int i = 0;
-            for (i = 0; i < EntryCount; i++)
+            
+            for (i = 0; i < EntryCount + 1; i++)
             {
                 if (Offsets[i] == -1)
                     continue;
     
+                FSeek(jamHeaderPos + JamHeader.ProgramChunkPhysicalOffset + Offsets[i]);
                 struct
                 {
-                    byte unk;
-                    byte unkUsedInMultiplication;
-                    byte unkWasntUsed_[2];
-                    int unkWasntused <format=hex>;
-                    byte unk;
-                    byte unkk;
-                    byte _0x10StrideCount;
-                    byte emptyMaybe;
-               
-                    byte UnkFlag <format=hex>;
-               
-                    BigEndian();
-                    int unk : 24 <format=hex, fgcolor=cRed>;
-                    LittleEndian();
-               
-                    short unk;
-                    short unk2SizeMaybe;
-                    byte unk;
-                    byte unk;
-                    byte unk;
-                    byte unk;
+                    ubyte UnkFlag <format=hex>;
+                    byte Volume;
+                    byte field_0x02;
+                    byte field_0x03;
+                    byte field_0x04;
+                    byte NoteCapacityMaybe; // note minus this
+                    byte UnkRangeMin;
+                    byte UnkRangeMax;
+                    
+                    if (UnkFlag == 0xFF)
+                    {
+                        JamSplitChunk chunks[(UnkRangeMax - UnkRangeMin) + 1];
+                    }
+                    else
+                    {
+                        JamSplitChunk chunks[(UnkFlag & 0x0f) + 1];
+                    }
+                    
+                    
                 } ProgChunk;
             }
-        } ProgData <bgcolor=cBlue>;
+        } Programs <bgcolor=cBlue>;
     }
 
     if (JamHeader.VelocityChunkPhysicalOffset != -1)

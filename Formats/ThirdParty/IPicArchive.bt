@@ -1,0 +1,41 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: Sony IPicArchive
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: Holds video frames (PS2)
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+struct
+{
+    struct
+    {
+        char Magic[4];
+        int ImgCount;
+    } Header;
+
+    struct 
+    {
+        int offset <format=hex>;
+        char Name[0x1C];
+    } Entry[Header.ImgCount];
+
+    local int i = 0;
+    for (i = 0; i < Header.ImgCount; i++)
+    {
+        FSeek(Entry[i].offset);
+        struct
+        {
+            char Magic[4];
+            int size;
+            int unk;
+            int unk;
+            byte data[size - 8];
+        } Ipum;
+    }
+} Ipic;
