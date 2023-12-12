@@ -1,0 +1,352 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BigEndian();
+
+typedef struct
+{
+    char Magic[4] <bgcolor=cLtPurple>;
+    short Version;
+    int64 BlobSize <format=hex>;
+
+    // Hash is HMac256
+    // Input is always { 0xFF, 0x94, 0x0D, 0x9E, 0xEE, 0x5E, 0x43, 0x28 };
+
+    // The key is presumably the default structure or meta of an entity
+    // It's often an array zeros of varying size, but not always the case.
+    // The length is also different per blob
+    byte Hash[0x20] <fgcolor=cYellow, comment="HMac256, read template comments">;
+} Blob <bgcolor=cBlue>;
+
+typedef struct
+{
+    Blob blob <comment="Batch Queue Data Template">;
+} BatchQueueDataTemplate;
+
+typedef struct
+{
+    Blob blob;
+    short inventorySize_;
+    int latestCarcolId_;
+
+    byte pad[12];
+    short count;
+    short ids[count];
+
+    struct
+    {
+        Blob blob;
+        byte status_;
+        int carcolId_;
+        byte unk;
+        int acquiredCarFlag_;
+        int64 pad;
+    } CarCollectionItem[count];
+} CarCollectionInventoryData;
+
+typedef struct
+{
+    Blob blob;
+    short inventorySize_;
+    short count;
+    short ids[count];
+
+    struct
+    {
+        Blob blob;
+        byte status_;
+        int carCode_;
+        int64 getDate_;
+        byte newFlag_;
+        int buyCount_;
+    } CarDictionaryItem[count];
+} CarDictionaryInventoryData;
+
+typedef struct
+{
+    Blob blob;
+    int64 playId_;
+
+    struct 
+    {
+        int64 unk_;
+        int64 targetStrLen;
+        char target_[targetStrLen];
+
+        int64 langStrLen;
+        char lang_[langStrLen];
+        int version_;
+    } eulaAcceptedList_;
+
+    byte unlockedTrophyList_[16];
+} MiscData;
+
+typedef struct KeyAssignSuperPort
+{ 
+    byte superPort_;
+    byte code_;
+};
+
+typedef struct KeyAssign
+{
+    struct
+    {
+        int64 analogArrLen;
+        KeyAssignSuperPort analog_[analogArrLen];
+    
+        int64 buttonArrLen;
+        KeyAssignSuperPort button_[buttonArrLen];
+
+        int64 gestureArrLen;
+        KeyAssignSuperPort gesture_[gestureArrLen];
+
+    } valueLists_[5] <optimize=false>;
+    int64 a;
+};
+
+typedef struct
+{
+    byte performanceMode_;
+    byte frameRateMode_;
+    float finalExposureAdjustValue_;
+    float globalChroma_;
+    float sdrGamma_;
+    float sdrExposureAdjustValue_;
+
+} DisplaySettings;
+
+typedef struct
+{
+    Blob blob;
+    int unitOfVelocity_;
+    byte playOpeningMovie_;
+    byte vibration_[2];
+    short menuBGMVolume_;
+    short menuSEVolume_;
+    byte raceBGM_;
+    short raceBGMVolume_;
+    short raceSEVolume_;
+    short replayBGMVolume_;
+    short replaySEVolume_;
+    short otherBGMVolume_;
+    byte soundDynamicRange_;
+    short XDCRVolume_;
+    byte audioOutputMode_;
+    byte SFXMode_;
+    byte sysMusicMode_;
+    byte BGMShareMode_;
+    short SFXVolume_[32];
+    byte RtextDebug_;
+
+    KeyAssign keyAssigns_;
+    KeyAssign keyAssigns2_;
+
+    FSeek(0x49F73);
+    DisplaySettings displaySettingPS4Base_;
+    DisplaySettings displaySettingPS4Pro_;
+    DisplaySettings displaySettingPS5_;
+    byte RtextTtyOutput_;
+
+    struct
+    {
+        byte offsetY_;
+        byte offsetZ_;
+        byte delay_;
+        byte distance_;
+        byte mount_;
+        byte mount_chase_;
+        byte mount_interior_;
+        byte shift_;
+    
+        byte playIndex_[4];
+        byte vertical_;
+    } cameraSetting_;
+    struct CarLabelSetting
+    {
+        byte offlineRace_;
+        byte offlineReplay_;
+        byte onlineRace_;
+        byte onlineReplay_;
+    } carLabelSetting_;
+    struct PlayListSetting
+    {
+        int64 raceExcludedPlayListLen;
+        int raceExcludedPlayList_[raceExcludedPlayListLen];
+    } playListSetting_;
+
+    byte playAutoDemo_;
+    byte timeUntilAutoDemoSec_;
+    byte mileageAcceleration_;
+    byte finishedSportRaceCount_;
+    struct
+    {
+        int64 nicknameStrLen;
+        char nickname_[nicknameStrLen];
+        short birthdayYear_;
+        byte birthdayMonth_;
+        byte birthdayDay_;
+        byte useHandicap_;
+
+        int64 greetingStrLen;
+        char greeting[greetingStrLen];
+    } profileSetting_;
+} OptionData;
+
+typedef struct
+{
+    Blob blob;
+    int pavillionStatus_[32];
+    int pavilionTips_[32];
+    byte pavilionCompass_[32];
+    int pavilionLevel_;
+    int myCredits_;
+    int myToken_;
+    byte level_;
+    int64 exp_;
+    int manufacturer_;
+    int gtworldLevel_;
+    int gtworldPoints_;
+    byte isFirstTime_FLAGS[8];
+    struct ChampionshipResultEvent
+    {
+        int point_;
+        int ranking_;
+    } lastChampionshipResult_;
+
+    struct ChampionshipContext
+    {
+        int isPlayingChampionship_;
+        int currentChampionshipRound_;
+        int championshipRankingsList_ <comment="Fix me maybe">;
+        byte championshipEntryMax_;
+        int championshipFolderId_;
+    } championshipContext_;
+
+    int licenseLevel_;
+    struct WorldCircuitStatus
+    {
+        int64 locationCount;
+        int locations_[locationCount];
+
+        int64 eventTypeCount;
+        int eventTypes_[eventTypeCount];
+
+        int64 championshipsCount;
+        int championships_[championshipsCount];
+    } worldCircuit_;
+
+    struct RacingGear
+    {
+        int64 unlockedHelmetsCount;
+        int unlockedHelmets_[unlockedHelmetsCount];
+
+        int64 unlockedSuitsCount;
+        int unlockedSuits_[unlockedSuitsCount];
+    } racingGear_;
+
+    byte tabUnlockBuddyMessageLevel_;
+    byte carDictionaryGuideBuddyMessageIndex_;
+} ProgressData;
+
+typedef struct 
+{ 
+    Blob blob;
+    short inventorySize_;
+    short entryCount;
+    short ids[entryCount];
+    struct
+    {
+        Blob blob;
+        byte status_;
+        int goodsId_;
+        int carCode_;
+        byte carColor_;
+        byte pad[8];
+    } LegendCarWishListItemData[entryCount];
+} LegendCarWishListInventoryData;
+
+typedef struct 
+{ 
+    Blob blob;
+    short inventorySize_;
+    short entryCount;
+    short ids[entryCount];
+    struct
+    {
+        Blob blob;
+        byte status_;
+        int goodsId_;
+        int carCode_;
+        byte carColor_;
+        byte pad[8];
+    } UsedCarWishListItemData[entryCount];
+} UsedCarWishListInventoryData;
+
+
+typedef struct
+{
+    
+    Blob blob;
+    short inventorySize_;
+    uint64 receivedVegasEntitlementGetListSortKey_;
+} EntitlementInventoryData;
+
+typedef struct 
+{
+    LittleEndian();
+    int EntitySize <format=hex, bgcolor=cPurple>;
+    BigEndian();
+
+    char Magic[8] <bgcolor=cPurple>;
+    
+    local int cPos = FTell();
+    switch (Magic)
+    {
+        case "BATCHQUE":
+            BatchQueueDataTemplate BATCHQUE; break;
+        case "CARCOLIV":
+            CarCollectionInventoryData CARCOLIV; break;
+        case "CARDICIV":
+            CarDictionaryInventoryData CARDIVIC; break;
+        case "ETMTIV":
+            EntitlementInventoryData ETMTIV; break;
+        case "MISC":
+            MiscData MISC; break;
+        case "OPTION":
+            OptionData OPTION; break;
+        case "PROGRESS":
+            ProgressData PROGRESS; break;
+        case "LCWLIV":
+            LegendCarWishListInventoryData LCWLIV; break;
+        case "UCWLIV":
+            UsedCarWishListInventoryData UCWLIV; break;
+    }
+
+    FSeek(cPos + EntitySize);
+} SaveEntity <comment=PrintEntity>;
+
+string PrintEntity(SaveEntity& entity)
+{
+    return entity.Magic;
+}
+
+struct
+{
+    while (!FEof())
+    {
+        SaveEntity entity;
+        if (entity.EntitySize == 0)
+            break;
+    }
+
+} UserData;
