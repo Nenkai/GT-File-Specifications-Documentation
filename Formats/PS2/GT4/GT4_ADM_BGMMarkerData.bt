@@ -1,0 +1,78 @@
+//------------------------------------------------
+//--- 010 Editor v14.0 Binary Template
+//
+//      File: ADS Marker Data (ADM)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .adm
+//  ID Bytes: 42 4D 52 4B
+//   History: 
+//------------------------------------------------
+
+struct BMRK
+{
+    struct
+    {
+        uint Magic <format=hex>;
+        uint RelocPtr;
+        int SampleRate;
+        int TotalSamples;
+        int CountPerPlaylist[32];
+        
+        union
+        {
+            int Offsets[32];
+            struct
+            {
+                // Could be incorrect
+                int start_offset <format=hex, fgcolor=cRed>;
+                int goal <format=hex, fgcolor=cRed>;
+                int racing <format=hex, fgcolor=cRed>;
+                int default_quick <format=hex, fgcolor=cRed>;
+                int result <format=hex, fgcolor=cRed>;
+                int torophy_solo <format=hex, fgcolor=cRed>;
+                int torophy_champ <format=hex, fgcolor=cRed>;
+                int get_car <format=hex, fgcolor=cRed>;
+                int replay_theater <format=hex, fgcolor=cRed>;
+                int license_start <format=hex, fgcolor=cRed>;
+                int license_goal <format=hex, fgcolor=cRed>;
+                int license_gold <format=hex, fgcolor=cRed>;
+                int license_silver <format=hex, fgcolor=cRed>;
+                int license_bronze <format=hex, fgcolor=cRed>;
+                int license_failed <format=hex, fgcolor=cRed>;
+                int license_torophy <format=hex, fgcolor=cRed>;
+                int autodemo <format=hex, fgcolor=cRed>;
+                int champ_start <format=hex, fgcolor=cRed>;
+                int champ_goal <format=hex, fgcolor=cRed>;
+                int timeattack_start <format=hex, fgcolor=cRed>;
+                int timeattack_goal <format=hex, fgcolor=cRed>;
+                int coffee_start <format=hex, fgcolor=cRed>;
+                int coffee_goal <format=hex, fgcolor=cRed>;
+                int etc_start <format=hex, fgcolor=cRed>;
+                int etc_goal <format=hex, fgcolor=cRed>;
+                int last_start <format=hex, fgcolor=cRed>;
+                int last_goal <format=hex, fgcolor=cRed>;
+                int challenge_win <format=hex, fgcolor=cRed>;
+                int license_quick <format=hex, fgcolor=cRed>;
+                int empty_30 <format=hex, fgcolor=cRed>;
+                int empty_31 <format=hex, fgcolor=cRed>;
+                int empty_32 <format=hex, fgcolor=cRed>;
+            } NamedOffsets;
+        } PlaylistOffsets;
+    } Header <size=0x90, bgcolor=cPurple>;
+
+    local int i = 0;
+    for (i = 0; i < 32; i++)
+    {
+        struct
+        {
+            if (Header.CountPerPlaylist[i] <= 0)
+                return;
+         
+            FSeek(Header.PlaylistOffsets.Offsets[i]);   
+            int SampleIndex[Header.CountPerPlaylist[i]] <bgcolor=cPurple>;
+        } TimingInformation;
+    }
+} BGiMMarkerData;
