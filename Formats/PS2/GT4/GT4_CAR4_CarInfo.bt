@@ -81,6 +81,56 @@ typedef struct
 
 typedef struct
 {
+    uint flag;
+    Vec3 forkPivotTop;
+    Vec3 forkPivotBot;
+    float forkOffset;
+    float forkLength;
+    
+    struct
+    {
+        float forkStrokeLimitMin;
+        float forkStrokeLimitMax;
+    } forkStrokeLimit;
+    
+    struct
+    {
+        float steerAngleLimitMin;
+        float steerAngleLimitMax;
+    } steerAngleLimit;
+    
+    Vec3 rearWheel;
+    
+    struct
+    {
+        float swingLimitAngleMin;
+        float swingLimitAngleMax;
+    } swingLimitAngle;
+    
+    float frontWheelSize;
+    float frontTireSize;
+    float frontTireWidth;
+    float rearWheelSize;
+    float rearTireSize;
+    float rearTireWidth;
+    
+
+    
+    Vec3 stand;
+    Vec3 unk;
+    Vec3 seatFront;
+    Vec3 seat;
+    Vec3 seatRear;
+    Vec3 leftHandleP;
+    Vec3 leftHandleD;
+    Vec3 rightHandleP;
+    Vec3 rightHandleD;
+    Vec3 leftStep;
+    Vec3 rightStep;
+} BikeGeometry;
+
+typedef struct
+{
     short Flags <format=hex>;
     byte DriverModelType <format=hex>;
     byte NumCrew;
@@ -147,6 +197,12 @@ typedef struct
 
     FSeek(NormalCarGeometryDetailOffset);
     NormalCarGeometryDetail Detail;
+    
+    if (BikeGeometryOffset != 0)
+    {
+        FSeek(NormalCarGeometryDetailOffset);
+        BikeGeometry BikeGeometry_;
+    }
 } GT4CarInfo <bgcolor=cGreen>;
 
 typedef struct
