@@ -207,6 +207,9 @@ typedef struct
     uint Magic <format=hex>;
     uint TicksPerBeat_PPQN;
     
+    lastStatus = 0;
+    end = false;
+    
     local int i = 0;
     while (true)
     {
