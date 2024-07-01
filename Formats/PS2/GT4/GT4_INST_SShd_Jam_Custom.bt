@@ -57,7 +57,7 @@ typedef struct
 {
     byte NoteMin;
     byte NoteMax;
-    byte SsaSize <comment="In strides of 0x10">;
+    byte BaseNote;
     byte unk;
     enum <ubyte> 
     {
