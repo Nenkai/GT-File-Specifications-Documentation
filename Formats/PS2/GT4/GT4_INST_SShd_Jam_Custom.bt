@@ -58,7 +58,9 @@ typedef struct
     byte NoteMin;
     byte NoteMax;
     byte BaseNote;
-    byte unk;
+    byte UnkPitch;
+    
+    Printf("%d\n", unk);
     enum <ubyte> 
     {
       SetNoiseShiftFrequency = 0x02, // SE only
@@ -66,13 +68,14 @@ typedef struct
       Reverb = 0x80,   
     } Flags <format=hex>;
     
-    int SsaOffset_hi : 8 <comment="upper 8 bits of offset to data. In stride of 0x10", format=hex>;
-    int SsaOffset_lo : 16 <comment="lower 16 bits of offset to data. In stride of 0x10", format=hex>;
+    int SD_VA_SSA_hi : 8 <comment="upper 8 bits of offset to data. In stride of 0x10", format=hex>;
+    int SD_VA_SSA_lo : 16 <comment="lower 16 bits of offset to data. In stride of 0x10", format=hex>;
     
-    short unk;
-    short unk;
-    short unk;
-    byte unk;
+    short SD_VP_ADSR1;
+    short SD_VP_ADSR2;
+    byte Volume;
+    byte Pan;
+    byte UnkPitchRelated_0x0E;
     byte LfoTableIndex <comment="None if 0x7F?", format=hex>;
 } JamSplitChunk;
                         
@@ -142,22 +145,22 @@ struct GTSOUNDINSTRUMENT
                 FSeek(jamHeaderPos + JamHeader.ProgramChunkPhysicalOffset + Offsets[i]);
                 struct
                 {
-                    ubyte UnkFlag <format=hex>;
-                    byte Volume;
-                    byte field_0x02;
+                    ubyte CountOrFlag <format=hex>;
+                    byte BaseVolume;
+                    byte MaybePan;
                     byte field_0x03;
-                    byte field_0x04;
-                    byte NoteCapacityMaybe; // note minus this
-                    byte UnkRangeMin;
-                    byte UnkRangeMax;
+                    byte UnkPitchRelated_0x04;
+                    byte LfoTableIndex;
+                    byte StartNoteRange;
+                    byte EndNoteRange;
                     
-                    if (UnkFlag == 0xFF)
+                    if (CountOrFlag == 0xFF)
                     {
-                        JamSplitChunk chunks[(UnkRangeMax - UnkRangeMin) + 1];
+                        JamSplitChunk chunks[(EndNoteRange - StartNoteRange) + 1];
                     }
                     else
                     {
-                        JamSplitChunk chunks[(UnkFlag & 0x0f) + 1];
+                        JamSplitChunk chunks[(CountOrFlag & 0x0f) + 1];
                     }
                     
                     
@@ -171,8 +174,8 @@ struct GTSOUNDINSTRUMENT
         FSeek(jamHeaderPos + JamHeader.VelocityChunkPhysicalOffset);
         struct
         {
-            short unk;
-            byte data[0x80];
+            short Empty;
+            byte Velocity[0x80];
         } VelocityChunk <bgcolor=cYellow>;
 
         FSeek(0xF0);
