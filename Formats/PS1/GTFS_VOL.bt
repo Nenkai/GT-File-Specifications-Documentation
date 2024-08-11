@@ -1,0 +1,49 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: GT2 File System (Volume)
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BitfieldDisablePadding();
+
+uint AlignValue(uint x, uint alignment)
+{
+    local uint mask = ~(alignment - 1);
+    return (x + (alignment - 1)) & mask;
+}
+
+typedef struct
+{
+    int LastSectorPaddingNum : 11 <format=hex>;
+    int SectorOffset : 21 <format=hex>;
+} FileDataOffset;
+
+typedef struct {
+    int date_time;
+    unsigned short next_dir_or_file_index;
+    unsigned char  entry_flags; // 0x00 = file, 0x01 = dir, 0x80 = end of dir
+    char name[25];
+} FileEntry <comment=name>;
+
+struct
+{
+    uint Magic <format=hex>;
+    uint Empty;
+    short FileDataCount;
+    short FileEntryCount;
+    uint Unk3;
+    
+    FileDataOffset FileDataOffsets[FileDataCount];
+    FSeek(AlignValue(FTell(), 0x800));
+    
+    FileEntry FileEntries[FileEntryCount];
+    FSeek(AlignValue(FTell(), 0x800));
+    
+} GTFileSystem;
