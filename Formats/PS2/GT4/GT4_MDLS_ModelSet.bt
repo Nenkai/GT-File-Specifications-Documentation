@@ -80,11 +80,6 @@ typedef struct
     FSeek(FileSize());
 } RegisterInfo <comment=Name>;
 
-uint AlignValue(uint x, uint alignment)
-{
-      local uint mask = ~(alignment - 1);
-      return (x + (alignment - 1)) & mask;
-}
 
 typedef struct 
 {
@@ -304,7 +299,7 @@ typedef struct
                     break;
                 }
 
-                if (CountAndFlag >= 0x80) // Array, all in a row
+                if (CountAndFlag > 0x80) // Array, all in a row
                 {
                     // Array, all in a row
                     local int i = 0;

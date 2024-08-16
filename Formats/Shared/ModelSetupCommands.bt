@@ -173,12 +173,12 @@ typedef struct
         
         // Does something with 4 floats. Not used above GT3. Other games's code skips 4 floats.
         // Refer to 0x2505E8 with param 3 (GT3 EU)
-        pglGT3_3_1ui = 50,
+        pglGT3_2_1ui = 50,
         
         // Does something with 1 float. Not used above GT3. Other games's code skips 1 float.
         // Operates similarly to command 51.
         // Refer to 0x250688 with param 3 (GT3 EU)
-        pglGT3_3_4f = 51,
+        pglGT3_2_4f = 51,
         
         // GT4 and above. Calls ModelSet2::setShapeTweenRatio
         ModelSet_setShapeTweenRatio = 52,
@@ -189,12 +189,12 @@ typedef struct
         // Does something with 1 float. Not used above GT3. Other games's code skips 1 float.
         // Operates similarly to command 51.
         // Refer to 0x250688 with param 2 (GT3 EU)
-        pgl_GT3_2_1ui = 54,
+        pgl_GT3_3_1ui = 54,
 
         // Does something with 1 float. Not used above GT3. Other games's code skips 1 float.
         // Operates similarly to command 54.
         // Refer to 0x2505E8 with param 2 (GT3 EU)
-        pglGT3_2_4f = 55,
+        pglGT3_3_4f = 55,
         
         // Calls pglGetCullFace, and pglCullFace
         pglCullFace = 64,
@@ -254,8 +254,7 @@ typedef struct
         pglVariableColorOffset = 83,
         
         // GT4 and above. Calls pglVariableColorScale using VM output registers.
-        VM_pglVariableColorScale
-         = 84,
+        VM_pglVariableColorScale = 84,
         
         // GT4 and above. Calls pglVariableColorOffset using VM output registers.
         VM_pglVariableColorOffset = 85,
@@ -471,10 +470,10 @@ typedef struct
             float c;
             break;
             
-        case pglGT3_3_1ui:
+        case pglGT3_2_1ui:
             float Unk_50;
             break;
-        case pglGT3_3_4f:
+        case pglGT3_2_4f:
             float Unk_51[4];
             break;
         case ModelSet_setShapeTweenRatio:
@@ -484,10 +483,10 @@ typedef struct
             short ShapeIndex;
             short TweenRatio;
             break;
-        case pglGT3_2_1ui:
+        case pgl_GT3_3_1ui:
             float value;
             break;
-        case pglGT3_2_4f:
+        case pglGT3_3_4f:
             float values[4];
             break;
             

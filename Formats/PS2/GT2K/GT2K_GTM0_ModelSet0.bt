@@ -11,6 +11,26 @@
 //   History: 
 //------------------------------------------------
 
+BitfieldDisablePadding();
+
+#include "../PS2ModelCommon.bt"
+#include "../Tex1_TextureSet1.bt"
+
+typedef struct
+{
+    int RelocPtr;
+    int UnkOffset1 <format=hex, fgcolor=cRed>;
+    short c1;
+    short ShapePartCount <fgcolor=cGreen>;
+    float d;
+
+    struct
+    {
+        int DataOffset <format=hex, fgcolor=cRed>;
+        int Size <fgcolor=cYellow>;
+    } ShapePartDescriptor[ShapePartCount] <bgcolor=cBlack>;
+} ShapeHeaderMaybe;
+
 typedef struct
 {
     local int mdlBasePos = FTell();
@@ -28,11 +48,11 @@ typedef struct
     local int i = 0;
     for (i = 0; i < Header.ModelCount; i++)
     {
-        FSeek(mdlBasePos + Header.ModelsOffset + (i * 0x80));
+        FSeek(startof(Header) + Header.ModelsOffset + (i * 0x80));
         struct
         {
-            int Empty;
-            int Unk;
+            int RelocPtr;
+            int UTexOffset;
             int UnkOffset1;
             int ShapesOffset <format=hex, fgcolor=cRed>;
             int UnkOffset3 <format=hex, fgcolor=cRed>;
@@ -41,6 +61,36 @@ typedef struct
             int empty;
             
             float BBox[3 * 8];
+            
+            if (UnkOffset1)
+            {
+                FSeek(startof(Header) + UnkOffset1);
+                pgluShape shape;
+            }
+            
+            if (ShapesOffset)
+            {
+                FSeek(startof(Header) + ShapesOffset);
+                pgluShape shape2;
+            }
+            
+            if (UnkOffset3)
+            {
+                FSeek(startof(Header) + UnkOffset3);
+                pgluShape shape3;
+            }
+            
+            if (UnkOffset4)
+            {
+                FSeek(startof(Header) + UnkOffset4);
+                pgluShape shape4;
+            }
+            
+            if (UnkOffset5)
+            {
+                FSeek(startof(Header) + UnkOffset4);
+                pgluShape shape5;
+            }
 
             FSeek(FileSize());
         } Model;
@@ -66,16 +116,36 @@ typedef struct
             struct
             {
                 int RelocPtr;
-                int MainModelInfo <format=hex, fgcolor=cRed>;
-                int UnkOffset <format=hex, fgcolor=cRed>;
+                int MainModelInfoOffset <format=hex, fgcolor=cRed>;
+                int TexturesOffset <format=hex, fgcolor=cRed>;
                 int UnkOffset2 <format=hex, fgcolor=cRed>;
                 int UnkOffset3 <format=hex, fgcolor=cRed>;
                 int UnkOffset4 <format=hex, fgcolor=cRed>;
                 int UnkOffset5 <format=hex, fgcolor=cRed>;
             } Header <size=0x20>;
             
-            FSeek(basePos + Header.MainModelInfo);
+            FSeek(basePos + Header.MainModelInfoOffset);
             ModelSet0 MainModelSet;
+            
+            FSeek(basePos + Header.TexturesOffset);
+            struct
+            {
+                local uint texBasePos = FTell();
+                int Magic;
+                int B;
+                short C;
+                short NumGsBlocks <format=hex>;
+                short TextureCount;
+                short F;
+                int Empty;
+                int TransfersOffset <format=hex>;
+                
+                FSeek(texBasePos + 0x18);
+                PGLUTexture textures[TextureCount];
+            } UTex;
+            
+            FSeek(startof(UTex) + UTex.TransfersOffset);
+            int test;
             
             //FSeek(FileSize()); // Fix 010 bug
         } CarInfo;

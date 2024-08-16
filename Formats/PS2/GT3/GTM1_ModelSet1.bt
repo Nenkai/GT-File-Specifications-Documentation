@@ -83,22 +83,22 @@ typedef struct
         int TireIndexTableOffset <format=hex, fgcolor=cRed>;
     } Header <size=0x94, bgcolor=cDkPurple>;
     
-    FSeek(basePos + Header.FrontLightsTableOffset);
+    FSeek(startof(Header) + (Header.FrontLightsTableOffset - Header.RelocPtr));
     LightFlare FrontLights[Header.FrontLightCount] <size=0x80>;
     
-    FSeek(basePos + Header.NightBrakeLightsTableOffset);
+    FSeek(startof(Header) + (Header.NightBrakeLightsTableOffset - Header.RelocPtr));
     LightFlare NightBrakeLights[Header.NightBrakeLightsCount] <size=0x80>;
     
-    FSeek(basePos + Header.NightBrakeLightFlareTableOffset);
+    FSeek(startof(Header) + (Header.NightBrakeLightFlareTableOffset - Header.RelocPtr));
     LightFlare NightBrakeLightFlares[Header.NightBrakeLightFlareCount] <size=0x80>;
     
-    FSeek(basePos + Header.CarSparkPosTableOffset);
+    FSeek(startof(Header) + (Header.CarSparkPosTableOffset - Header.RelocPtr));
     struct
     {
         Vector3 Position;
     } CarSparks[Header.CarSparkPosCount] <size=0x10>;
     
-    FSeek(basePos + Header.OnboardCamerasOffset);
+    FSeek(startof(Header) + (Header.OnboardCamerasOffset - Header.RelocPtr));
     struct
     {
         Vector3 Position;
@@ -112,7 +112,7 @@ typedef struct
     if (Header.TireIndexTableOffset != 0)
     {
         // Note: 0x1AAAB0 buffer max for a tire
-        FSeek(basePos + Header.TireIndexTableOffset);
+        FSeek(startof(Header) + (Header.TireIndexTableOffset - Header.RelocPtr));
         struct
         {
             int MenuTireIndices[8] <comment="menu/tire/n%d">;
@@ -127,12 +127,6 @@ typedef struct
     PGLCommands SetupCommands;
 } Model;
 
-uint AlignValue(uint x, uint alignment)
-{
-      local uint mask = ~(alignment - 1);
-      return (x + (alignment - 1)) & mask;
-}
-
 typedef struct
 {
     local int basePos = FTell();
@@ -140,7 +134,7 @@ typedef struct
     struct
     {
         uint Magic <format=hex>;
-        uint RelocPtr;
+        uint RelocPtr <format=hex>;
         int Empty;
         int Empty2;
         short ModelCount <fgcolor=cGreen>;
@@ -163,7 +157,7 @@ typedef struct
     {
         struct
         {
-            FSeek(basePos + Header.MaterialsOffset);
+            FSeek(startof(Header) + (Header.MaterialsOffset - Header.RelocPtr));
             PGLUmaterial material[Header.MaterialCount];
         } Materials;
     }
@@ -172,13 +166,13 @@ typedef struct
     {
         struct
         {
-            FSeek(basePos + Header.ModelTableOffset);
+            FSeek(startof(Header) + (Header.ModelTableOffset - Header.RelocPtr));
             int ModelTable[Header.ModelCount] <format=hex, fgcolor=cRed>;
             
             local int i = 0;
             for (i = 0; i < Header.ModelCount; i++)
             {
-                FSeek(basePos + ModelTable[i]); 
+                FSeek(startof(Header) + (ModelTable[i] - Header.RelocPtr)); 
                 Model model;
             }
         } Models;
@@ -188,13 +182,13 @@ typedef struct
     {
         struct
         {
-            FSeek(basePos + Header.ShapeTableOffset);
+            FSeek(startof(Header) + (Header.ShapeTableOffset - Header.RelocPtr));
             int ShapeTable[Header.ShapeCount] <format=hex, fgcolor=cRed>;
             
             local int i = 0;
             for (i = 0; i < Header.ShapeCount; i++)
             {
-                FSeek(basePos + ShapeTable[i]); 
+                FSeek(startof(Header) + (ShapeTable[i] - Header.RelocPtr)); 
                 pgluShape shape;
             }
         } Shapes;
@@ -204,7 +198,7 @@ typedef struct
     {
         struct
         {
-            FSeek(basePos + Header.BoundingsOffset);
+            FSeek(startof(Header) + (Header.BoundingsOffset - Header.RelocPtr));
             struct
             {
                 float unk;
@@ -220,7 +214,7 @@ typedef struct
     {
         struct
         {
-            FSeek(basePos + Header.TexSetTableOffset);
+            FSeek(startof(Header) + (Header.TexSetTableOffset - Header.RelocPtr));
             int TexTable[Header.TexSetCount] <format=hex, fgcolor=cRed>;
             
             local int i = 0;
@@ -236,10 +230,9 @@ typedef struct
     
     if (Header.Offset0x38 != 0)
     {
-        FSeek(basePos + Header.Offset0x38);
         struct
         {
-            FSeek(basePos + Header.Offset0x38);
+            FSeek(startof(Header) + (Header.Offset0x38 - Header.RelocPtr));
             int VariationTexSetOffsets[Header.UnkCount0x38] <format=hex, fgcolor=cRed>;
             
             local int i = 0;
@@ -268,13 +261,13 @@ typedef struct
     {
         struct
         {
-            FSeek(basePos + Header.VariationMaterialsOffset);
+            FSeek(startof(Header) + (Header.VariationMaterialsOffset - Header.RelocPtr));
             int VariationMaterialTable[Header.VariationMaterialCount] <format=hex, fgcolor=cRed>;
             
             local int i = 0;
             for (i = 0; i < Header.VariationMaterialCount; i++)
             {
-                FSeek(basePos + VariationMaterialTable[i]); 
+                FSeek(startof(Header) + (VariationMaterialTable[i] - Header.RelocPtr));
                 PGLUmaterial VariationMaterials;
             }
             
@@ -288,7 +281,7 @@ typedef struct
 {
     struct
     {
-        int RelocPtr;
+        int RelocPtr <format=hex>;
         uint CarInfoOffset <format=hex, fgcolor=cRed>;
         uint MainModelSetOffset <format=hex, fgcolor=cRed>;
         uint TireFileOffset <format=hex, fgcolor=cRed>;
@@ -296,13 +289,13 @@ typedef struct
         uint ModelSet1Offset <format=hex, fgcolor=cRed>;
     } Header <bgcolor=cPurple, size=0x40>;
     
-    FSeek(Header.CarInfoOffset);
+    FSeek(startof(Header) + (Header.CarInfoOffset - Header.RelocPtr));
     CarInfo Info;
     
-    FSeek(Header.MainModelSetOffset);
+    FSeek(startof(Header) + (Header.MainModelSetOffset - Header.RelocPtr));
     ModelSet MainModelSet;
     
-    FSeek(Header.TireFileOffset);
+    FSeek(startof(Header) + (Header.TireFileOffset - Header.RelocPtr));
     struct
     {
         struct
@@ -317,7 +310,7 @@ typedef struct
             uint TireTextureSetOffset <format=hex>;
         } TireFileHeader;
         
-        FSeek(Header.TireFileOffset + TireFileHeader.TireTextureSetOffset);
+        FSeek(startof(Header) + ((Header.TireFileOffset + TireFileHeader.TireTextureSetOffset) - Header.RelocPtr));
         TextureSet1 TexSet;
     } TireFile;
     
@@ -342,14 +335,18 @@ typedef struct
     } WheelFile;
 } CarModel;
 
-if (ReadUInt() == 0x305A5250)
+if (ReadUInt() == 0x305A5250) // PRZ0
 {
      local uint mdl = ReadUInt(0x2C);
      FSeek(mdl);
      ModelSet a;
      return;
 }
-
+else if (ReadUInt(0xC0) == 0x314D5447)
+{
+    FSeek(0xC0);
+    ModelSet courseModelSet;   
+}
 if (ReadUInt() == 0x314D5447)
     ModelSet ModelSet_;
 else

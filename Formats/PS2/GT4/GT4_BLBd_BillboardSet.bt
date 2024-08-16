@@ -1,0 +1,69 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: GT4 Billboard Set
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 42 4C 42 64
+//   History: 
+//------------------------------------------------
+
+typedef struct BillboardSet
+{
+    local int basePos = FTell();
+    
+    struct
+    {
+        uint Magic <format=hex>;
+        uint RelocPtr;
+        uint ThisPtr;
+        uint HeaderSize <format=hex, fgcolor=cRed>;
+        short BillboardCount <fgcolor=cGreen>;
+        short lol <fgcolor=cGreen>;
+        short UnkData3 <fgcolor=cGreen>;
+        short NumShapes <fgcolor=cGreen>;
+        int BillboardMapOffset <format=hex, fgcolor=cRed>;
+        int TexSetOffset <format=hex, fgcolor=cRed>;
+        int PGLUMatTableOffset <format=hex, fgcolor=cRed>;
+        int Lol <format=hex>;
+        int ShapesOffset <format=hex, fgcolor=cRed>;
+    } Header <size=0x40, bgcolor=cPurple>;
+    
+    FSeek(startof(Header) + Header.BillboardMapOffset);
+    struct
+    {
+        int BillboardOffsets[Header.BillboardCount] <format=hex, fgcolor=cRed>;
+        
+        local int i = 0;
+        for (i = 0; i < Header.BillboardCount; i++)
+        {
+            FSeek(startof(Header) + BillboardOffsets[i]);
+            struct
+            {
+                int Count;
+                struct
+                {
+                    short ShapeIdx;
+                    short MaterialIdx;
+                    Vector3 Pos;
+                } Entry[Count];
+            } Array;
+        }
+    } BillBoards;
+    
+    
+    FSeek(startof(Header) + Header.TexSetOffset);
+    TextureSet1 TexSet;
+    
+    FSeek(startof(Header) + Header.Lol);
+    struct
+    {
+        float data[4];
+    } Test[Header.UnkData3];
+};
+
+if (ReadUInt() == 0x64424C42)
+    BillboardSet Set;

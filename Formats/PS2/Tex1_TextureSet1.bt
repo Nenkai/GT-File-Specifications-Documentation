@@ -130,11 +130,12 @@ typedef struct
         unsigned long MAXU:10 <comment="Clamp U Direction - Upper Limit">;
         unsigned long MINV:10 <comment="Clamp Y Direction - Lower Limit">;
         unsigned long MAXV:10 <comment="Clamp Y Direction - Upper Limit">;
-        
-        Printf("%dx%d (%s, %s)\n", MAXU+1, MAXV+1, EnumToString(WMS_WrapModeS), EnumToString(WMT_VrapModeT));
         unsigned long pad44:20;
     } sceGsClamp <optimize=false>;
 
+    Printf("TBP %x: %dx%d - %s (%s, %s)\n", sceGsTex0.TBP0_TextureBasePointer, sceGsClamp.MAXU+1, sceGsClamp.MAXV+1, 
+        EnumToString(sceGsTex0.PSM_TexturePixelStorageFormat), EnumToString(sceGsClamp.WMS_WrapModeS), EnumToString(sceGsClamp.WMT_VrapModeT));
+    
 } PGLUTexture <optimize=false>;
 
 typedef struct
@@ -156,7 +157,6 @@ typedef struct
 // GS's Users Manual - Page 161 to 170 are useful for understanding blocks and pages
 typedef struct TextureSet1
 {
-    local int BasePos = FTell();
     struct
     {
         char Magic[4];
@@ -171,19 +171,19 @@ typedef struct TextureSet1
         int PGLUTextureMapOffset <format=hex, fgcolor=cRed>;
         int TransferInfosOffset  <format=hex, fgcolor=cRed>;
         int ClutPatchesOffset <format=hex, fgcolor=cRed, comment="Used for cars">;
-        int clutAnimationOffset <format=hex, fgcolor=cRed>; // TODO - havent seen any texture that uses that yet
+        int ClutAnimationOffset <format=hex, fgcolor=cRed>; // TODO - havent seen any texture that uses that yet
         int unkOffset4 <format=hex, fgcolor=cRed>;
     } Header <size=0x30 , bgcolor=cPurple>;
 
-    FSeek(BasePos + Header.PGLUTextureMapOffset);
+    FSeek(startof(Header) + Header.PGLUTextureMapOffset);
     PGLUTexture Textures[Header.PGLUTextureCount];
     
-    FSeek(BasePos + Header.TransferInfosOffset);
+    FSeek(startof(Header) + Header.TransferInfosOffset);
     TransferInfo Transfers[Header.TransferCount];
     
-    if (Header.ClutPatchesOffset != 0)
+    if (Header.ClutPatchesOffset)
     {
-        FSeek(BasePos + Header.ClutPatchesOffset);
+        FSeek(startof(Header) + Header.ClutPatchesOffset);
         struct
         {
             int ClutPatchCount;
@@ -192,7 +192,7 @@ typedef struct TextureSet1
             local int i = 0;
             for (i = 0; i < ClutPatchCount; i++)
             {
-                FSeek(BasePos + ClutPatchOffsets[i]);
+                FSeek(startof(Header) + ClutPatchOffsets[i]);
                 
                 struct
                 {
@@ -208,6 +208,71 @@ typedef struct TextureSet1
             }
         } ClutPatches;
     }
+    
+    // Used by GT4's route5_club environment model set
+    // For the building lights
+    if (Header.ClutAnimationOffset)
+    {
+        struct
+        {
+            FSeek(startof(Header) + Header.ClutAnimationOffset);
+            short NumEntries;
+            short _empty_;
+            int EntriesOffset <format=hex, fgcolor=cRed>;
+            
+            local int i = 0;
+            for (i = 0; i < NumEntries; i++)
+            {
+                FSeek(startof(Header) + EntriesOffset + (i * 0x20));
+                struct
+                {
+                    ushort UnkIndex;
+                    ushort Unused;
+                    ushort NumColors;
+                    ushort Count2;
+                    int ClutOffset <format=hex, fgcolor=cRed>;
+                    int Offset2 <format=hex, fgcolor=cRed>;
+                    short Unk;
+                    short Unk;
+                    float Unk;
+                    float Unk;
+                    short Unk;
+                    byte Unk;
+                    byte Unk;
+                    
+                    FSeek(startof(Header) + ClutOffset);
+                    int Colors[NumColors] <bgcolor=cBlack>;
+                    
+                    local int j = 0;
+                    for (j = 0; j < Count2; j++)
+                    {
+                        FSeek(startof(Header) + Offset2 + (j * 0x08));
+                        struct
+                        {
+                            float Time;
+                            int ClutOffset <format=hex, fgcolor=cRed>; 
+                            
+                            FSeek(startof(Header) + ClutOffset);
+                            byte Clut[0x40] <bgcolor=cGreen>;
+                            
+                            // Fix "Ending position was in front of starting position."
+                            FSeek(startof(Header) + Offset2 + (j * 0x08) + 0x08);              
+                        } UnkClutEntry <bgcolor=cBlue>;
+                    }
+
+                    // Fix "Ending position was in front of starting position."
+                    FSeek(startof(Header) + EntriesOffset + (i * 0x20) + 0x20);
+                } AnimEntry;
+            }
+        } ClutAnimation;
+    }
+    
+    /*
+    if (Header.TransferCount > 0)
+    {
+        byte TextureData[Header.FileSize - Transfers[0].FileDataOffset] <bgcolor=cDkRed>;
+    }
+    */
 }; 
 
 local int LastTexSetOffset;

@@ -1,0 +1,48 @@
+//------------------------------------------------
+//--- 010 Editor v15.0 Binary Template
+//
+//      File: GT4 MiniMapSet
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 47 54 43 4D
+//   History: 
+//------------------------------------------------
+
+
+typedef struct MiniMapSet
+{
+    struct
+    {
+        uint Magic <format=hex>;
+        uint _reserved_[3];
+        int Width; // Max 624
+        int Height;// Max
+        float OriginX;
+        float OriginY;
+        float Scale;
+        float Angle;
+        uint TexSetOffset <format=hex, fgcolor=cRed>;
+        int ChunkCount <fgcolor=cGreen>;
+        int ChunksOffset <format=hex, fgcolor=cRed>;
+        short Unused1;
+        short Unused2;
+    } Header <size=0x80, bgcolor=cPurple>;
+    
+    FSeek(startof(Header) + Header.TexSetOffset);
+    TextureSet1 TexSet;
+    
+    FSeek(startof(Header) + Header.ChunksOffset);
+    struct
+    {
+        float A;
+        float B;
+        float C;
+        float D;
+    } Curves[Header.ChunkCount];
+};
+
+if (ReadUInt() == 0x4D435447)
+    MiniMapSet miniMapSet;

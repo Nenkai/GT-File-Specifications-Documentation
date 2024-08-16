@@ -11,6 +11,14 @@
 //   History: 
 //------------------------------------------------
 
+BitfieldDisablePadding();
+
+uint AlignValue(uint x, uint alignment)
+{
+      local uint mask = ~(alignment - 1);
+      return (x + (alignment - 1)) & mask;
+}
+
 typedef struct
 {
     float X;

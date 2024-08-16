@@ -39,18 +39,31 @@ typedef struct (int size)
         
             FSeek(baseSegPos + nextBlock);
         } BTreeSegment;
-        
     }
 
 } BTreeSegments;
 
 typedef struct
 {
+    local int basePos = FTell();
+    
     byte hasEntries;
     int IndexBlockOffset : 24 <format=hex, fgcolor=cRed>;
     short SegmentCount <fgcolor=cGreen>;
 
     BTreeSegments segments(SegmentCount);
+    
+    if (SegmentCount > 1)
+    {
+        FSeek(basePos + IndexBlockOffset);
+        
+        struct
+        {
+            int cnt : 12;
+            BTreeKeyOffsets index(cnt);
+            int next : 12 <format=hex>;
+        } Indexer <bgcolor=cBlue>;
+    }
 } BTree;
 
 struct TOC

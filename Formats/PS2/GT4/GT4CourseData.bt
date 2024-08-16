@@ -1,5 +1,5 @@
 //------------------------------------------------
-//--- 010 Editor v10.0.2 Binary Template
+//--- 010 Editor v15.0 Binary Template
 //
 //      File: 
 //   Authors: 
@@ -13,63 +13,115 @@
 
 LittleEndian();
 
+#include "GT4_MDLS_ModelSet.bt";
+#include "GT4_BLBd_BillboardSet.bt";
+#include "GT4_GTCM_MiniMapSet.bt";
+
 struct 
 {
    // Empty. Intentional.
-   int magic;
-   int courseModelSet <format=hex, fgcolor=cRed>;
-   int visionListOffset1 <format=hex, fgcolor=cRed>;
-   int visionListOffset2 <format=hex, fgcolor=cRed>;
-   int visionListOffset3 <format=hex, fgcolor=cRed>;
-   int modelSet2;
-   int visionListOffset4; // 0x18
-   int visionListOffset5; // 0x1c
-   int visionListOffset6; // 0x20
-   int reflectionModelSet; // 0x24
-   int visionListOffset7; // 0x28
+   int Magic;
+   int WorldModelSetOffset <format=hex, fgcolor=cRed>;
+   int EnvironmentVisionListOffset <format=hex, fgcolor=cRed>;
+   int BackMirrorVisionListOffset <format=hex, fgcolor=cRed>;
+   int _2PlayerModeVisionListOffset <format=hex, fgcolor=cRed>;
+   int EnvironmentModelSetOffset <format=hex, fgcolor=cRed>;
+   int EnvironmentVisionListOffset <format=hex, fgcolor=cRed>;
+   int visionListOffset5 <format=hex, fgcolor=cRed>; // 0x1c
+   int visionListOffset6 <format=hex, fgcolor=cRed>; // 0x20
+   int ReflectionModelSetOffset <format=hex, fgcolor=cRed>; // 0x24
+   int ReflectionVisionListOffset <format=hex, fgcolor=cRed>; // 0x28
    byte _skipped_[8]; // intentional
-   int reflectionMaskModelSet; // 0x34
-   int reflectionVisionList;
+   int ReflectionMaskModelSet <format=hex, fgcolor=cRed>; // 0x34
+   int ReflectionVisionListOffset <format=hex, fgcolor=cRed>;
    byte _skipped2_[8]; // intentional
-   int afterModelSet;
-   int afterVisionList;
-   int visionList10;
-   int visionList11;
-   int skyModelSet;
-   int fogModelMaybe;
-   int modelSet8;
-   int modelSet9;
+   int AfterModelSet <format=hex, fgcolor=cRed>;
+   int AfterVisionList <format=hex, fgcolor=cRed>;
+   int UnkVisionListOffset_0x4C <format=hex, fgcolor=cRed>;
+   int UnkVisionListOffset_0x50 <format=hex, fgcolor=cRed>;
+   int SkyModelSetOffset <format=hex, fgcolor=cRed>;
+   int FarModelSetOffset<format=hex, fgcolor=cRed>;
+   int EnvSkyModelSetOffset <format=hex, fgcolor=cRed>;
+   int MirrorSkyModelSetOffset <format=hex, fgcolor=cRed>;
 
    // c8 is modelset
-   int a;
-   int pgluMapTexSet1 <format=hex, fgcolor=cRed>;
-   int _empty_; // uncalled from function
-   int unk; // Intentionally set to 0
-   int flareCourseEffect <format=hex, fgcolor=cRed>;
-   int billboardSet <format=hex, fgcolor=cRed>;
-   int unkOffset <format=hex, fgcolor=cRed>;
-   int fogEnvPtr <format=hex, fgcolor=cRed>;
-   int miniMap <format=hex, fgcolor=cRed>;
-   int texSet2 <format=hex, fgcolor=cRed>;
-   int courseSound <format=hex, fgcolor=cRed>;
-   int empty; // Intentional
-   int pgluMapShape <format=hex, fgcolor=cRed>;
-   int texSet3 <format=hex, fgcolor=cRed>;
-   int texSet4 <format=hex, fgcolor=cRed>;
-   int texSet5 <format=hex, fgcolor=cRed>;
-   int gt4ReplayData <format=hex, fgcolor=cRed>;
-   int texSet6 <format=hex, fgcolor=cRed>;
-   int modelSet10 <format=hex, fgcolor=cRed>;
-   int replayData <format=hex, fgcolor=cRed>;
-   int replayData2 <format=hex, fgcolor=cRed>;
-   int replayData3 <format=hex, fgcolor=cRed>;
-   int gadgetShapeList <format=hex, fgcolor=cRed>;
-   int preRaceCamerasREP4 <format=hex, fgcolor=cRed>;
-   int texSet7 <format=hex, fgcolor=cRed>;
+   int UnkOffset_0x64 <format=hex, fgcolor=cRed>;
+   int RaceSmokeTexSetOffset <format=hex, fgcolor=cRed>;
+   int UnkModelSetOffset_0x6C <format=hex, fgcolor=cRed>; // uncalled from function
+   int _empty_; // Intentionally set to 0
+   int CourseEfxOffset <format=hex, fgcolor=cRed>;
+   int BillboardSetOffset <format=hex, fgcolor=cRed, comment="Only used by route5?">;
+   int UnkOffset_0x7C <format=hex, fgcolor=cRed>;
+   int CourseEnvParameterOffset <format=hex, fgcolor=cRed>;
+   int MiniMapSetOffset <format=hex, fgcolor=cRed>;
+   int UnusedSphereReflectionTexSetOffset <format=hex, fgcolor=cRed>;
+   int CourseSoundOffset <format=hex, fgcolor=cRed>;
+   int _empty_; // Intentional
+   int FlareShapeOffset <format=hex, fgcolor=cRed>;
+   int FlareTexSetOffset <format=hex, fgcolor=cRed>;
+   int ParticleTexSetOffset <format=hex, fgcolor=cRed>;
+   int FlareReflectionTexSetOffset <format=hex, fgcolor=cRed>;
+   int UnkGt4ReplayDataOffset_0xA4 <format=hex, fgcolor=cRed>;
+   int UnkTexSetOffset_0xA8 <format=hex, fgcolor=cRed>;
+   int ProjectionMaskOffset <format=hex, fgcolor=cRed>;
+   int ReplayGT4Offset <format=hex, fgcolor=cRed>;
+   int PlayStartCameraOffset <format=hex, fgcolor=cRed>;
+   int ReplayStartCameraOffset <format=hex, fgcolor=cRed>;
+   int GadgetsOffset <format=hex, fgcolor=cRed>;
+   int CoursePreviewCameraOffset <format=hex, fgcolor=cRed>;
+   int UnkTexSetOffset_0xC4 <format=hex, fgcolor=cRed>;
    int skyReflectionModelSet <format=hex, fgcolor=cRed>;
    int dPhotoMode <format=hex, fgcolor=cRed>;
-   int startCameraMotionSet <format=hex, fgcolor=cRed>;
-   int motionSet2 <format=hex, fgcolor=cRed>;
-   int fgSkyModelSet <format=hex, fgcolor=cRed>;
-   int rwy <format=hex, fgcolor=cRed>;
+   int StartCameraMotionSet <format=hex, fgcolor=cRed>;
+   int ReplayStartCameraOffset <format=hex, fgcolor=cRed>;
+   int FgSkyModelSetOffset <format=hex, fgcolor=cRed>;
+   int RunwayOffset <format=hex, fgcolor=cRed>;   
 } CourseDataGT4;
+
+if (CourseDataGT4.WorldModelSetOffset)
+{
+    FSeek(CourseDataGT4.WorldModelSetOffset);
+    //ModelSet2 World;
+}
+
+if (CourseDataGT4.EnvironmentModelSetOffset)
+{
+     FSeek(CourseDataGT4.EnvironmentModelSetOffset);
+     ModelSet2 Environment;
+}
+
+if (CourseDataGT4.SkyModelSetOffset)
+{
+     FSeek(CourseDataGT4.SkyModelSetOffset);
+     ModelSet2 Sky;
+}
+
+if (CourseDataGT4.EnvSkyModelSetOffset)
+{
+     FSeek(CourseDataGT4.EnvSkyModelSetOffset);
+     ModelSet2 EnvSky;
+}
+
+if (CourseDataGT4.MirrorSkyModelSetOffset)
+{
+     FSeek(CourseDataGT4.MirrorSkyModelSetOffset);
+     ModelSet2 MirrorSky;
+}
+
+if (CourseDataGT4.BillboardSetOffset)
+{
+    FSeek(CourseDataGT4.BillboardSetOffset);
+    BillboardSet Billboards;
+}
+
+if (CourseDataGT4.MiniMapSetOffset)
+{
+    FSeek(CourseDataGT4.MiniMapSetOffset);
+    MiniMapSet MiniMap;  
+}
+
+if (CourseDataGT4.FlareShapeOffset)
+{
+    FSeek(CourseDataGT4.FlareShapeOffset);
+    pgluShape FlareShape;
+}
