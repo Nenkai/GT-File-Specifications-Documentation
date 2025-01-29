@@ -159,7 +159,7 @@ typedef struct
         struct
         {
             int reserved;
-    
+            
             int pad : 20;
             SurfaceFormat FormatMaybe : 6;
             RenderTargetChannelType ChannelType : 4;
@@ -190,7 +190,19 @@ typedef struct
             int empty;
             int empty;
             int ImageSize <format=hex, fgcolor=cYellow>;
-        } PGLUTextureInfo[Header.PGLUTextureInfoCount] <comment="PS4 GNF Texture Descriptor", size=0x48>;
+            
+            int field_0x20;
+            int field_0x24;
+            int field_0x28;
+            int field_0x2C;
+            int field_0x30;
+            short field_0x34;
+            short field_0x36;
+            int field_0x38;
+            int field_0x3C;
+            int FileNameOffset <format=hex, fgcolor=cRed>;
+            int field_0x44;
+        } PGLUTextureInfo[Header.PGLUTextureInfoCount] <bgcolor=cYellow, comment="PS4 GNF Texture Descriptor", size=0x48>;
     }
 
     FSeek(BaseTXSPos + Header.ImageInfoOffset);
