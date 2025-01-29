@@ -221,20 +221,20 @@ enum SCE_GE_CMD
 	SCE_GE_CMD_TSIZE5,
 	SCE_GE_CMD_TSIZE6,
 	SCE_GE_CMD_TSIZE7,
-  SCE_GE_CMD_TMAP = 0xC0, // Texture Map Mode
-  SCE_GE_CMD_TSHADE = 0xC1, // Texture Shade Mapping
-  SCE_GE_CMD_TMODE = 0xC2, // Texture Mode
-  SCE_GE_CMD_TPF = 0xC3, // Texture Pixel Format
-  SCE_GE_CMD_CLOAD = 0xC4, // Clut Load
-  SCE_GE_CMD_CLUT = 0xC5, // Clut
-  SCE_GE_CMD_TFILTER = 0xC6, // Texture Filter
-  SCE_GE_CMD_TWRAP = 0xC7, // Texture Wrap Mode
-  SCE_GE_CMD_TLEVEL = 0xC8, // texture Level Mode
-  SCE_GE_CMD_TFUNC = 0xC9, // Texture Function
-  SCE_GE_CMD_TEC = 0xCA, // Texture environment color
-  SCE_GE_CMD_TFLUSH = 0xCB, // Texture flush
-  SCE_GE_CMD_TSYNC = 0xCC, 
-  SCE_GE_CMD_FOG1 = 0xCD,
+    SCE_GE_CMD_TMAP = 0xC0, // Texture Map Mode
+    SCE_GE_CMD_TSHADE = 0xC1, // Texture Shade Mapping
+    SCE_GE_CMD_TMODE = 0xC2, // Texture Mode
+    SCE_GE_CMD_TPF = 0xC3, // Texture Pixel Format
+    SCE_GE_CMD_CLOAD = 0xC4, // Clut Load
+    SCE_GE_CMD_CLUT = 0xC5, // Clut
+    SCE_GE_CMD_TFILTER = 0xC6, // Texture Filter
+    SCE_GE_CMD_TWRAP = 0xC7, // Texture Wrap Mode
+    SCE_GE_CMD_TLEVEL = 0xC8, // texture Level Mode
+    SCE_GE_CMD_TFUNC = 0xC9, // Texture Function
+    SCE_GE_CMD_TEC = 0xCA, // Texture environment color
+    SCE_GE_CMD_TFLUSH = 0xCB, // Texture flush
+    SCE_GE_CMD_TSYNC = 0xCC, 
+    SCE_GE_CMD_FOG1 = 0xCD,
 	SCE_GE_CMD_FOG2 = 0xCE,
 	SCE_GE_CMD_FC = 0xCF, // FOGCOLOR
 	SCE_GE_CMD_TSLOPE = 0xD0, // TEXLODSLOPE
@@ -276,7 +276,7 @@ enum SCE_GE_CMD
 	SCE_GE_CMD_VAP = 0xF7,
 	SCE_GE_CMD_VFC = 0xF8,
 	SCE_GE_CMD_VSCV = 0xF9,
-  SCE_GE_CMD_DUMMY = 0xFF,
+    SCE_GE_CMD_DUMMY = 0xFF,
 };
 
 enum SCE_GE_TMODE_HSM
@@ -408,7 +408,7 @@ typedef struct
 typedef struct
 {
     eSCE_GE_TLEVEL lcm : 2; // Mipmap level mode
-    short     : 14;
+    short             : 14;
     byte offl : 8; // Bias
     SCE_GE_CMD cmd : 8 <format=hex>;
 } SCE_GE_TLEVEL;
@@ -493,7 +493,7 @@ typedef struct
     uint ImageOffset <format=hex, fgcolor=cRed>;
     uint ImageSize <format=hex>;
     byte _two_; // 0x20 flag when running
-    ubyte ImageFormat : 8;
+    eSCE_GE_TPF ImageFormat : 8;
     byte MipmapCount;
     byte _two2_;
     ushort ImageWidth;
@@ -504,12 +504,7 @@ typedef struct
     int pad;
     int pad;
     uint UnkOffset_0x1C;
-} ImageData <bgcolor=cGreen, optimize=false>;
-
-typedef struct (int arrSize)
-{
-    ImageData images[arrSize];
-} ImageDataMap <bgcolor=cDkGreen>;
+} TextureBufferInfo <bgcolor=cGreen, optimize=false>;
 
 typedef struct 
 {
@@ -554,8 +549,12 @@ typedef struct
     FSeek(UnkOffset1 - RelocPtr);
     struct
     {
-        SCE_GE_CBP SCE_GE_CBP_;
-        SCE_GE_CBP SCE_GE_CBW_;
+        if (ClutMapEntryIndex != -1)
+        {
+            SCE_GE_CBP SCE_GE_CBP_;
+            SCE_GE_CBP SCE_GE_CBW_;
+        }
+        
         SCE_GE_TBP0 SCE_GE_TBP0_;
         SCE_GE_TBW0 SCE_GE_TBW0_;
         SCE_GE_TSIZE0 SCE_GE_TSIZE0_;
@@ -564,15 +563,15 @@ typedef struct
         SCE_GE_TU SCE_GE_TU_;
         SCE_GE_TV SCE_GE_TV_;
         SCE_GE_TMAP SCE_GE_TMAP_;
-        SCE_GE_TSHADE SCE_GE_TSHADE_;
         SCE_GE_TMODE SCE_GE_TMODE_;
         SCE_GE_TPF SCE_GE_TPF_;
-        SCE_GE_CLOAD SCE_GE_CLOAD_;
-        SCE_GE_CLUT SCE_GE_CLUT_;
         SCE_GE_TFILTER SCE_GE_TFILTER_;
         SCE_GE_TWRAP SCE_GE_TWRAP_;
         SCE_GE_TLEVEL SCE_GE_TLEVEL_;
         SCE_GE_TFUNC SCE_GE_TFUNC_;
+        SCE_GE_TEC SCE_GE_TEC_;
+        SCE_GE_CLUT SCE_GE_CLUT_;
+        SCE_GE_CLOAD SCE_GE_CLOAD_;
     } SubTextureParams <bgcolor=cRed>;
     
     FSeek(FileNameOffset - RelocPtr);
@@ -592,9 +591,9 @@ struct TXS3
     uint _empty;
     uint _empty;
     ushort PGLUTextureInfoCount <fgcolor=cGreen>;
-    ushort TextureImageInfoCount <fgcolor=cGreen>;
+    ushort BufferInfoCount <fgcolor=cGreen>;
     uint PGLUTextureInfoOffset <format=hex, fgcolor=cRed>;
-    uint TextureInfoOffset <format=hex, fgcolor=cRed>;
+    uint BufferInfoOffset <format=hex, fgcolor=cRed>;
     uint RelocSize <format=hex, fgcolor=cRed>;
     short UnkCount_0x24 <fgcolor=cGreen>;
     short ClutMapEntryCount <fgcolor=cGreen>;
@@ -624,16 +623,16 @@ struct TXS3
         }
     } TextureInfos;
     
-    FSeek(TextureInfoOffset - RelocPtr);
+    FSeek(BufferInfoOffset - RelocPtr);
     struct
     {
         local int i = 0;
-        for (i = 0; i < TextureImageInfoCount; i++)
+        for (i = 0; i < BufferInfoCount; i++)
         {
-            FSeek(TextureInfoOffset + (i * 0x20) - RelocPtr);
-            ImageData ImageInfo;
+            FSeek(BufferInfoOffset + (i * 0x20) - RelocPtr);
+            TextureBufferInfo BufferInfo;
         }
-    } ImageInfos;
+    } BufferInfos;
     
     FSeek(ClutMapOffset - RelocPtr);
     struct
