@@ -40,6 +40,7 @@ typedef struct
 
 } AutoDriveInfo;
 
+// EnemyLine::Header::map
 typedef struct
 {
     local int baseADLNPos = FTell();
@@ -79,6 +80,67 @@ typedef struct
     }
 } EnemyLine;
 
+typedef struct
+{
+    // Most are used from AIdriverOld::SetupAutoDriveBaseParameters
+    ubyte CorneringSkill <comment="(float)adpSource->field_0 * 0.01;">;
+    ubyte UnkSkill_0x01 <comment="(float)adpSource->field_1 * 0.01;">;
+    ubyte UnkSkill_0x02 <comment="(float)(adpSource->field_2 - 100) * 0.27777776;">;
+    ubyte field_0x03 <comment="(float)(5 * adpSource->field_3) * 0.01;">;
+    ubyte field_0x04 <comment="(float)adpSource->field_4 * 0.01;">;
+    ubyte field_0x05 <comment="(float)adpSource->field_5 * 0.01;">;
+    ubyte field_0x06 <comment="1.0 / (float)((float)(2 * field_0x06) * 0.27777776);">;
+    ubyte field_0x07 <comment="(float)adpSource->field_7">;
+    ubyte AssistParameter_ABS <comment="(float)adpSource->field_8;">;
+    ubyte AssistParameter_ASM <comment="(float)adpSource->field_9 * 0.01">;
+    ubyte AssistParameter_field_0x0A <comment="(float)adpSource->field_A * 0.01;">;
+    ubyte AssistParameter_TCSMin <comment="(float)adpSource->field_B * 0.1;">;
+    ubyte AssistParameter_TCSMax <comment="Requires TCS(float)adpSource->field_C * 0.01;">;
+    ubyte AssistParameter_TCS <comment="Determines if TCS is on. (float)adpSource->field_D * 0.1;">;
+    ubyte AttackOrBoostUnk <comment="(float)adpSource->field_E * 0.01;">;
+    ubyte field_0x0F <comment="(float)adpSource->field_F * 0.27777776;">;
+    ubyte field_0x10 <comment="(float)(10 * adpSource->field_10) * 0.017453291;">;
+    ubyte field_0x11 <comment="10 * adpSource->field_11;">;
+    
+    /* Hatersbby: This may be 50 55 or something else in the original file. 
+    Nullifying this was the key for making AI go 380 km/h (group c) on the straights of La Sarthe (or any other track). 
+    Beware though, this makes the AI take corners worse but it makes closer to the player. 
+    You can see the effects of Blue Box and Green Box in this video 
+    https://www.youtube.com/watch?v=NUm7ai7nPlI (top speed 365 kmh was increased further more as i didnt completely nullify Green in this). */
+    ubyte field_0x12 <comment="(float)(adpSource.field_12 != 0 ? adpSource.field_12 : 80) * 0.27777776">;
+    ubyte AssistFlags <comment="Bit flags, all bits can be used">;
+    
+    ubyte AssistParameter_ABSOrAsmUnk <comment="(float)adpSource->field_14 * 0.01;">;
+    ubyte AssistParameter_ASMUnk <comment="(float)adpSource->field_15 * 0.01">;
+    ubyte AssistParameter_ABSOrAsmUnk <comment="(float)adpSource->field_16 * 0.01">;
+    ubyte AssistParameter_ASMUnk2 <comment="(float)adpSource->field_17 * 0.01">;
+    ubyte AssistParameter_TCSUnk <comment="adpSource->field_18 != 0 && adpSource->field_18 != 100 ? adpSource->field_18 * 0.1 : 1.0">;
+    
+    // DynamicsConductor::getSpecialStart_Rolling_ByCourse
+    ubyte RollingStart_field_0x19 <comment="-10 * ADPsource->field_19">;
+    ubyte RollingStart_field_0x1A <comment="5 * ADPsource->field_1A;">;
+    
+    ubyte field_0x1B <comment="Related to 0x20? Must be 32.">;
+    ubyte field_0x1C <comment="1D must also be set. (float)adpSource->field_1C * 0.017453291">;
+    ubyte field_0x1D <comment="1C must also be set. (float)adpSource->field_1D * 0.27777776">;
+    byte field_0x1E;
+    
+    // DynamicsConductorFreePractice::getSpecialStart
+    byte field_0x1F <comment="Distance? -10 * field_0x1F">;
+    
+    ubyte MuBooster[3] <comment="3 values. if (val != 0 && val != 100) (float)(int)val / 100.0">;
+    
+    // DynamicsConductor::initialize
+    ubyte RollingStartVCoordBeforeStartLine <comment="-10 * ADPsource->field_23">;
+    ubyte RollingStartInitialSpeed;
+    ubyte GapForRollingDistance;
+    byte Unused_0x26;
+    ubyte McEyePoint[4] <comment="4 values. If 0, uses gtbMcEyePointDefaultTbl">;
+
+    // GT4O: sub_222ED8
+    ubyte field_0x2B <comment="Vcoord? GetCourseLength() - (float)(10 * field_0x2B)">;
+} AutoDriveParameterSource <bgcolor=cGray>;
+    
 struct TrackAutoDrive
 {
     // Base Header, 0x80
@@ -86,14 +148,94 @@ struct TrackAutoDrive
     {
         uint RelocPtr <format=hex, fgcolor=cGray>;
         uint ADNLHeaderOffset <format=hex, fgcolor=cRed>;
-        uint unkTree1Offset <format=hex, fgcolor=cRed>;
-        uint unkTree2Offset <format=hex, fgcolor=cRed>;
-        uint unkTree3Offset <format=hex, fgcolor=cRed>;
-        uint unkTree4Offset <format=hex, fgcolor=cRed>;
-        byte _pad_[ADNLHeaderOffset - FTell()] <fgcolor=cDkGray>;
+        
+        // Fetched by GetADPsource using autodrive type - AutoDriveParameterSource[autoDriveType]
+        // autodrive type is fetched from GetAutoDriveType using car's drivetrain type & 4wd type from DRIVETRAIN
+        
+        // Drivetrain Type
+        // ---------------
+        // 0	FR
+        // 1	FF
+        // 2	_4WD
+        // 3	MR
+        // 4	RR
+        // 5	OTHER
+        
+        // Drivetrain 4wd Type
+        // -------------------
+        // __GT4___________
+        // 0	StandBy
+        // 1	Ferguson
+        // 2	DriverCtrl
+        // 3	AttesaETS
+        // 4	Mitsubishi
+        // 5	Honda
+        // 6	Haldex
+        // __GT5____________
+        // 7	Ideal
+        // 8	ACD
+        // 9	Nissan
+        // __GTS____________
+        // 10	E4WD_R_DUAL
+        // 11	E4WD_F_DUAL
+        // 12	_0WD
+        // 13	E4WD_R_SINGLE
+        // 14	E4WD_F_SINGLE
+        // 15	Inwheel
+        // 254  -
+        
+        // 0 = FR or 4WD (Honda) or anything else
+        // 1 = FF or 4WD (Standby)
+        // 2 = 4WD (Ferguson, DriverCtrl, Mitsubishi, Haldex)
+        // 3 = 4WD (AttesaETS)
+        uint AutoDriveParameterSourceOffsets[4] <format=hex, fgcolor=cRed>;
+        
+        /* __int64 __fastcall GetAutoDriveType(__int64 driveType, __int64 type4WD)
+        {
+          __int64 result; // $v0
+          __int64 v3; // $v1
+        
+          if ( driveType == 1 )
+            return 1;
+          result = 0;
+          if ( driveType == 2 )
+          {
+            if ( type4WD == 3 )
+              return 3;
+            if ( type4WD >= 4 )
+            {
+              if ( type4WD == 5 )
+                return 0;
+              return 2;
+            }
+            else
+            {
+              v3 = 1;
+              if ( type4WD )
+                return 2;
+            }
+            return v3;
+          }
+          return result;
+        }
+        */
     } Header <bgcolor=cPurple>;
 
     FSeek(Header.ADNLHeaderOffset);
     EnemyLine EnemyLineData; 
 
-} trackAutoDrive;
+    struct
+    {
+        FSeek(Header.AutoDriveParameterSourceOffsets[0]);
+        AutoDriveParameterSource ADPSourceDefault <comment="Also used for some default settings", bgcolor=cGray>;
+        
+        FSeek(Header.AutoDriveParameterSourceOffsets[1]);
+        AutoDriveParameterSource ADPSourceFF_Or_4WDStandby <bgcolor=cGray>;
+        
+        FSeek(Header.AutoDriveParameterSourceOffsets[2]);
+        AutoDriveParameterSource ADPSource4WD <bgcolor=cGray>;
+        
+        FSeek(Header.AutoDriveParameterSourceOffsets[3]);
+        AutoDriveParameterSource ADPSource_4WDAttesa <bgcolor=cGray>;
+    } AutoDriveParameterSources <open=true>;
+} AutoDriveData <open=true>;
