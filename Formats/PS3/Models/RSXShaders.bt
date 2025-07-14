@@ -194,6 +194,9 @@ typedef struct
     FSeek(progBasePos + 0x10);
     int InstructionsOffset;
 
-    FSeek(progBasePos + InstructionsOffset);
-    Instruction ins[InstructionCount];
+    if (InstructionCount)
+    {
+        FSeek(progBasePos + InstructionsOffset);
+        Instruction ins[InstructionCount] <optimize=false>;
+    }
 } RSXVertexProgram;

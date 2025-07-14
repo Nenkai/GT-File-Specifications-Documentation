@@ -18,9 +18,10 @@ typedef struct
     byte Count <format=hex, fgcolor=cGreen>;
     CELL_GCM_VERTEX_TYPE DataType;
     byte UnkIndex;
-    FSeek(BasePos + FieldNameOffset);
+    
+    FSeek(startof(ModelSetHeader) + FieldNameOffset);
     string FieldName;
-} FVFField;
+} FVFElementDefinition <read=FieldName>;
 
 typedef struct
 {
@@ -30,7 +31,7 @@ typedef struct
     byte ArrayVertexSize;
     byte ArrayVertexDefaultSize <comment="Maybe?">;
     short pad;
-} FVFArrayDefinition <bgcolor=cDkGreen>;
+} FVFFieldArrayDefinition <bgcolor=cDkGreen>;
 
 typedef struct
 {
@@ -52,15 +53,15 @@ typedef struct
     local int j = 0;
     for (j = 0; j < FieldCount; j++)
     {
-        FSeek(BasePos + FieldDefsOffset + (j * 0x08));
-        FVFField FieldDef;
+        FSeek(startof(ModelSetHeader) + FieldDefsOffset + (j * 0x08));
+        FVFElementDefinition FieldDef;
     }
     
-    FSeek(BasePos + FVFArraysOffset);
-    FVFArrayDefinition ArrayDefinition;
+    FSeek(startof(ModelSetHeader) + FVFArraysOffset);
+    FVFFieldArrayDefinition ArrayDefinition;
 
-    FSeek(BasePos + FVFNameOffset);
+    FSeek(startof(ModelSetHeader) + FVFNameOffset);
     string FVFName <comment="Used directly to search in Shaders">;
 
 
-} FVFDefinition;
+} FlexibleVertexDefinition <read=FVFName>;

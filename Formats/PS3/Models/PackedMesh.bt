@@ -31,10 +31,10 @@ typedef struct
     byte BitSizeForEachPackedFace;
     byte Pad;
 
-    FSeek(BasePos + PackedFacesOffset);
+    FSeek(startof(ModelSetHeader) + PackedFacesOffset);
     byte PackedFaces[0x10 * StrideCountOfPackedFaces];
 
-    FSeek(BasePos + PackedFaceDescriptorsOffset);
+    FSeek(startof(ModelSetHeader) + PackedFaceDescriptorsOffset);
     
     struct
     {
@@ -92,13 +92,21 @@ typedef struct
     float unk;
     int DataOffset <format=hex, fgcolor=cRed>; // combine with countofunk
     int BBoxOffset <format=hex, fgcolor=cRed>;
-
+    float unk;
+    float unk;
+    short unk;
+    short unk;
+    short unk;
+    short unk;
+    short unk;
+    short unk;
+    int pad;
     local int i = 0;
     if (DataOffset != 0)
     {
         for (i = 0; i < CountOfUnk; i++)
         {
-            FSeek(BasePos + DataOffset + (i * 0x30));
+            FSeek(startof(ModelSetHeader) + DataOffset + (i * 0x30));
             FlexData Data;
         }
     }
@@ -145,19 +153,19 @@ typedef struct
     int ElementDefsOffset;
     int ElementNamesArrayOffset <format=hex, fgcolor=cRed>;
 
-    FSeek(BasePos + ElementDefsOffset);
+    FSeek(startof(ModelSetHeader) + ElementDefsOffset);
     FlexElementDef elementDefs1[ElementCount];
     FlexElementDef elementDefs2[ElementCount2];
 
-    FSeek(BasePos + ElementNamesArrayOffset);
+    FSeek(startof(ModelSetHeader) + ElementNamesArrayOffset);
     struct
     {
         int NamesOffsets[ElementCount + ElementCount2] <format=hex, fgcolor=cRed>;
     
         for (j = 0; j < ElementCount + ElementCount2; j++)
         {
-            FSeek(BasePos + NamesOffsets[j]);
-            String name;
+            FSeek(startof(ModelSetHeader) + NamesOffsets[j]);
+            String Name;
         }
     } ElementNames;
 
@@ -169,46 +177,46 @@ typedef struct
     struct
     {
         char Magic[4];
-        int Version;
+        uint Version <format=hex>;
         int RelocSize <format=hex>;
         int RelocPtr;
-        short FormatCount_0x18;
-        short UnkCount_0x1C;
-        short ElementBitLayoutDefinitionArrayCount_0x20;
-        short StructDeclarationCount_0x24;
+        ushort FormatCount_0x18 <fgcolor=cGreen>;
+        ushort UnkCount_0x1C <fgcolor=cGreen>;
+        ushort ElementBitLayoutDefinitionArrayCount_0x20 <fgcolor=cGreen>;
+        ushort StructDeclarationCount_0x24 <fgcolor=cGreen>;
         int FormatsOffset_0x18 <format=hex, fgcolor=cRed>;
         int UnkOffset_0x1C <format=hex, fgcolor=cRed>;
         int ElementBitLayoutDefinitionArraysOffset_0x20 <format=hex, fgcolor=cRed>;
         int StructDeclarationsOffset_0x24 <format=hex, fgcolor=cRed>;
         int UnkOffset_0x28;
         int Unk;
-        int UnkOffset_0x30;
-    } Header;
+        int UnkOffset_0x30 <format=hex, fgcolor=cRed>;
+    } PackedMeshHeader;
     
     local int i = 0;
     local int j = 0;
     struct
     {
-        for (i = 0; i < Header.FormatCount_0x18; i++)
+        for (i = 0; i < PackedMeshHeader.FormatCount_0x18; i++)
         {
-            FSeek(BasePos + Header.FormatsOffset_0x18 + (i * 0x30));
-            FlexInfoAndData format;
+            FSeek(startof(ModelSetHeader) + PackedMeshHeader.FormatsOffset_0x18 + (i * 0x30));
+            FlexInfoAndData FlexFormats;
         }
     } FlexInfos;
     
     struct
     {
         
-        for (i = 0; i < Header.ElementBitLayoutDefinitionArrayCount_0x20; i++)
+        for (i = 0; i < PackedMeshHeader.ElementBitLayoutDefinitionArrayCount_0x20; i++)
         {
-            FSeek(BasePos + Header.ElementBitLayoutDefinitionArraysOffset_0x20 + (i * 0x08));
+            FSeek(startof(ModelSetHeader) + PackedMeshHeader.ElementBitLayoutDefinitionArraysOffset_0x20 + (i * 0x08));
             struct
             {
                 int Length;
                 int EntriesOffset <format=hex, fgcolor=cRed>;
     
-                FSeek(BasePos + EntriesOffset + (j * 0x10));
-                ElementBitLayoutDefinition layout[Length];
+                FSeek(startof(ModelSetHeader) + EntriesOffset + (j * 0x10));
+                ElementBitLayoutDefinition ElemBitLayoutDef[Length];
     
             } ElementBitLayoutDefinitionArray;
         }
@@ -216,13 +224,16 @@ typedef struct
         FSeek(FileSize());
     } ElementBitLayoutDefinitions;
     
-    struct
+    if (PackedMeshHeader.StructDeclarationCount_0x24)
     {
-        for (i = 0; i < Header.StructDeclarationCount_0x24; i++)
+        struct
         {
-            FSeek(BasePos + Header.StructDeclarationsOffset_0x24 + (i * 0x10));
-            FlexStructDeclaration decl;
-        }
-} FlexStructDeclarations;
-
+            for (i = 0; i < PackedMeshHeader.StructDeclarationCount_0x24; i++)
+            {
+                FSeek(startof(ModelSetHeader) + PackedMeshHeader.StructDeclarationsOffset_0x24 + (i * 0x10));
+                FlexStructDeclaration FlexStructDeclaration_;
+            }
+        } FlexStructDeclarations;
+    }
+    
 } PMSH <comment="Replaces FVF stuff">;

@@ -107,7 +107,7 @@ typedef struct
     uint TriLength <fgcolor=cGreen, bgcolor=cGreen>;
     uint TriOffset <format=hex, fgcolor=cRed, bgcolor=cGreen, comment="Giving an offset in shapestream course: nothing happens">;
     uint Unk <bgcolor=cGreen>;
-    if (Header.VersionMajor < 10)
+    if (ModelSetHeader.VersionMajor < 10)
     {
         ushort Unk <comment="version < 10", bgcolor=cGreen>;
         short UnkIndex <comment="version < 10", bgcolor=cGreen>;   
@@ -135,7 +135,7 @@ typedef struct
 
     if (PMSHRefOffset != 0)
     {
-        FSeek(BasePos + PMSHRefOffset);
-        MeshPMSHRef pmshRef;
+        FSeek(startof(ModelSetHeader) + PMSHRefOffset);
+        MeshPMSHRef PackedMeshRef;
     }
 } Mesh <comment="Mapped at FUN_008e7dac">;

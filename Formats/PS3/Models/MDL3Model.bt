@@ -15,6 +15,18 @@
 // The payload is used to define and initialize all the meshes for each model in the set
 // For the name of each model, refer to ModelKeys
 
+typedef enum <ubyte>
+{
+    PGLUCallShapeByte = 3,
+    PGLUCallShapeUShort = 4,
+    LODRenderSwitch = 5,
+    JumpByte = 9,
+    JumpShort = 10,
+    CallVM_Ptr2 = 44,
+    PGLUCallShape2Byte = 59,
+    PGLUCallShape2UShort = 60,
+} PGLCommand;
+
 typedef struct
 {
     local int counter = 0;
@@ -23,7 +35,7 @@ typedef struct
     {
         struct
         {
-            ubyte opcode <fgcolor=cLtRed>;
+            PGLCommand opcode <fgcolor=cLtRed>;
 
             switch (opcode)
             {
@@ -37,7 +49,7 @@ typedef struct
                     } Opcode2;
                     break;
 
-                case 3:
+                case PGLUCallShapeByte: // 3
                     struct
                     {
                         /*     
@@ -45,17 +57,17 @@ typedef struct
                             or
                         ppiVar4 = (int **)(*(int *)(mdl + 0xa8) + index * 0x20);
                         */
-                        byte unkMaybeMeshIndex;
-                    } Opcode3;
+                        byte ShapeIndex;
+                    } PGLUCallShapeByte;
                     break;
 
-                case 4: // Similar to 0x3C opcode
+                case PGLUCallShapeUShort: // 4
                     struct
                     {
-                        short unkMaybeMeshIndex; // Does same addressing as opcode 3
-                    } Opcode4;
+                        ushort ShapeIndex;
+                    } PGLUCallShapeUShort;
                     break;
-                case 5:
+                case LODRenderSwitch: // 5
                     struct
                     {
                         short unk <comment="Diff stuff happens if >10000 or == 10001 or 10002">;
@@ -64,7 +76,7 @@ typedef struct
                         short Offsets[BranchCount] <format=hex>;
 
                         
-                    } Opcode5;
+                    } LODRenderSwitch;
                     break;
 
                 case 6:
@@ -92,7 +104,7 @@ typedef struct
 						
 						if ((flags & 0x80) == 0)
 						{
-						
+						    
 						}
 						else
 						{
@@ -110,15 +122,16 @@ typedef struct
 							{
 								byte Unk9;
 							}
+                            
+                            float singles[flags & 0x0F];
+                            byte unk;
 						}
-			
-						float singles[flags & 0x0F];
-						
-						byte count2;
-						short unks[count2];
+
+						short unk2[flags & 0x0F];
+						 
                     } Opcode8;
                     break;
-                case 9:
+                case JumpByte: // 9
                     // this is what it does: *param_5 = opcodePtr + *dataPtr + 2;
                     struct
                     {
@@ -126,7 +139,7 @@ typedef struct
                     } Opcode9_JumpMaybe;
                     break;
 
-               case 10:
+               case JumpShort: // 10
                     // Same but short
                     struct
                     {
@@ -134,17 +147,17 @@ typedef struct
                     } OpcodeA_JumpMaybe;
                     break;
 
-                case 0x0D:
-                case 0x0E:
-                case 0x0F:
+                case 13:
+                case 14:
+                case 15:
                     break;
 
-                case 0x10:
-                case 0x11:
+                case 16:
+                case 17:
                     byte data[0x40];
                     break;
 
-                case 0x12:
+                case 18:
                     struct
                     {
                         float unk;
@@ -153,7 +166,7 @@ typedef struct
                     } Opcode12;
                     break;
 
-                case 0x13:
+                case 19:
                     struct
                     {
                         float unk;
@@ -161,7 +174,7 @@ typedef struct
                         float unk;
                     } Opcode13;
                     break;
-                case 0x14:
+                case 20:
                     struct
                     {
                         float unk;
@@ -171,44 +184,44 @@ typedef struct
                     } Opcode14;
                     break;
 
-                case 0x15:
+                case 21:
                     struct
                     {
                         float unk <format=hex>;
                     } Opcode15;
                     break;
 
-                case 0x16:
+                case 22:
                     struct
                     {
                         uint color <format=hex>;
                     } Opcode16;
                     break;
 
-                case 0x17:
+                case 23:
                     struct
                     {
                         float unk <format=hex>;
                     } Opcode17;
                     break;
 
-                case 0x18:
+                case 24:
                     break;
 
-                case 0x19: // GT6
+                case 25: // GT6
                     break;
-                case 0x1A:
+                case 26:
                     struct
                     {
                         byte unk;
                     } Opcode1A;
                     break;
 
-                case 0x1B:
-                case 0x1C:
+                case 27:
+                case 28:
                     break;
 
-                case 0x1D:
+                case 29:
                     struct
                     {
                         byte unk;
@@ -216,17 +229,17 @@ typedef struct
                     } Opcode1D;
                     break;
 
-                case 0x22:
+                case 34:
                     struct
                     {
                         byte bits;
                     } OpCode22;
                     break;
-                case 0x23:
-                case 0x24:
+                case 35:
+                case 36:
                     break;
 
-                case 0x25:
+                case 37:
                     struct
                     {
                         int unk;
@@ -234,66 +247,66 @@ typedef struct
                     } Opcode25;
                     break;
 
-                case 0x26:
-                case 0x27:
-                case 0x28:
-                case 0x29:
-                case 0x2A:
+                case 38:
+                case 39:
+                case 40:
+                case 41:
+                case 42:
                     break;
 
-                case 0x2B:
+                case 43:
                     struct
                     {
                         float unk <format=hex>;
                     } Opcode2B;
                     break;
 
-                case 0x2C:
+                case CallVM_Ptr2: // 44
                     break;
 
-                case 0x2D:
+                case 45:
                     struct
                     {
                         short unk;
                     } Opcode2D;
                     break;
 
-                case 0x2E:
+                case 46:
                     struct
                     {
                         short unk;
                     } Opcode2E;
                     break;
 
-                case 0x2F:
+                case 47:
                     struct
                     {
                         short unk;
                     } Opcode2F;
                     break;
 
-                case 0x33:
+                case 51:
                     struct
                     {
                         short unk;
                     } Opcode33;
                     break;
 
-                case 0x34:
+                case 52:
                     struct
                     {
                         short unk;
                     } Opcode34;
                     break;
 
-                case 0x35:
+                case 53:
                     struct
                     {
                         short unk;
                     } Opcode35;
                     break;
 
-                case 0x36:
+                case 54:
                     struct
                     {
                         short unk;
@@ -302,7 +315,7 @@ typedef struct
                     } Opcode36;
                     break;
 
-                case 0x37:
+                case 55:
                     struct
                     {
                         float unk;
@@ -312,7 +325,7 @@ typedef struct
                     } Opcode37;
                     break;
 
-                case 0x38: // GT PSP seems to not use the data
+                case 56: // GT PSP seems to not use the data
                     struct
                     {
                         float unk;
@@ -322,7 +335,7 @@ typedef struct
                     } Opcode38;
                     break;
 
-                case 0x39:
+                case 57:
                     struct
                     {
                         short unk;
@@ -332,7 +345,7 @@ typedef struct
                     } Opcode37;
                     break;
 
-                case 0x3A: // GT PSP seems to not use the data, again
+                case 58: // GT PSP seems to not use the data, again
                     struct
                     {
                         short unk;
@@ -342,26 +355,26 @@ typedef struct
                     } Opcode3A;
                     break;
 
-                case 0x3B:
+                case PGLUCallShape2Byte: // 59
                     struct
                     {
-                        byte MeshID; // Does same addressing as opcode 3
+                        byte ShapeIndex;
                         byte Unk2; // maybe not used?
                     } Opcode3B;
                     break;
 
-                case 0x3C:
+                case PGLUCallShape2UShort: // 60
                     struct
                     {
-                        short unkIndex; // Does same addressing as opcode 3, this is a short however
+                        short ShapeIndex;
                         short unk; // maybe not used?
                     } Opcode3C;
                     break;
 
-                case 0x3D:
+                case 61:
                     break;
 
-                case 0x3E: // GT PSP does not use data
+                case 62: // GT PSP does not use data
                     struct
                     {
                         byte unk;
@@ -369,7 +382,7 @@ typedef struct
                     } Opcode3E;
                     break;
 
-                case 0x41:
+                case 65:
                     struct
                     {
                         /*
@@ -386,7 +399,7 @@ typedef struct
                     } Opcode41;
                     break;
 
-                case 0x42:
+                case 66:
                     struct
                     {
                         byte unk;
@@ -395,14 +408,14 @@ typedef struct
                     } Opcode42;
                     break;
 
-                case 0x43:
+                case 67:
                     struct
                     {
                         int color <format=hex>;
                     } Opcode43;
                     break;
 
-                case 0x44:
+                case 68:
                     struct
                     {
                         float unkvec1_1;
@@ -415,17 +428,17 @@ typedef struct
                     } Opcode0x44;
                     break;
 
-                case 0x45:
+                case 69:
                     struct
                     {
                         byte PGLUTextureInfoIndex;
                     } Opcode0x45;
                     break;
 
-                case 0x46: // GT6
-                case 0x47:
+                case 70: // GT6
+                case 71:
                     break;
-                case 0x48:
+                case 72:
                     struct
                     {
                         // All these three are converted to float and multiplied by 0.003921569
@@ -435,7 +448,7 @@ typedef struct
                     } Opcode0x48;
                     break;
 
-                case 0x4A:
+                case 74:
                     struct
                     {
                         byte MeshCount;
@@ -446,7 +459,7 @@ typedef struct
                     Printf("Unrecognized opcode %d\n", opcode);
                     break;
             }
-        } Command <optimize=false, bgcolor=cBlack>;
+        } Command <optimize=false, bgcolor=cBlack, read=(EnumToString(opcode) == "" ? opcode : EnumToString(opcode))>;
 
         if (Command[counter].opcode == 0)
             break;
@@ -476,10 +489,10 @@ typedef struct
     short Unk;
     short UnkBitFlags <format=hex>;
    
-    FSeek(BasePos + BoundsOffset);
+    FSeek(startof(ModelSetHeader) + BoundsOffset);
     //Vec3 Bounds[BoundsCount];
 
-    FSeek(BasePos + CommandsOffset);
+    FSeek(startof(ModelSetHeader) + CommandsOffset);
     Commands commands;
 
     /* All of this is LE
@@ -492,7 +505,7 @@ typedef struct
     
     SetEndian();
     local int currentEndpos = FTell();
-    local int endPos = BasePos + CommandsOffset + CommandsLength + 1;
+    local int endPos = startof(ModelSetHeader) + CommandsOffset + CommandsLength + 1;
     if (currentEndpos != endPos);
     {
         Printf("Payload parsed entirely %d = %d\n", currentEndpos, endPos);

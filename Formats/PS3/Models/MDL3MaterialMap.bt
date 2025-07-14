@@ -17,8 +17,6 @@ BitfieldDisablePadding();
 
 typedef enum <uint>
 {
-
-
     // SetBlendFunc
 	CELL_GCM_ZERO						= (0),
 	CELL_GCM_ONE						= (1),
@@ -90,10 +88,11 @@ typedef enum <uint>
 typedef struct
 {
     int StringOffset <fgcolor=cRed, format=hex>;
-    int ImageMetadataIndex <fgcolor=cYellow>;
-    FSeek(BasePos + StringOffset);
+    int TextureIndex <fgcolor=cYellow>;
+    
+    FSeek(startof(ModelSetHeader) + StringOffset);
     string Name;
-} ImageMetadataKey;
+} TextureKey <read=Str("%s (%d)", Name, TextureIndex)>;
 
 typedef struct
 {
@@ -109,8 +108,8 @@ typedef struct
     local int n = 0;
     for (n = 0; n < KeyCount; n++)
     {
-        FSeek(BasePos + KeysOffset + (n * 8));
-        ImageMetadataKey Key;
+        FSeek(startof(ModelSetHeader) + KeysOffset + (n * 8));
+        TextureKey Key;
     }
 
     if (NameOffset != 0)
@@ -118,15 +117,15 @@ typedef struct
         FSeek(NameOffset);
         string Name;
     }
-} MaterialDefinition;
+} MaterialDefinition <read=Str("%s (Data ID: %d)", Name, MaterialDataID)>;
 
 typedef struct
 {
     int StringOffset <fgcolor=cRed, format=hex>;
     int UnkIndex <fgcolor=cYellow, comment="0 to 1?">;
-    FSeek(BasePos + StringOffset);
+    FSeek(startof(ModelSetHeader) + StringOffset);
     string Name;
-} Material2Name;
+} Material2Name <read=Str("%s (%d)", Name, UnkIndex)>;
 
 typedef struct
 {
@@ -140,7 +139,7 @@ typedef struct
     int KeyCount <bgcolor=cLtGray>;
     int KeyOffset <format=hex, fgcolor=cRed, bgcolor=cLtGray>;
 
-    FSeek(BasePos + ShaderEntrySearchNameOffset);
+    FSeek(startof(ModelSetHeader) + ShaderEntrySearchNameOffset);
     string ShaderRefName;
 } MaterialData0x14;
 
@@ -153,7 +152,7 @@ typedef struct
 typedef struct
 {
     int NameOffset <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="Own Thing">;
-    int UnkIndex <fgcolor=cYellow, bgcolor=cDkGray>;  
+    int SetIndex <fgcolor=cYellow, bgcolor=cDkGray>;  
     byte Unk <bgcolor=cDkGray>;
     byte Version <bgcolor=cDkGray>;
     short KeysCount <fgcolor=cGreen, bgcolor=cDkGray>;
@@ -184,21 +183,21 @@ typedef struct
         int UnkOffset0x1C <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, Own Thing">;
         short _empty_ <bgcolor=cDkGray>;
         short Count0x18 <fgcolor=cGreen, bgcolor=cDkGray>;
-        int UnkOffset0x24 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="Same as 0x14 - Stride 0x20 - If Version == 2">;
+        int ShaderReferencesOffset0x24 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="Same as 0x14 - Stride 0x20 - If Version == 2">;
         /* if (this->field_0x10 == 0x0) {
             this->field_0x10 = *(int *)(this->field_0x14 + 0x1c); */
 
         local int n = 0;
         for (n = 0; n < KeysCount; n++)
         {
-            FSeek(BasePos + KeysOffset + (n * 8));
+            FSeek(startof(ModelSetHeader) + KeysOffset + (n * 8));
             Material2Name ElementKey;
         }
 
-        FSeek(BasePos + UnkOffset0x14);
+        FSeek(startof(ModelSetHeader) + UnkOffset0x14);
         MaterialData0x14 unk0x14;
 
-        FSeek(BasePos + UnkOffset0x18);
+        FSeek(startof(ModelSetHeader) + UnkOffset0x18);
         Material2Unk unk0x18;
 
         if (UnkOffset0x1C > 0)
@@ -206,36 +205,49 @@ typedef struct
     
         }
 
-        if (UnkOffset0x24 != 0)
+        if (ShaderReferencesOffset0x24 != 0)
         {
-            FSeek(BasePos + UnkOffset0x24);
+            FSeek(startof(ModelSetHeader) + ShaderReferencesOffset0x24);
             struct
             {
-                int a;
-                int b;
-                int c;
-                int d <format=hex>;
-                int e <format=hex>;
-                int f;
-                int g <format=hex>;
-                int h;
+                short field_0x00;
+                short field_0x02;
+                int field_0x04 <format=hex>;
+                int field_0x08 <format=hex>;
+                int ShaderProgramOffset <format=hex>;
+                int ShaderProgram2Offset <format=hex>;
+                int field_0x14;
+                short field_0x18;
+                short field_0x1A;
+                int field_0x1C;
 
-            } MaterialData0x24;
+                if (ShaderProgramOffset != 0)
+                {
+                    FSeek(startof(ModelSetHeader) + ShaderProgramOffset);
+                    ShaderProgram Program;   
+                }
+                
+                if (ShaderProgram2Offset != 0)
+                {
+                    FSeek(startof(ModelSetHeader) + ShaderProgram2Offset);
+                    ShadersProgram_0x2C Program2;   
+                }
+            } ShaderReferences;
         }
     }
 
     if (NameOffset > 0)
     {
-        FSeek(BasePos + NameOffset);
+        FSeek(startof(ModelSetHeader) + NameOffset);
         string Name <comment="Used when addressing shaders (to shaders's defs 0x1C)">;
     }
 
     if (UnkOffset0x0C > 0)    
     {
-        FSeek(BasePos + UnkOffset0x0C);
+        FSeek(startof(ModelSetHeader) + UnkOffset0x0C);
         float unkFloats0x0C[8] <fgcolor=cLtBlue>;
     }
-} MaterialData;
+} MaterialData <read=Str("%s (%d)", Name, SetIndex)>;
 
 
 typedef struct
@@ -257,7 +269,7 @@ typedef struct
         {
             for (j = 0; j < MaterialCount; j++)
             {
-                FSeek(BasePos + MaterialsOffset + (j * 0x34));
+                FSeek(startof(ModelSetHeader) + MaterialsOffset + (j * 0x34));
                 MaterialDefinition Definition <comment="0x34 Stride">;
             }
         } MaterialDefinitions;
@@ -270,7 +282,7 @@ typedef struct
         {
             for (j = 0; j < MaterialDataCount_0x0C; j++)
             {
-                FSeek(BasePos + MaterialDataOffset_0x0C + (j * 0x28));
+                FSeek(startof(ModelSetHeader) + MaterialDataOffset_0x0C + (j * 0x28));
                 MaterialData entry;
             
                 FSeek(cPos);
@@ -280,7 +292,7 @@ typedef struct
 
     cPos = FTell();
 
-    FSeek(BasePos + CellGcmParamsOffset_0x10);
+    FSeek(startof(ModelSetHeader) + CellGcmParamsOffset_0x10);
 
 #define	CELL_GCM_NV4097_SET_SURFACE_CLIP_VERTICAL	(0x00000204)
 #define	CELL_GCM_NV4097_SET_ALPHA_TEST_ENABLE	(0x00000304)
@@ -367,7 +379,7 @@ typedef struct
             short unk;
     
             int unk;
-        } CellGcmParams[CellGcmParamCount_0x10] <comment="Order is heavily inspired from cell\gcm\gcm_macros.h">;
+        } CellGcmParams[CellGcmParamCount_0x10] <optimize=false, comment="Order is heavily inspired from cell\gcm\gcm_macros.h">;
     }
 
     FSeek(FileSize());
@@ -376,7 +388,7 @@ typedef struct
     {
         struct
         {
-            FSeek(BasePos + TextureParameterMapOffset);
+            FSeek(startof(ModelSetHeader) + TextureParameterMapOffset);
             PGLUTextureInfo TextureParameter[TextureParameterCount];
     
             FSeek(FileSize());

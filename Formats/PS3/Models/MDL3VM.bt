@@ -26,13 +26,13 @@
 
 typedef struct
 {
-    int NameOffset;
+    int NameOffset <format=hex, fgcolor=cRed>;
     short SizeInts;
     short StorageIndex;
 
     FSeek(NameOffset);
     string Name;
-} VMRegisterVal;
+} VMHostMethod <read=Name>;
 
 typedef struct
 {
@@ -55,14 +55,14 @@ typedef struct
 
 typedef struct
 {
-    for (i = 0; i < Header.HostMethodCount; i++)
+    for (i = 0; i < ModelSetHeader.HostMethodCount; i++)
     {
-        FSeek(BasePos + Header.HostMethodsOffset + (i * 0x08));
-        VMRegisterVal var;
+        FSeek(startof(ModelSetHeader) + ModelSetHeader.HostMethodsOffset + (i * 0x08));
+        VMHostMethod Var;
         FSeek(FileSize());
     }
 
-} VMRegisterVals;
+} VMHostMethods;
 
 typedef struct
 {
@@ -80,7 +80,7 @@ typedef struct
     local int x;
     for (x = 0; x < unkCount_0x08; x++)
     {
-        FSeek(BasePos + offset_0x08 + (x * 0x10));
+        FSeek(startof(ModelSetHeader) + offset_0x08 + (x * 0x10));
         struct
         {
             int NameOffset;
@@ -89,12 +89,12 @@ typedef struct
             int c;
             int d;
 
-            FSeek(BasePos + NameOffset);
+            FSeek(startof(ModelSetHeader) + NameOffset);
             string Name;
-        } a;
+        } UnkEntry_0x08 <read=Name>;
     }
 
-} VMRelated;
+} VMRelated_0xB8;
 
 typedef struct
 {

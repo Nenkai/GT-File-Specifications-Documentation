@@ -21,9 +21,9 @@ typedef struct
     short Shader0x24_or_0x2CEntry_ID;
 
     //Printf("%d\n", UnkID);
-    FSeek(BasePos + NameOffset);
+    FSeek(startof(ModelSetHeader) + NameOffset);
     string Name;
-} ShaderDefinition;
+} ShaderDefinition <read=Name>;
 
 typedef struct
 {
@@ -33,27 +33,27 @@ typedef struct
     int c;
     int d;
 
-    FSeek(BasePos + NameOffset);
+    FSeek(startof(ModelSetHeader) + NameOffset);
     string Name;
 
     FSeek(FileSize());
-} Entry0x20_0x14 <comment="Referenced by each FVF field when searching, search happens by name">;
+} Entry0x20_0x14 <read=Name, comment="Referenced by each FVF field when searching, search happens by name">;
 
 local int maxx = -1;
 
 typedef struct
 {
     int NameOffset <format=hex, fgcolor=cRed>;
-    short unk;
-    short unk2;
-    int c;
-    int d;
+    short field_0x04;
+    short field_0x06;
+    int field_0x08;
+    int field_0x0C;
 
-    FSeek(BasePos + NameOffset);
+    FSeek(startof(ModelSetHeader) + NameOffset);
     string Name;
 
     FSeek(FileSize());
-} ShaderConstSource;
+} ShaderConstSource <read=Name>;
 
 typedef struct
 {
@@ -70,19 +70,19 @@ typedef struct
     int unk9;
     int unk10;
 
-    FSeek(BasePos + RSXVertexProgramOffset);
+    FSeek(startof(ModelSetHeader) + RSXVertexProgramOffset);
     RSXVertexProgram vertexProgram;
 
     local int j = 0;
     for (j = 0; j < Count_0x14; j++)
     {
-        FSeek(BasePos + UnkOffset_0x14 + (j * 0x10));
+        FSeek(startof(ModelSetHeader) + UnkOffset_0x14 + (j * 0x10));
         Entry0x20_0x14 entry_0x14;
     }
 
     for (j = 0; j < Count_0x18; j++)
     {
-        FSeek(BasePos + UnkOffset_0x18 + (j * 0x10));
+        FSeek(startof(ModelSetHeader) + UnkOffset_0x18 + (j * 0x10));
         ShaderConstSource constSource;
     }
 
@@ -103,37 +103,37 @@ typedef struct
     int UnkOffset_0x1C <format=hex, fgcolor=cRed>;
     int unk_[6];
     int UnkOffset_0x38 <format=hex, fgcolor=cRed>;
-    int unk;
-    int unk;
+    int field_0x3C;
+    int field_0x40;
     int UnkOffset_0x44;
 
     local int j = 0;
     for (j = 0; j < UnkCount_0x10; j++)
     {
-        FSeek(BasePos + UnkOffset_0x10 + (j * 0x10));
-        Entry0x20_0x14 entry_0x10;
+        FSeek(startof(ModelSetHeader) + UnkOffset_0x10 + (j * 0x10));
+        Entry0x20_0x14 Entry_0x10;
     }
 
     for (j = 0; j < UnkCount_0x14; j++)
     {
-        FSeek(BasePos + UnkOffset_0x14 + (j * 0x10));
-        ShaderConstSource entry_0x14;
+        FSeek(startof(ModelSetHeader) + UnkOffset_0x14 + (j * 0x10));
+        ShaderConstSource Entry_0x14;
     }
 
     for (j = 0; j < UnkCount_0x18; j++)
     {
-        FSeek(BasePos + UnkOffset_0x18 + (j * 0x10));
-        ShaderConstSource entry_0x18;
+        FSeek(startof(ModelSetHeader) + UnkOffset_0x18 + (j * 0x10));
+        ShaderConstSource Entry_0x18;
     }
 
     for (j = 0; j < UnkCount_0x38; j++)
     {
-        FSeek(BasePos + UnkOffset_0x38 + (j * 0x10));
-        ShaderConstSource entry_0x38;
+        FSeek(startof(ModelSetHeader) + UnkOffset_0x38 + (j * 0x10));
+        ShaderConstSource Entry_0x38;
     }
 
     FSeek(FileSize());
-} UnkProgram;
+} ShadersProgram_0x2C;
 
 typedef struct
 {
@@ -149,11 +149,11 @@ typedef struct
     int j;
     int k;
 
-    FSeek(BasePos + NameOffset);
+    FSeek(startof(ModelSetHeader) + NameOffset);
     string Name <comment="Used for searching">;
 
     FSeek(FileSize());
-} Entry0x3C <comment="Refered to by Material Data 0x14 Entry by both Name and ID">;
+} Entry0x3C <read=Name, comment="Refered to by Material Data 0x14 Entry by both Name and ID">;
 
 typedef struct
 {
@@ -195,73 +195,72 @@ typedef struct SHDS
         uint Offset0x38 <format=hex, fgcolor=cRed, comment="0x10 Stride">;
         uint Offset0x3C <format=hex, fgcolor=cRed, comment="0x4 Stride">;
         uint Offset0x40 <format=hex, fgcolor=cRed, comment="0x20 Stride">;
-    } Header <bgcolor=cPurple>;
+    } ShaderSetHeader <bgcolor=cPurple>;
 
     local int i = 0;
-    if (Header.ShaderDefinitionCount > 0)
+    if (ShaderSetHeader.ShaderDefinitionCount > 0)
     {
         struct
         {
-            for (i = 0; i < Header.ShaderDefinitionCount; i++) 
+            for (i = 0; i < ShaderSetHeader.ShaderDefinitionCount; i++) 
             {
-                FSeek(BasePos + Header.ShaderDefinitionsOffset_0x1C + (i * 0x0C));
+                FSeek(startof(ModelSetHeader) + ShaderSetHeader.ShaderDefinitionsOffset_0x1C + (i * 0x0C));
                 ShaderDefinition def;
             }
         } ShaderDefinitions;
     }
 
-    if (Header.ShaderProgramCount > 0)
+    if (ShaderSetHeader.ShaderProgramCount > 0)
     {
         struct
         {
             
-            for (i = 0; i < Header.ShaderProgramCount; i++) 
+            for (i = 0; i < ShaderSetHeader.ShaderProgramCount; i++) 
             {
-                FSeek(BasePos + Header.ShaderProgramsOffset_0x20 + (i * 0x28));
-                ShaderProgram programs;
+                FSeek(startof(ModelSetHeader) + ShaderSetHeader.ShaderProgramsOffset_0x20 + (i * 0x28));
+                ShaderProgram Program_;
             }
         } ShaderPrograms;
     }
 
-    if (Header.Count0x24_2c > 0)
+    if (ShaderSetHeader.Count0x24_2c > 0)
     {
         struct
         {
             
-            for (i = 0; i < Header.Count0x24_2c; i++) 
+            for (i = 0; i < ShaderSetHeader.Count0x24_2c; i++) 
             {
-                FSeek(BasePos + Header.Offset0x2C + (i * 0x48));
-                UnkProgram prog;
+                FSeek(startof(ModelSetHeader) + ShaderSetHeader.Offset0x2C + (i * 0x48));
+                ShadersProgram_0x2C prog;
             }
         } UnkPrograms;
     }
 
-    if (Header.Count0x3C > 0)
+    if (ShaderSetHeader.Count0x3C > 0)
     {
         struct
         {
-            
-            for (i = 0; i < Header.Count0x3C; i++) 
+            for (i = 0; i < ShaderSetHeader.Count0x3C; i++) 
             {
-                FSeek(BasePos + Header.Offset0x3C + (i * 4));
+                FSeek(startof(ModelSetHeader) + ShaderSetHeader.Offset0x3C + (i * 4));
                 int offset <format=hex, fgcolor=cRed>;
 
-                FSeek(BasePos + offset);
+                FSeek(startof(ModelSetHeader) + offset);
                 Entry0x3C entry;
             }
         } Entries0x3C;
     }
 
-    if (Header.Count0x40 > 0)
+    if (ShaderSetHeader.Count0x40 > 0)
     {
         struct
         {
             
-            for (i = 0; i < Header.Count0x40; i++) 
+            for (i = 0; i < ShaderSetHeader.Count0x40; i++) 
             {
-                FSeek(BasePos + Header.Offset0x40 + (i * 0x20));
+                FSeek(startof(ModelSetHeader) + ShaderSetHeader.Offset0x40 + (i * 0x20));
                 Entry0x40 entry;
             }
         } Entries0x40;
     }
-} Shaders;
+} ShaderSet;

@@ -20,21 +20,14 @@ typedef struct
     
     FSeek(NameOffset);
     string Name;
-} MeshKey;
+} MeshKey <read=Str("%s (%d)", Name, MeshID)>;
 
 typedef struct
 {
     local int i = 0;
-    for (i = 0; i < Header.MeshKeyCount; i++)
+    for (i = 0; i < ModelSetHeader.MeshKeyCount; i++)
     {
-        FSeek(BasePos + Header.MeshKeysOffset + (i * 0x08));
-        MeshKey key <comment=PrintMeshKey>;
+        FSeek(startof(ModelSetHeader) + ModelSetHeader.MeshKeysOffset + (i * 0x08));
+        MeshKey MeshKey_;
     }
 } MeshKeys;
-
-string PrintMeshKey(MeshKey& meshKey)
-{
-    string str;
-    SPrintf(str, "%s (ID: %d)", meshKey.Name, meshKey.MeshID);
-    return str;
-}
