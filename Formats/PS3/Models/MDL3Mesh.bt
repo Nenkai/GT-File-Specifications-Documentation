@@ -31,7 +31,8 @@ typedef struct
     byte Count0x08 <fgcolor=cGreen>;
     uint Offset0x24 <format=hex, fgcolor=cRed, comment="Own Thing">;
     uint Offset0x28 <format=hex, fgcolor=cRed, comment="Own Thing">;
-    FSeek(FileSize());
+    
+    FSeek(startof(this) + 0x2C);
 } MeshUnk0x2C_0x04_0x04_0x08;
 
 typedef struct
@@ -51,8 +52,8 @@ typedef struct
         FSeek(BasePos + EntryOffsets0x08[w]);
         MeshUnk0x2C_0x04_0x04_0x08 entry;
     }
-    FSeek(FileSize());
-
+    
+    FSeek(startof(this) + 0x10);
 } MeshUnk0x2C_0x04_0x04;
 
 typedef struct
@@ -69,7 +70,7 @@ typedef struct
         MeshUnk0x2C_0x04_0x04 unk;
     }
 
-    FSeek(FileSize());
+    FSeek(startof(this) + 0x10);
 } MeshUnk0x2C_0x04;
 
 typedef struct
@@ -91,35 +92,35 @@ typedef struct
         MeshUnk0x2C_0x04 unk0x04;
     }
 
-    FSeek(FileSize());
+    FSeek(startof(this) + 0x30);
 } MeshPMSHRef;
 
 typedef struct
 {
-    ushort Flags <bgcolor=cGreen, format=hex, comment="0x80 = No verts?, Removing 0x01 causes massive vertex fuckery">;
-    short FVFIndex <fgcolor=cYellow, bgcolor=cGreen, comment="-1 if not used">;
-    short MaterialIndex <fgcolor=cYellow, bgcolor=cGreen, comment="Index to first array in Materials">;
+    ushort Flags <format=hex, comment="0x80 = No verts?, Removing 0x01 causes massive vertex fuckery">;
+    short FVFIndex <fgcolor=cYellow, comment="-1 if not used">;
+    short MaterialIndex <fgcolor=cYellow, comment="Index to first array in Materials">;
     byte unk;
     byte unk;
-    uint VertCount <fgcolor=cGreen, bgcolor=cGreen>;
-    uint VerticesOffset <format=hex, fgcolor=cRed, bgcolor=cGreen>;
-    uint Unk <bgcolor=cGreen>;
-    uint TriLength <fgcolor=cGreen, bgcolor=cGreen>;
-    uint TriOffset <format=hex, fgcolor=cRed, bgcolor=cGreen, comment="Giving an offset in shapestream course: nothing happens">;
-    uint Unk <bgcolor=cGreen>;
+    uint VertCount <fgcolor=cGreen>;
+    uint VerticesOffset <format=hex, fgcolor=cRed>;
+    uint Unk;
+    uint TriLength <fgcolor=cGreen>;
+    uint TriOffset <format=hex, fgcolor=cRed, comment="Giving an offset in shapestream course: nothing happens">;
+    uint Unk;
     if (ModelSetHeader.VersionMajor < 10)
     {
-        ushort Unk <comment="version < 10", bgcolor=cGreen>;
-        short UnkIndex <comment="version < 10", bgcolor=cGreen>;   
+        ushort Unk <comment="version < 10">;
+        short UnkIndex <comment="version < 10">;   
     }
     else
     {
-        uint UnkOffset <format=hex, fgcolor=cRed, comment="Confirmed offset, version >= 10", bgcolor=cGreen>;
+        uint UnkOffset <format=hex, fgcolor=cRed, comment="Confirmed offset, version >= 10">;
     }
-    ushort Unk <bgcolor=cGreen>;
-    ushort TriCount <fgcolor=cGreen, bgcolor=cGreen>;
-    uint BoundaryBoxOffset <format=hex, fgcolor=cRed, bgcolor=cGreen>;
-    uint PMSHRefOffset <format=hex, fgcolor=cRed, comment="Confirmed offset", bgcolor=cGreen>;
+    ushort Unk;
+    ushort TriCount <fgcolor=cGreen>;
+    uint BoundaryBoxOffset <format=hex, fgcolor=cRed>;
+    uint PMSHRefOffset <format=hex, fgcolor=cRed, comment="Confirmed offset">;
 
     /*
     local int vertexLen = mdl3.FVFDefMap.Def[FVFIndex].DataLength;
@@ -138,4 +139,6 @@ typedef struct
         FSeek(startof(ModelSetHeader) + PMSHRefOffset);
         MeshPMSHRef PackedMeshRef;
     }
-} Mesh <comment="Mapped at FUN_008e7dac">;
+    
+    FSeek(startof(this) + 0x30);
+} Mesh <bgcolor=cGreen, comment="Mapped at FUN_008e7dac">;

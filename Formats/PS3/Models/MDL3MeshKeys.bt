@@ -16,10 +16,12 @@
 typedef struct
 {
     int NameOffset <format=hex, fgcolor=cRed>;
-    int MeshID;
+    int MeshID <fgcolor=cYellow>;
     
     FSeek(NameOffset);
     string Name;
+    
+    FSeek(startof(this) + 0x08);
 } MeshKey <read=Str("%s (%d)", Name, MeshID)>;
 
 typedef struct
@@ -30,4 +32,4 @@ typedef struct
         FSeek(startof(ModelSetHeader) + ModelSetHeader.MeshKeysOffset + (i * 0x08));
         MeshKey MeshKey_;
     }
-} MeshKeys;
+} MeshKeys <bgcolor=cDkGreen>;

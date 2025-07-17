@@ -475,8 +475,8 @@ typedef struct
     byte Unk;
     ushort BoundsCount <fgcolor=cGreen>;
     int BoundsOffset <format=hex, fgcolor=cRed>;
-    int CommandsOffset <format=hex, fgcolor=cRed, comment="Unknown, mem breakpoint doesnt work, may be SPU related">;
-    int CommandsLength <format=hex, fgcolor=cPurple>;
+    int RenderCommandsOffset <format=hex, fgcolor=cRed, comment="Unknown, mem breakpoint doesnt work, may be SPU related">;
+    int RenderCommandsLength <format=hex, fgcolor=cPurple>;
 
     struct
     {
@@ -492,8 +492,8 @@ typedef struct
     FSeek(startof(ModelSetHeader) + BoundsOffset);
     //Vec3 Bounds[BoundsCount];
 
-    FSeek(startof(ModelSetHeader) + CommandsOffset);
-    Commands commands;
+    FSeek(startof(ModelSetHeader) + RenderCommandsOffset);
+    Commands RenderCommands <bgcolor=cBlack>;
 
     /* All of this is LE
       The payloads in PS3 are sent directly to SPUs
@@ -505,10 +505,11 @@ typedef struct
     
     SetEndian();
     local int currentEndpos = FTell();
-    local int endPos = startof(ModelSetHeader) + CommandsOffset + CommandsLength + 1;
+    local int endPos = startof(ModelSetHeader) + RenderCommandsOffset + RenderCommandsLength + 1;
     if (currentEndpos != endPos);
     {
         Printf("Payload parsed entirely %d = %d\n", currentEndpos, endPos);
-        return;
     }
-} Model <optimize=false>;
+    
+    FSeek(startof(this) + 0x30);
+} Model <bgcolor=cRed, optimize=false>;

@@ -22,7 +22,9 @@ typedef struct
 
     //Printf("%d\n", UnkID);
     FSeek(startof(ModelSetHeader) + NameOffset);
-    string Name;
+    string Name <bgcolor=cLtGray>;
+    
+    FSeek(startof(this) + 0x0C);
 } ShaderDefinition <read=Name>;
 
 typedef struct
@@ -167,7 +169,7 @@ typedef struct
     int unk;
     int unk;
 
-    FSeek(FileSize());
+    FSeek(startof(this) + 0x20);
 } Entry0x40 <comment="Referenced by 0x78's entries (entry->0x00 (short)) in model set">;
 
 typedef struct SHDS
@@ -200,21 +202,22 @@ typedef struct SHDS
     local int i = 0;
     if (ShaderSetHeader.ShaderDefinitionCount > 0)
     {
+        FSeek(startof(ModelSetHeader) + ShaderSetHeader.ShaderDefinitionsOffset_0x1C);
         struct
         {
             for (i = 0; i < ShaderSetHeader.ShaderDefinitionCount; i++) 
             {
                 FSeek(startof(ModelSetHeader) + ShaderSetHeader.ShaderDefinitionsOffset_0x1C + (i * 0x0C));
-                ShaderDefinition def;
+                ShaderDefinition ShaderDef;
             }
         } ShaderDefinitions;
     }
 
     if (ShaderSetHeader.ShaderProgramCount > 0)
     {
+        FSeek(startof(ModelSetHeader) + ShaderSetHeader.ShaderProgramsOffset_0x20);
         struct
         {
-            
             for (i = 0; i < ShaderSetHeader.ShaderProgramCount; i++) 
             {
                 FSeek(startof(ModelSetHeader) + ShaderSetHeader.ShaderProgramsOffset_0x20 + (i * 0x28));
@@ -225,6 +228,7 @@ typedef struct SHDS
 
     if (ShaderSetHeader.Count0x24_2c > 0)
     {
+        FSeek(startof(ModelSetHeader) + ShaderSetHeader.Offset0x2C);
         struct
         {
             
@@ -238,6 +242,7 @@ typedef struct SHDS
 
     if (ShaderSetHeader.Count0x3C > 0)
     {
+        FSeek(startof(ModelSetHeader) + ShaderSetHeader.Offset0x3C);
         struct
         {
             for (i = 0; i < ShaderSetHeader.Count0x3C; i++) 
@@ -253,13 +258,13 @@ typedef struct SHDS
 
     if (ShaderSetHeader.Count0x40 > 0)
     {
+        FSeek(startof(ModelSetHeader) + ShaderSetHeader.Offset0x40);
         struct
         {
-            
             for (i = 0; i < ShaderSetHeader.Count0x40; i++) 
             {
                 FSeek(startof(ModelSetHeader) + ShaderSetHeader.Offset0x40 + (i * 0x20));
-                Entry0x40 entry;
+                Entry0x40 Entry;
             }
         } Entries0x40;
     }

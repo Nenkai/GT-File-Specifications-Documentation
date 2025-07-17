@@ -20,8 +20,8 @@ typedef struct
     byte UnkIndex;
     
     FSeek(startof(ModelSetHeader) + FieldNameOffset);
-    string FieldName;
-} FVFElementDefinition <read=FieldName>;
+    string FieldName <bgcolor=cLtGray>;
+} FVFElementDefinition <bgcolor=cLtBlue, read=FieldName>;
 
 typedef struct
 {
@@ -31,7 +31,7 @@ typedef struct
     byte ArrayVertexSize;
     byte ArrayVertexDefaultSize <comment="Maybe?">;
     short pad;
-} FVFFieldArrayDefinition <bgcolor=cDkGreen>;
+} FVFFieldArrayDefinition <bgcolor=cDkBlue>;
 
 typedef struct
 {
@@ -61,7 +61,7 @@ typedef struct
     FVFFieldArrayDefinition ArrayDefinition;
 
     FSeek(startof(ModelSetHeader) + FVFNameOffset);
-    string FVFName <comment="Used directly to search in Shaders">;
+    string FVFName <bgcolor=cLtGray, comment="Used directly to search in Shaders">;
 
-
-} FlexibleVertexDefinition <read=FVFName>;
+    FSeek(startof(this) + 0x70);
+} FlexibleVertexDefinition <bgcolor=cBlue, read=FVFName>;

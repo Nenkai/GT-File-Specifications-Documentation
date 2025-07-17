@@ -11,229 +11,218 @@
 //   History: 
 //------------------------------------------------
 
-typedef struct
+BitfieldDisablePadding();
+
+void AlignToNextByte()
 {
-    int VertDataOffset <format=hex, fgcolor=cRed>;
-    int UnkOffset0x04 <format=hex, fgcolor=cRed>;
-    int UnkOffset0x08 <format=hex, fgcolor=cRed>;
-    int NonPackedVertDataOffset <format=hex, fgcolor=cRed>;
-    int UnkOffset0x10 <format=hex, fgcolor=cRed>;
-    int PackedFacesOffset <format=hex, fgcolor=cRed>;
-    int PackedFaceDescriptorsOffset <format=hex, fgcolor=cRed>;
-    int unk;
-    short unk;
-    short FlexVertCount;
-    short unk;
-    short NonPackedFlexVertCount;
-    short StrideCountOf0x10 <comment="0x10 each">;
-    short StrideCountOfPackedFaces <comment="0x10 each">;
-    short StrideCountOfPackedFaceDescriptor <comment="0x10 each">;
-    byte BitSizeForEachPackedFace;
-    byte Pad;
+    local int currentShift = BitfieldGetCurrentShift();
+    if (currentShift > 0)
+       FSeek(FTell());
+}
 
-    FSeek(startof(ModelSetHeader) + PackedFacesOffset);
-    byte PackedFaces[0x10 * StrideCountOfPackedFaces];
+int Align(int pos, int alignment) {
+    local int amount = (-pos % alignment + alignment) % alignment;
 
-    FSeek(startof(ModelSetHeader) + PackedFaceDescriptorsOffset);
-    
-    struct
-    {
-        int unk : 6;
-        if (unk == 18)
-        {
-            byte test : 6;
-            if (test == 4)
-            {
-                ulong off : 33;
-            }
-            else
-            {
-                ulong off : 16;
-            }
-
-            int type : 6;
-        }
-
-        int sectOffset : 11;
-        byte zoneCount : 4;
-        byte b : 4;
-    
-        local int aa = 0;
-        for (aa = 0; aa < zoneCount; aa++)
-        {
-            short remap : 16;
-            int BaseFaceOffsetMaybe : 10;
-        }
-    
-        int pad : 2;
-        int code : 9;
-    
-        if (code == 412)
-        {
-            int fDesc_i0 : 11;
-            int fDesc_inum : 12;
-            int unk : 8;
-            int fDesc_fin : 11;
-        }
-    } PackedFaceDescriptors;
-
-    FSeek(FileSize());
-
-} FlexData;
+    return pos + amount;
+}
 
 typedef struct
 {
-    short FlexDeclarationIndex;
-    short ElementBitLayoutDefinitionIndex;
-    short unk;
-    byte CountOfUnk;
-    byte unk;
-    int UnkOffset <format=hex, fgcolor=cRed>;
-    float unk;
-    int DataOffset <format=hex, fgcolor=cRed>; // combine with countofunk
-    int BBoxOffset <format=hex, fgcolor=cRed>;
-    float unk;
-    float unk;
-    short unk;
-    short unk;
-    short unk;
-    short unk;
-    short unk;
-    short unk;
-    int pad;
-    local int i = 0;
-    if (DataOffset != 0)
+    // This is a bit stream read by SPU.
+    
+    /* Debugging process (GT6 1.00 was used):
+    * Setup and compile RPCS3 with memory breakpoints enabled
+    * Setup RPCS3 & GT6 with fsroot (preferably)
+    * Setup WinDbg to use command line arguments, make sure the source paths to RPCS3 are also present
+       Set access violations as second chance, make sure Settings -> Debugging Settings -> Default Source Paths has the paths to RPCS3's source
+    * Find ModelSet3::map in eboot
+    * Interpreter PPU & SPU in RPCS3, start game, break on ModelSet3::map's address
+    * Start garage, breakpoint should hit. Search for modelset bytes using Memory Viewer in RPCS3, if not found Run, repeat till found in log
+	    NOTE: thread is ksF3, the last one with that name
+    * Once log shows a result, copy address
+    * In WinDbg, run command ba r<size> <x><address> - replace <size> with byte size like 4, <x> with 3 (normally) so that you have "ba r4 342C337A0" as example
+    * In RPCS3, remove breakpoint, and run.
+    
+    You should get a hit in WinDbg somewhere around spu_thread::do_dma_transfer
+    Copy the address of the dst register, set a break there, then run
+    You should land in an instruction. Make sure you use source level view; step out until you're out of the instruction, and try to get the LS and add SPU->PC to this
+    You should now have the address to the instruction that did the last instruction, try to match it in Ghidra/IDA against the Spu Job binaries
+    
+    PC of the WRCH that transfers the PackedInfoDescriptors: 0x783C (0x383C in SmoothMesh, GT6 1.00)
+    PC of the LQD+SHUFB that actually loads the first 8 bytes of the PackedInfoDescriptors: 0x76D8 (which is 0x36D8 in SmoothMesh, GT6 1.00)
+    
+    For GT6 1.00, the way I debugged this after I got the offset was:
+    - Set breakpoint to PDICellSpursKernel0 at 0x76D8 in the home menu, then go into the garage
+    - leave it a bit, wait for it to break
+    - once it break, you should be landing more or less in the relevant code
+    
+    After that you can also probably dump SPURS SPU modules from RPCS3 debug pane by hitting Alt+S.
+    NOTE: The first bitstream that will be loaded is character/mf07, FlexFormats[4]
+    
+    Open that in Ghidra with the SPU module, I used elad335's PR fork
+    https://github.com/elad335/GhidraSPU/tree/patch-2
+    
+    I will *try* to store the relevant elf file in a way that you can download it,
+    otherwise for the function itself, it may need fixing, there's a big switch table which I used FindPs3JumpableTargets.py & SwitchOverride.java scripts to fix
+    the module stores the current stream BIT offset (not byte) at sp + 0x90
+    You can use RPCS3's memory viewer, and use that value, divide it by 8 (size of one byte), and add it to 0xE8000000.
+    (0xE8000000 is the local storage offset for the current spu thread. You can see it above the register list in RPCS3.)
+    
+    Also Ghidra likes to try and open each switch block as their own function but that's wrong, make sure you are decompiling FUN_000071E8
+    */
+
+    typedef enum
     {
-        for (i = 0; i < CountOfUnk; i++)
-        {
-            FSeek(startof(ModelSetHeader) + DataOffset + (i * 0x30));
-            FlexData Data;
-        }
-    }
-} FlexInfoAndData;
-
-typedef struct
-{
-    int TotalBitCount;
-    ubyte XBitCount;
-    ubyte YBitCount;
-    ubyte ZBitCount;
-    ubyte WBitCount;
-    ubyte XBitEnd;
-    ubyte YBitEnd;
-    ubyte ZBitEnd;
-    ubyte WBitEnd;
-    short unk;
-    short unk;
-    float ScaleX;
-    float ScaleY;
-    float ScaleZ;
-    float ScaleW;
-    float OffsetX;
-    float OffsetY;
-    float OffsetZ;
-    float OffsetW;
-} ElementBitLayoutDefinition;
-
-typedef struct
-{
-    byte NameID;
-    byte FlexOffset;
-    byte ElementCount;
-    CELL_GCM_VERTEX_TYPE Type;
-} FlexElementDef;
-
-typedef struct
-{
-    byte ElementCount;
-    byte ElementCount2;
-    byte Unk;
-    byte Stride;
-    int unk;
-    int ElementDefsOffset;
-    int ElementNamesArrayOffset <format=hex, fgcolor=cRed>;
-
-    FSeek(startof(ModelSetHeader) + ElementDefsOffset);
-    FlexElementDef elementDefs1[ElementCount];
-    FlexElementDef elementDefs2[ElementCount2];
-
-    FSeek(startof(ModelSetHeader) + ElementNamesArrayOffset);
-    struct
-    {
-        int NamesOffsets[ElementCount + ElementCount2] <format=hex, fgcolor=cRed>;
+        SmoothMesh_End = 0,
+        SmoothMesh_PushLayout = 7,
+    } SmoothMeshOpcode;
     
-        for (j = 0; j < ElementCount + ElementCount2; j++)
-        {
-            FSeek(startof(ModelSetHeader) + NamesOffsets[j]);
-            String Name;
-        }
-    } ElementNames;
-
-    FSeek(FileSize());
-} FlexStructDeclaration;
-
-typedef struct
-{
-    struct
-    {
-        char Magic[4];
-        uint Version <format=hex>;
-        int RelocSize <format=hex>;
-        int RelocPtr;
-        ushort FormatCount_0x18 <fgcolor=cGreen>;
-        ushort UnkCount_0x1C <fgcolor=cGreen>;
-        ushort ElementBitLayoutDefinitionArrayCount_0x20 <fgcolor=cGreen>;
-        ushort StructDeclarationCount_0x24 <fgcolor=cGreen>;
-        int FormatsOffset_0x18 <format=hex, fgcolor=cRed>;
-        int UnkOffset_0x1C <format=hex, fgcolor=cRed>;
-        int ElementBitLayoutDefinitionArraysOffset_0x20 <format=hex, fgcolor=cRed>;
-        int StructDeclarationsOffset_0x24 <format=hex, fgcolor=cRed>;
-        int UnkOffset_0x28;
-        int Unk;
-        int UnkOffset_0x30 <format=hex, fgcolor=cRed>;
-    } PackedMeshHeader;
     
-    local int i = 0;
-    local int j = 0;
-    struct
-    {
-        for (i = 0; i < PackedMeshHeader.FormatCount_0x18; i++)
-        {
-            FSeek(startof(ModelSetHeader) + PackedMeshHeader.FormatsOffset_0x18 + (i * 0x30));
-            FlexInfoAndData FlexFormats;
-        }
-    } FlexInfos;
+    local int currentLayoutIndex = 1; // Accurate to SPU code
+    local int layoutIndices[2];
+    local int lastIndex = 0;
     
-    struct
-    {
-        
-        for (i = 0; i < PackedMeshHeader.ElementBitLayoutDefinitionArrayCount_0x20; i++)
-        {
-            FSeek(startof(ModelSetHeader) + PackedMeshHeader.ElementBitLayoutDefinitionArraysOffset_0x20 + (i * 0x08));
-            struct
-            {
-                int Length;
-                int EntriesOffset <format=hex, fgcolor=cRed>;
-    
-                FSeek(startof(ModelSetHeader) + EntriesOffset + (j * 0x10));
-                ElementBitLayoutDefinition ElemBitLayoutDef[Length];
-    
-            } ElementBitLayoutDefinitionArray;
-        }
-    
-        FSeek(FileSize());
-    } ElementBitLayoutDefinitions;
-    
-    if (PackedMeshHeader.StructDeclarationCount_0x24)
+    local int stop = false;
+    local int k = 0;
+    while (!stop)
     {
         struct
         {
-            for (i = 0; i < PackedMeshHeader.StructDeclarationCount_0x24; i++)
+            SmoothMeshOpcode DataType : 5; // Confirmed
+            switch (DataType)
             {
-                FSeek(startof(ModelSetHeader) + PackedMeshHeader.StructDeclarationsOffset_0x24 + (i * 0x10));
-                FlexStructDeclaration FlexStructDeclaration_;
+                case SmoothMesh_End: // Likely parsed successfully
+                    stop = true;
+                    break;
+                    
+                case 1: // OK!
+                    int type1_a : 12;
+                    break;
+                    
+                case 5: // OK!
+                    int unk : 12;
+                    int FaceGroupCount : 4;
+                    int unk : 4;
+                    
+                    local int k = 0;
+                    for (k = 0; k < FaceGroupCount; k++)
+                    {
+                        // Bit size for these may be defined somewhere else?
+                        // TODO: Find out if the bit size for these is actually dynamic
+                        struct
+                        {
+                            int IndexStart : 16;
+                            int NumIndices : 10;
+                        } FaceGroup;
+                    }
+                    break;
+                    
+                case 6: // OK!
+                    break;
+                    
+                case SmoothMesh_PushLayout: // 7 - OK!
+                    // This opcode essentially loads a bit layout (?) from UnkData[]
+                    // Which is then used by opcode 22 (at least)
+                    int UnkDataIndex : 12;
+                    layoutIndices[lastIndex++] = UnkDataIndex;
+                    
+                    // TODO: investigate what happens when there's already two?
+                    if (lastIndex >= 1)
+                        lastIndex = 1;
+                    break;
+                    
+                case 14: // OK!
+                    int type14_a : 12;
+                    int type14_b : 12;
+                    break;
+                    
+                case 15: // OK!
+                    // 62 bits + data
+                    uint64 unk : 27;
+                    int unk : 5;
+                    int unk : 17 <format=hex>;
+            
+                    // 46 Confirmed offset, size unknown
+                    ubyte DataBitSize : 8 <format=hex>;
+                    
+                    struct
+                    {
+                        local int k = 0;
+                        for (k = 0; k < DataBitSize; k++)
+                            int bit : 1;
+                    } UnkBits;
+                    break;
+                    
+                case 17: // OK!
+                    int type17_a : 2;
+                    break;
+                    
+                case 21: // OK!
+                    int type21_numEntries : 6;
+                    int type21_b : 1;
+                    int type21_c : 1;
+                    AlignToNextByte(); // Intended
+                    
+                    struct
+                    {
+                        // This is correct, 320 bits per entry
+                        byte bits[320 / 8];
+                    } Entry[type21_numEntries + 1]; // This is correct, there's always an extra
+                    break;
+                    
+                case 22: // OK! But side note, investigate how opcode 7 works..
+                    int IsSwitchLayout : 1;
+                    int EntryNum : 8;
+                    
+                    // The switch happens before the data. Accurate to SPU code
+                    if (IsSwitchLayout)
+                        currentLayoutIndex = !currentLayoutIndex;
+
+                    // spu debugging: mf07 - FlexFormats[4] - Opcode_[8] = 0x1e0 * 0x19?
+                    // spu debugging: mf07 - FlexFormats[4] - Opcode_[15] = 0x140 * 0x1c (0x8c0)?
+                    
+                    // (0xC * 4) * 0xA = 0x1E0 - is 0xA packed face bit size? yes it is
+                    // (0x8 * 4) * 0xA = 0x140
+                    
+                    // 0x0C/0x08 comes from UnkOffset_0x1C from the main header
+                    // 0x0C is UnkData[0] byte at 0x01
+                    // 0x08 is UnkData[3] byte at 0x01
+                    
+                    // the UnkData selected depends on opcode 7, at least the ones that are pushed for use
+                    local int countFromLayout = UnkData0x1C.Unk[layoutIndices[currentLayoutIndex]].unk2;
+                    local int mainEntryNum = Align(EntryNum, 4) / 4;
+
+                    local int l = 0;
+                    struct
+                    {
+                        // Not sure if it's really supposed to be grouped by 4, but the game does multiply by 4 so idk.
+                        struct
+                        {
+                            local int k = 0;
+                            for (l = 0; l < countFromLayout * 4; l++)
+                                int FaceIndex : PackedFaceIndexBitSize <optimize=false>;
+                        } IndexGroup;
+                    } MainEntries[mainEntryNum] <optimize=false>;
+                    break;
+                    
+                case 23: // OK for mf07
+                    int NumEntries : 6;
+                    
+                    // spu debugging: mf07 - FlexFormats[4] - Opcode_[7] = 0x10 * 0x19?
+                    // todo: find out where 1e0 and 0x19 comes from
+                    struct
+                    {
+                        int bits : 16;
+                    } Entries[NumEntries + 1] <optimize=false>;
+                    break;
+                    
+                default:
+                    Printf("Unsupported SmoothMesh opcode %d, bailing\n", DataType);
+                    stop = true;
+                    break;
+                    
             }
-        } FlexStructDeclarations;
+        } Opcode_ <optimize=false, read=Str("Type %s", (EnumToString(DataType) == "" ? Str("%d", DataType) : EnumToString(DataType)))>;
+            
     }
-    
-} PMSH <comment="Replaces FVF stuff">;
+} PackedFaceDescriptors;

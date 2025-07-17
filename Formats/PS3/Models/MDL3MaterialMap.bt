@@ -15,6 +15,11 @@
 
 BitfieldDisablePadding();
 
+#define	CELL_GCM_NV4097_SET_SURFACE_CLIP_VERTICAL	(0x00000204)
+#define	CELL_GCM_NV4097_SET_ALPHA_TEST_ENABLE	(0x00000304)
+#define	CELL_GCM_NV4097_SET_DEPTH_FUNC	(0x00000a6c)
+#define	CELL_GCM_NV4097_SET_CULL_FACE_ENABLE	(0x0000183c)
+
 typedef enum <uint>
 {
     // SetBlendFunc
@@ -87,11 +92,95 @@ typedef enum <uint>
 
 typedef struct
 {
+    struct
+    {
+        CELL_GCM_METHOD method;
+        int enable;
+    } CELL_GCM_METHOD_SET_ALPHA_TEST_ENABLE;
+
+    CELL_GCM_ENUM AlphaFunc;
+    int AlphaFuncReference <format=hex>;
+
+    CELL_GCM_ENUM BlendEnable;
+    CELL_GCM_ENUM BlendFuncSfColor : 16;
+    CELL_GCM_ENUM BlendFuncDfColor : 16;
+    CELL_GCM_ENUM BlendFuncSfAlpha : 16;
+    CELL_GCM_ENUM BlendFuncDfAlpha : 16;
+    int BlendColor <format=hex>;
+    CELL_GCM_ENUM BlendEquationColor : 16;
+    CELL_GCM_ENUM BlendEquationAlpha : 16;
+
+    struct
+    {
+        byte CELL_GCM_COLOR_MASK_A;
+        byte CELL_GCM_COLOR_MASK_R;
+        byte CELL_GCM_COLOR_MASK_G;
+        byte CELL_GCM_COLOR_MASK_B;
+    } ColorMask;
+
+    int StencilTest;
+    int StencilMask;
+    CELL_GCM_ENUM StencilFunc;
+    CELL_GCM_ENUM StencilFuncRef;
+    CELL_GCM_ENUM StencilFuncMask;
+    CELL_GCM_ENUM StencilOpFail;
+    CELL_GCM_ENUM StencilOpZFail;
+    CELL_GCM_ENUM StencilOpZPass;
+
+    int TwoSidedStencilTestEnable;
+    int BackStencilMask;
+    CELL_GCM_ENUM BackStencilFunc;
+    int BackStencilFuncRef;
+    int BackStencilFuncMask;
+    CELL_GCM_ENUM BackStencilOpFail;
+    CELL_GCM_ENUM BackStencilOpZFail;
+    CELL_GCM_ENUM BackStencilOpZPass;
+
+    CELL_GCM_ENUM ShadeMode; // SetShadeMode
+
+    int BlendEnableMRT;
+    int ColorMaskMRT; // SetColorMaskMrt
+
+    CELL_GCM_ENUM LogicOpEnable;
+    CELL_GCM_ENUM LogicOp;
+
+    struct
+    {
+        CELL_GCM_METHOD method;
+        CELL_GCM_ENUM depth_func;
+    } CELL_GCM_METHOD_SET_DEPTH_FUNC;
+    
+    CELL_GCM_ENUM DepthMask;
+    CELL_GCM_ENUM DepthTestEnable;
+
+    struct
+    {
+        CELL_GCM_METHOD method;
+        int enable;
+    } CELL_GCM_METHOD_SET_CULL_FACE_ENABLE;
+
+    int unk;
+
+    byte unk : 4;
+    byte unk2 : 4;
+
+    byte unk;
+    short unk;
+
+    int unk;
+    
+    FSeek(startof(this) + 0xA0);
+} CellGcmParam <optimize=false, comment="cell\gcm\gcm_macros.h">;
+
+typedef struct
+{
     int StringOffset <fgcolor=cRed, format=hex>;
     int TextureIndex <fgcolor=cYellow>;
     
     FSeek(startof(ModelSetHeader) + StringOffset);
     string Name;
+    
+    FSeek(startof(this) + 0x08);
 } TextureKey <read=Str("%s (%d)", Name, TextureIndex)>;
 
 typedef struct
@@ -117,6 +206,8 @@ typedef struct
         FSeek(NameOffset);
         string Name;
     }
+    
+    FSeek(startof(this) + 0x34);
 } MaterialDefinition <read=Str("%s (Data ID: %d)", Name, MaterialDataID)>;
 
 typedef struct
@@ -125,6 +216,8 @@ typedef struct
     int UnkIndex <fgcolor=cYellow, comment="0 to 1?">;
     FSeek(startof(ModelSetHeader) + StringOffset);
     string Name;
+    
+    FSeek(startof(this) + 0x08);
 } Material2Name <read=Str("%s (%d)", Name, UnkIndex)>;
 
 typedef struct
@@ -138,9 +231,12 @@ typedef struct
     int UnkOffset <format=hex, fgcolor=cRed, bgcolor=cLtGray>;
     int KeyCount <bgcolor=cLtGray>;
     int KeyOffset <format=hex, fgcolor=cRed, bgcolor=cLtGray>;
-
+    byte padMaybe[8] <bgcolor=cLtGray>;
+    
     FSeek(startof(ModelSetHeader) + ShaderEntrySearchNameOffset);
     string ShaderRefName;
+    
+    FSeek(startof(this) + 0x28);
 } MaterialData0x14;
 
 typedef struct
@@ -247,6 +343,8 @@ typedef struct
         FSeek(startof(ModelSetHeader) + UnkOffset0x0C);
         float unkFloats0x0C[8] <fgcolor=cLtBlue>;
     }
+    
+    FSeek(startof(this) + 0x28);
 } MaterialData <read=Str("%s (%d)", Name, SetIndex)>;
 
 
@@ -290,109 +388,33 @@ typedef struct
         } MaterialDataEntries;
     }
 
-    cPos = FTell();
-
-    FSeek(startof(ModelSetHeader) + CellGcmParamsOffset_0x10);
-
-#define	CELL_GCM_NV4097_SET_SURFACE_CLIP_VERTICAL	(0x00000204)
-#define	CELL_GCM_NV4097_SET_ALPHA_TEST_ENABLE	(0x00000304)
-#define	CELL_GCM_NV4097_SET_DEPTH_FUNC	(0x00000a6c)
-#define	CELL_GCM_NV4097_SET_CULL_FACE_ENABLE	(0x0000183c)
-
     if (CellGcmParamCount_0x10 > 0)
     {
+        FSeek(startof(ModelSetHeader) + CellGcmParamsOffset_0x10);
         struct
         {
-            struct
+            local int k = 0;
+            for (k = 0; k < CellGcmParamCount_0x10; k++)
             {
-                CELL_GCM_METHOD method;
-                int enable;
-            } CELL_GCM_METHOD_SET_ALPHA_TEST_ENABLE;
-    
-            CELL_GCM_ENUM AlphaFunc;
-            int AlphaFuncReference <format=hex>;
-    
-            CELL_GCM_ENUM BlendEnable;
-            CELL_GCM_ENUM BlendFuncSfColor : 16;
-            CELL_GCM_ENUM BlendFuncDfColor : 16;
-            CELL_GCM_ENUM BlendFuncSfAlpha : 16;
-            CELL_GCM_ENUM BlendFuncDfAlpha : 16;
-            int BlendColor <format=hex>;
-            CELL_GCM_ENUM BlendEquationColor : 16;
-            CELL_GCM_ENUM BlendEquationAlpha : 16;
-    
-            struct
-            {
-                byte CELL_GCM_COLOR_MASK_A;
-                byte CELL_GCM_COLOR_MASK_R;
-                byte CELL_GCM_COLOR_MASK_G;
-                byte CELL_GCM_COLOR_MASK_B;
-            } ColorMask;
-        
-            int StencilTest;
-            int StencilMask;
-            CELL_GCM_ENUM StencilFunc;
-            CELL_GCM_ENUM StencilFuncRef;
-            CELL_GCM_ENUM StencilFuncMask;
-            CELL_GCM_ENUM StencilOpFail;
-            CELL_GCM_ENUM StencilOpZFail;
-            CELL_GCM_ENUM StencilOpZPass;
-    
-            int TwoSidedStencilTestEnable;
-            int BackStencilMask;
-            CELL_GCM_ENUM BackStencilFunc;
-            int BackStencilFuncRef;
-            int BackStencilFuncMask;
-            CELL_GCM_ENUM BackStencilOpFail;
-            CELL_GCM_ENUM BackStencilOpZFail;
-            CELL_GCM_ENUM BackStencilOpZPass;
-    
-            CELL_GCM_ENUM ShadeMode; // SetShadeMode
-    
-            int BlendEnableMRT;
-            int ColorMaskMRT; // SetColorMaskMrt
-    
-            CELL_GCM_ENUM LogicOpEnable;
-            CELL_GCM_ENUM LogicOp;
-    
-            struct
-            {
-                CELL_GCM_METHOD method;
-                CELL_GCM_ENUM depth_func;
-            } CELL_GCM_METHOD_SET_DEPTH_FUNC;
-            
-            CELL_GCM_ENUM DepthMask;
-            CELL_GCM_ENUM DepthTestEnable;
-    
-            struct
-            {
-                CELL_GCM_METHOD method;
-                int enable;
-            } CELL_GCM_METHOD_SET_CULL_FACE_ENABLE;
-    
-            int unk;
-        
-            byte unk : 4;
-            byte unk2 : 4;
-    
-            byte unk;
-            short unk;
-    
-            int unk;
-        } CellGcmParams[CellGcmParamCount_0x10] <optimize=false, comment="Order is heavily inspired from cell\gcm\gcm_macros.h">;
+                FSeek(startof(ModelSetHeader) + CellGcmParamsOffset_0x10 + (k * 0xA0));
+                CellGcmParam GcmParam <optimize=false, comment="cell\gcm\gcm_macros.h">;
+            }
+        } CellGcmParams;
     }
-
-    FSeek(FileSize());
 
     if (TextureParameterCount > 0)
     {
+        FSeek(startof(ModelSetHeader) + TextureParameterCount);
         struct
         {
-            FSeek(startof(ModelSetHeader) + TextureParameterMapOffset);
-            PGLUTextureInfo TextureParameter[TextureParameterCount];
-    
-            FSeek(FileSize());
-        } TextureParameters <comment="May have more entries than images, but image ids will fit the TXS count and will have different parameters such as Aniso">;
+            local int k = 0;
+            for (k = 0; k < TextureParameterCount; k++)
+            {
+                FSeek(startof(ModelSetHeader) + TextureParameterCount + (k * 0xA0));
+                PGLUTextureInfo TextureParameter;
+            }
+        } TextureParameters  <comment="May have more entries than images, but image ids will fit the TXS count and will have different parameters such as Aniso">;
     }
 
+    FSeek(startof(this) + 0x1C);
  } MaterialMap;

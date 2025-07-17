@@ -53,9 +53,255 @@ typedef struct
 #include "MDL3VM.bt"
 #include "MDL3ShapeStreaming.bt"
 #include "MDL3SeparateCarData.bt"
-
 #include "PackedMesh.bt"
+
 #include "../../Shared/ModelVM.bt"
+        
+typedef struct
+{
+    // All of this is largely handled by the SPU jobs
+    // Don't expect PPU reads on these
+    int PackedVertexDataOffset <format=hex, fgcolor=cRed>;
+    int UnkOffset0x04 <format=hex, fgcolor=cRed>;
+    int UnkOffset0x08 <format=hex, fgcolor=cRed>;
+    int NonPackedVertDataOffset <format=hex, fgcolor=cRed>;
+    int UnkOffset0x10 <format=hex, fgcolor=cRed>;
+    int PackedFacesOffset <format=hex, fgcolor=cRed>;
+    int PackedFaceDescriptorsOffset <format=hex, fgcolor=cRed>;
+    int unk;
+    short unk;
+    short FlexVertCount;
+    short unk;
+    short NonPackedFlexVertCount;
+    short StrideCountOf0x10 <comment="0x10 each">;
+    short PackedFacesQuadwordSize <comment="0x10 each">;
+    short PackedFaceDescriptorQuadwordSize <format=hex, comment="0x10 each">;
+    byte PackedFaceIndexBitSize;
+    byte Pad;
+
+    FSeek(startof(ModelSetHeader) + PackedFacesOffset);
+    union
+    {
+        byte PackedFaceBytes[0x10 * PackedFacesQuadwordSize];
+        struct
+        {
+            local int j = 0;
+            local int estimatedFaceCount = ((PackedFacesQuadwordSize * 0x10) * 8) // num quadwords * bits per byte
+                                                / PackedFaceIndexBitSize;
+                
+            // TODO: Find out the number of actual faces
+            for (j = 0; j < estimatedFaceCount; j++)
+                int faceIdx : PackedFaceIndexBitSize;
+        } FaceIndices;
+    } PackedFacesUnion <comment="Face Indices", bgcolor=cYellow>;
+
+    FSeek(startof(ModelSetHeader) + PackedFaceDescriptorsOffset);
+    union
+    {
+        // GT61.00 -> mf07 -> FlexFormat[4] 
+        // - 0xC360 to 0xC381
+        // - 0xC381 to 0xC384
+        // - 0xC384 to 0xC38A
+        
+        byte PackedFaceDescriptorBytes[0x10 * PackedFaceDescriptorQuadwordSize];
+        PackedFaceDescriptors FaceDescriptors;
+    } PackedFacesDescriptorUnion <bgcolor=cDkYellow>;
+
+    FSeek(startof(this) + 0x30);
+} SmoothMeshData;
+
+typedef struct
+{
+    short FlexDeclarationIndex;
+    short ElementBitLayoutDefinitionIndex;
+    short unk;
+    byte SmoothMeshParamCount;
+    byte unk;
+    int UnkOffset <format=hex, fgcolor=cRed>;
+    float unk;
+    int DataOffset <format=hex, fgcolor=cRed>; // combine with countofunk
+    int BBoxOffset <format=hex, fgcolor=cRed>;
+    float unk;
+    float unk;
+    short unk;
+    short unk;
+    short unk;
+    short unk;
+    short unk;
+    short unk;
+    int pad;
+    
+    local int i = 0;
+    if (DataOffset != 0)
+    {
+        for (i = 0; i < SmoothMeshParamCount; i++)
+        {
+            FSeek(startof(ModelSetHeader) + DataOffset + (i * 0x30));
+            SmoothMeshData SmoothMeshSPUData;
+        }
+    }
+    
+    FSeek(startof(ModelSetHeader) + BBoxOffset);
+    Vec3 BBox[8] <bgcolor=cBlue>;
+    
+    FSeek(startof(this) + 0x30);
+} FlexInfoAndData;
+
+typedef struct
+{
+    int TotalBitCount;
+    ubyte XBitCount;
+    ubyte YBitCount;
+    ubyte ZBitCount;
+    ubyte WBitCount;
+    ubyte XBitEnd;
+    ubyte YBitEnd;
+    ubyte ZBitEnd;
+    ubyte WBitEnd;
+    short unk;
+    short unk;
+    float ScaleX;
+    float ScaleY;
+    float ScaleZ;
+    float ScaleW;
+    float OffsetX;
+    float OffsetY;
+    float OffsetZ;
+    float OffsetW;
+} ElementBitLayoutDefinition;
+
+typedef struct
+{
+    byte NameID;
+    byte FlexOffset;
+    byte ElementCount;
+    CELL_GCM_VERTEX_TYPE Type;
+} FlexElementDef;
+
+typedef struct
+{
+    byte ElementCount;
+    byte ElementCount2;
+    byte Unk;
+    byte Stride;
+    int unk;
+    int ElementDefsOffset;
+    int ElementNamesArrayOffset <format=hex, fgcolor=cRed>;
+
+    FSeek(startof(ModelSetHeader) + ElementDefsOffset);
+    FlexElementDef elementDefs1[ElementCount];
+    
+    if (ElementCount2)
+        FlexElementDef elementDefs2[ElementCount2];
+
+    FSeek(startof(ModelSetHeader) + ElementNamesArrayOffset);
+    struct
+    {
+        int NamesOffsets[ElementCount + ElementCount2] <format=hex, fgcolor=cRed>;
+    
+        local int j = 0;
+        for (j = 0; j < ElementCount + ElementCount2; j++)
+        {
+            FSeek(startof(ModelSetHeader) + NamesOffsets[j]);
+            String Name;
+        }
+    } ElementNames;
+
+    FSeek(FileSize());
+} FlexStructDeclaration;
+
+typedef struct
+{
+    struct
+    {
+        char Magic[4];
+        uint Version <format=hex>;
+        int RelocSize <format=hex>;
+        int RelocPtr;
+        ushort FormatCount_0x18 <fgcolor=cGreen>;
+        ushort UnkCount_0x1C <fgcolor=cGreen>;
+        ushort ElementBitLayoutDefinitionArrayCount_0x20 <fgcolor=cGreen>;
+        ushort StructDeclarationCount_0x24 <fgcolor=cGreen>;
+        int FormatsOffset_0x18 <format=hex, fgcolor=cRed>;
+        int UnkOffset_0x1C <format=hex, fgcolor=cRed>;
+        int ElementBitLayoutDefinitionArraysOffset_0x20 <format=hex, fgcolor=cRed>;
+        int StructDeclarationsOffset_0x24 <format=hex, fgcolor=cRed>;
+        int UnkOffset_0x28;
+        int Unk;
+        int UnkOffset_0x30 <format=hex, fgcolor=cRed>;
+
+    } PackedMeshHeader <bgcolor=cPurple>;
+    
+    local int i = 0;
+    
+    // We need this first. Formats require it
+    if (PackedMeshHeader.UnkCount_0x1C)
+    {
+        FSeek(startof(ModelSetHeader) + PackedMeshHeader.UnkOffset_0x1C);
+        struct
+        {
+            for (i = 0; i < PackedMeshHeader.UnkCount_0x1C; i++)
+            {
+                FSeek(startof(ModelSetHeader) + PackedMeshHeader.UnkOffset_0x1C + (i * 0x08));
+                struct
+                {
+                    ubyte unk;
+                    ubyte unk2;
+                    ushort TotalDataSize <format=hex>;
+                    uint DataOffset <fgcolor=cRed, format=hex>;
+                } Unk <bgcolor=cBlack>;
+            }
+        } UnkData0x1C;
+    }
+    
+    if (PackedMeshHeader.FormatCount_0x18)
+    {
+        FSeek(startof(ModelSetHeader) + PackedMeshHeader.FormatsOffset_0x18);
+        struct
+        {
+            for (i = 0; i < PackedMeshHeader.FormatCount_0x18; i++)
+            {
+                FSeek(startof(ModelSetHeader) + PackedMeshHeader.FormatsOffset_0x18 + (i * 0x30));
+                FlexInfoAndData FlexFormats;
+            }
+        } FlexInfos;
+    }
+
+    if (PackedMeshHeader.ElementBitLayoutDefinitionArrayCount_0x20)
+    {
+        FSeek(startof(ModelSetHeader) + PackedMeshHeader.ElementBitLayoutDefinitionArraysOffset_0x20);
+        struct
+        {
+            for (i = 0; i < PackedMeshHeader.ElementBitLayoutDefinitionArrayCount_0x20; i++)
+            {
+                FSeek(startof(ModelSetHeader) + PackedMeshHeader.ElementBitLayoutDefinitionArraysOffset_0x20 + (i * 0x08));
+                struct
+                {
+                    int Length;
+                    int EntriesOffset <format=hex, fgcolor=cRed>;
+        
+                    FSeek(startof(ModelSetHeader) + EntriesOffset + (i * 0x10));
+                    ElementBitLayoutDefinition ElemBitLayoutDef[Length];
+        
+                } ElementBitLayoutDefinitionArray;
+            }
+        } ElementBitLayoutDefinitions;
+    }
+    
+    if (PackedMeshHeader.StructDeclarationCount_0x24)
+    {
+        FSeek(startof(ModelSetHeader) + PackedMeshHeader.StructDeclarationsOffset_0x24);
+        struct
+        {
+            for (i = 0; i < PackedMeshHeader.StructDeclarationCount_0x24; i++)
+            {
+                FSeek(startof(ModelSetHeader) + PackedMeshHeader.StructDeclarationsOffset_0x24 + (i * 0x10));
+                FlexStructDeclaration FlexStructDeclaration_;
+            }
+        } FlexStructDeclarations;
+    }
+    
+} PMSH <comment="Replaces FVF stuff">;
 
 typedef struct
 {
@@ -90,82 +336,86 @@ struct MDL3
     {
         char Magic[4];
         SetEndian();
-
+        
         uint RelocFileSize <format=hex>;
         uint RelocPtr <format=hex>;
         short VersionMajor;
         short RuntimeFlags <comment="Set at runtime, ignore">;
-
-       ushort ModelCount <fgcolor=cGreen>;
-       ushort ModelKeyCount <fgcolor=cGreen>;
-       ushort MeshCount <fgcolor=cGreen>;
-       ushort MeshKeyCount <fgcolor=cGreen>;
-       ushort FlexibleVertexDefinitionCount <fgcolor=cGreen>;
-       ushort BonesCount <fgcolor=cGreen>;
-       ushort SizeFor0x68;
-       ushort HostMethodCount <fgcolor=cGreen>;
-       ushort VMStackSizeMaybe <comment="this * 4">;
-       ushort Count0x5C <fgcolor=cGreen>;
-       ushort Unk;
-       ushort Count0x78 <fgcolor=cGreen>;
-       ushort Count0xA4 <fgcolor=cGreen>;
-       ushort Count0x54 <fgcolor=cGreen, comment="Can be safely wiped? No changes (c053x GT6)">;
-       ushort Count0x88 <fgcolor=cGreen>;
-       ushort Unk;
-       uint ModelsOffset <format=hex, fgcolor=cRed, comment="0x30 Stride">; // Figured (except a short value)
-       uint ModelKeysOffset <format=hex, fgcolor=cRed, comment="0x08 Stride">; // Figured
-       uint MeshesOffset <format=hex, fgcolor=cRed, comment="0x30 Stride">;
-       uint MeshKeysOffset <format=hex, fgcolor=cRed, comment="0x08 Stride">;
-       uint FlexibleVertexDefinitionsOffset <format=hex, fgcolor=cRed, comment="0x78 Stride">;
-       uint MaterialsOffset <format=hex, fgcolor=cRed, comment="Always 1 entry, 0x18 Stride">;
-       uint TextureSetOffset <format=hex, fgcolor=cRed, comment="Alone">;
-       uint ShadersOffset <format=hex, fgcolor=cRed, comment="Own component">;
-       uint BonesOffset <format=hex, fgcolor=cRed, comment="0x48 Stride">;
-       uint UnkKeyMap0x54 <format=hex, fgcolor=cRed, comment="0x4 Stride">;
-       uint HostMethodsOffset <format=hex, fgcolor=cRed, comment="0x8 Stride">;
-       uint Offset0x5C <format=hex, fgcolor=cRed, comment="0x8 Stride">;
-       uint VMCommandsOpcodesLength <format=hex, fgcolor=cGreen>;
-       uint VMCommandsOffset <format=hex, fgcolor=cRed, comment="Possibly own thing, opcodes for animations">;
-       uint VMInstanceOffset <format=hex, fgcolor=cRed, comment="Possibly own thing">;
-       uint RelocSize <format=hex>;
-       uint PossiblyEmpty;
-       uint RuntimeValue <comment="Set to 0 after mapping">;
-       uint Offset0x78 <format=hex, fgcolor=cRed, comment="0x14 Stride">;
-       uint PossiblyEmpty;
-       uint PossiblyEmpty;
-       ushort UnkIndex <comment="Set to -1 at runtime if Version > 4">;
-       ushort UnkIndex <comment="Set to -1 at runtime if Version > 4">;
-       uint Offset0x88 <format=hex, fgcolor=cRed, comment="0x28 Stride, points to a map already discovered in materials">;
-       short Unk0x8C;
-       ushort TextureKeyCount <fgcolor=cGreen>;
-       uint TextureKeysOffset <format=hex, fgcolor=cRed, comment="0x8 Stride">;
-       uint PossiblyEmpty;
-       ushort WingDataCount <comment="If VersionMajor < 7">;
-       ushort WingKeyCount;
-       uint WingDataOffset <format=hex, fgcolor=cRed, comment="If VersionMajor < 7, 0x80 Stride">;
-       uint WingKeysOffset <format=hex, fgcolor=cRed, comment="0x8 Stride">;
-       uint Offset0xA4 <format=hex, fgcolor=cRed, comment="0x4 Stride">;
-       uint PossiblyEmpty;
-       uint ShapeStreamingMapOffset <format=hex, fgcolor=cRed, comment="If VersionMajor > 1, always 1 entry, Stride 0x20">;
-       uint Offset0xB0 <format=hex, fgcolor=cRed, comment="If VersionMajor > 1, Stride 0x40">;
-       uint Unk <comment="Needs checking">;
-       uint Offset0xB8 <format=hex, fgcolor=cRed, comment="If VersionMajor > 2, Own thing">;
-       uint VMContextOffset <format=hex, fgcolor=cRed, comment="If VersionMajor > 5, always 1 entry, Stride 0x20">;
-       uint Offset0xC0 <format=hex, fgcolor=cRed, comment="If VersionMajor > 5, always 1 entry, Stride 0x20">;
-       ushort Count0xC0 <fgcolor=cGreen, comment="If VersionMajor > 5">;
-       ushort PossiblyEmpty;
-       short Unk;
-       ushort PackedMeshKeyCount <fgcolor=cGreen, comment="If VersionMajor > 8">;
-       uint PackedMeshKeysOffset <format=hex, fgcolor=cRed, comment="If VersionMajor > 8">;
-       uint PackedMeshHeaderOffset <format=hex, fgcolor=cRed, comment="Own Thing, If VersionMajor > 8">;
-       int unk;
-       int empty;
-       uint CarBodyStreamOffset <format=hex, fgcolor=cRed, comment="Own Thing, If VersionMajor > 13">;
+        
+        ushort ModelCount <fgcolor=cGreen>;
+        ushort ModelKeyCount <fgcolor=cGreen>;
+        ushort MeshCount <fgcolor=cGreen>;
+        ushort MeshKeyCount <fgcolor=cGreen>;
+        ushort FlexibleVertexDefinitionCount <fgcolor=cGreen>;
+        ushort BonesCount <fgcolor=cGreen>;
+        ushort SizeFor0x68;
+        ushort HostMethodCount <fgcolor=cGreen>;
+        ushort VMStackSizeMaybe <comment="this * 4">;
+        ushort Count0x5C <fgcolor=cGreen>;
+        ushort Unk;
+        ushort Count0x78 <fgcolor=cGreen>;
+        ushort Count0xA4 <fgcolor=cGreen>;
+        ushort Count0x54 <fgcolor=cGreen, comment="Can be safely wiped? No changes (c053x GT6)">;
+        ushort Count0x88 <fgcolor=cGreen>;
+        ushort Unk;
+        uint ModelsOffset <format=hex, fgcolor=cRed, comment="0x30 Stride">; // Figured (except a short value)
+        uint ModelKeysOffset <format=hex, fgcolor=cRed, comment="0x08 Stride">; // Figured
+        uint MeshesOffset <format=hex, fgcolor=cRed, comment="0x30 Stride">;
+        uint MeshKeysOffset <format=hex, fgcolor=cRed, comment="0x08 Stride">;
+        uint FlexibleVertexDefinitionsOffset <format=hex, fgcolor=cRed, comment="0x78 Stride">;
+        uint MaterialsOffset <format=hex, fgcolor=cRed, comment="Always 1 entry, 0x18 Stride">;
+        uint TextureSetOffset <format=hex, fgcolor=cRed, comment="Alone">;
+        uint ShadersOffset <format=hex, fgcolor=cRed, comment="Own component">;
+        uint BonesOffset <format=hex, fgcolor=cRed, comment="0x48 Stride">;
+        uint UnkKeyMap0x54 <format=hex, fgcolor=cRed, comment="0x4 Stride">;
+        uint HostMethodsOffset <format=hex, fgcolor=cRed, comment="0x8 Stride">;
+        uint Offset0x5C <format=hex, fgcolor=cRed, comment="0x8 Stride">;
+        uint VMCommandsOpcodesLength <format=hex, fgcolor=cGreen>;
+        uint VMCommandsOffset <format=hex, fgcolor=cRed, comment="Possibly own thing, opcodes for animations">;
+        uint VMInstanceOffset <format=hex, fgcolor=cRed, comment="Possibly own thing">;
+        uint RelocSize <format=hex>;
+        uint PossiblyEmpty;
+        uint RuntimeValue <comment="Set to 0 after mapping">;
+        uint Offset0x78 <format=hex, fgcolor=cRed, comment="0x14 Stride">;
+        uint Unk_0x7C;
+        uint PossiblyEmpty;
+        ushort UnkIndex <comment="Set to -1 at runtime if Version > 4">;
+        ushort UnkIndex <comment="Set to -1 at runtime if Version > 4">;
+        uint Offset0x88 <format=hex, fgcolor=cRed, comment="0x28 Stride, points to a map already discovered in materials">;
+        short Unk0x8C;
+        ushort TextureKeyCount <fgcolor=cGreen>;
+        uint TextureKeysOffset <format=hex, fgcolor=cRed, comment="0x8 Stride">;
+        uint PossiblyEmpty;
+        ushort WingDataCount <comment="If VersionMajor < 7">;
+        ushort WingKeyCount;
+        uint WingDataOffset <format=hex, fgcolor=cRed, comment="If VersionMajor < 7, 0x80 Stride">;
+        uint WingKeysOffset <format=hex, fgcolor=cRed, comment="0x8 Stride">;
+        uint Offset0xA4 <format=hex, fgcolor=cRed, comment="0x4 Stride">;
+        uint PossiblyEmpty;
+        uint ShapeStreamingMapOffset <format=hex, fgcolor=cRed, comment="If VersionMajor > 1, always 1 entry, Stride 0x20">;
+        uint Offset0xB0 <format=hex, fgcolor=cRed, comment="If VersionMajor > 1, Stride 0x40">;
+        
+        // Used when sending PackedMesh data.
+        // Specifically, this is m_mmLengthInQwords in a WwsJob command, for the SmoothMesh spu job
+        // Relevant function: 0x0086acf4 (GT6 1.00) 0x008eb430 (GT6 1.22) which I called "ModelSet3::BuildAndSubmitSmoothMeshJobCommands"
+        uint UnkSpuJobBufferSizeQwords <comment="Needs checking">;
+        uint Offset0xB8 <format=hex, fgcolor=cRed, comment="If VersionMajor > 2, Own thing">;
+        uint VMContextOffset <format=hex, fgcolor=cRed, comment="If VersionMajor > 5, always 1 entry, Stride 0x20">;
+        uint Offset0xC0 <format=hex, fgcolor=cRed, comment="If VersionMajor > 5, always 1 entry, Stride 0x20">;
+        ushort Count0xC0 <fgcolor=cGreen, comment="If VersionMajor > 5">;
+        ushort PossiblyEmpty;
+        short Unk;
+        ushort PackedMeshKeyCount <fgcolor=cGreen, comment="If VersionMajor > 8">;
+        uint PackedMeshKeysOffset <format=hex, fgcolor=cRed, comment="If VersionMajor > 8">;
+        uint PackedMeshHeaderOffset <format=hex, fgcolor=cRed, comment="Own Thing, If VersionMajor > 8">;
+        int unk;
+        int empty;
+        uint CarBodyStreamOffset <format=hex, fgcolor=cRed, comment="Own Thing, If VersionMajor > 13">;
     } ModelSetHeader <bgcolor=cPurple>;
 
-    FSeek(startof(ModelSetHeader));
     if (ModelSetHeader.ModelCount > 0)
     {
+        FSeek(startof(ModelSetHeader) + ModelSetHeader.ModelsOffset);
         struct
         {
             local int i = 0;
@@ -272,6 +522,7 @@ struct MDL3
 
     if (ModelSetHeader.TextureKeyCount > 0)
     {
+        FSeek(startof(ModelSetHeader) + ModelSetHeader.TextureKeysOffset);
         struct
         {
             for (i = 0; i < ModelSetHeader.TextureKeyCount; i++)
@@ -299,6 +550,7 @@ struct MDL3
         FSeek(startof(ModelSetHeader) + ModelSetHeader.VMContextOffset);
         VMContext VmContext_;
     }
+
 
     if (ModelSetHeader.VersionMajor > 8 && ModelSetHeader.PackedMeshHeaderOffset != 0)
     {
