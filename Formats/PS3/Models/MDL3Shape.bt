@@ -15,7 +15,7 @@ typedef struct
     float X;
     float Y;
     float Z;
-} MeshVec3;
+} ShapeVec3;
 
 typedef struct
 {
@@ -33,7 +33,7 @@ typedef struct
     uint Offset0x28 <format=hex, fgcolor=cRed, comment="Own Thing">;
     
     FSeek(startof(this) + 0x2C);
-} MeshUnk0x2C_0x04_0x04_0x08;
+} ShapeUnk0x2C_0x04_0x04_0x08;
 
 typedef struct
 {
@@ -50,11 +50,11 @@ typedef struct
     for (w = 0; w < Count; w++)
     {
         FSeek(BasePos + EntryOffsets0x08[w]);
-        MeshUnk0x2C_0x04_0x04_0x08 entry;
+        ShapeUnk0x2C_0x04_0x04_0x08 entry;
     }
     
     FSeek(startof(this) + 0x10);
-} MeshUnk0x2C_0x04_0x04;
+} ShapeUnk0x2C_0x04_0x04;
 
 typedef struct
 {
@@ -67,11 +67,11 @@ typedef struct
     if (Count0x04 > 0)
     {
         FSeek(BasePos + Offset0x04);
-        MeshUnk0x2C_0x04_0x04 unk;
+        ShapeUnk0x2C_0x04_0x04 unk;
     }
 
     FSeek(startof(this) + 0x10);
-} MeshUnk0x2C_0x04;
+} ShapeUnk0x2C_0x04;
 
 typedef struct
 {
@@ -89,11 +89,11 @@ typedef struct
         short UnkBits : 12;
 
         FSeek(BasePos + Offset0x04);
-        MeshUnk0x2C_0x04 unk0x04;
+        ShapeUnk0x2C_0x04 unk0x04;
     }
 
     FSeek(startof(this) + 0x30);
-} MeshPMSHRef;
+} ShapePackedMeshRef;
 
 typedef struct
 {
@@ -137,8 +137,8 @@ typedef struct
     if (PMSHRefOffset != 0)
     {
         FSeek(startof(ModelSetHeader) + PMSHRefOffset);
-        MeshPMSHRef PackedMeshRef;
+        ShapePackedMeshRef PackedMeshRef;
     }
     
     FSeek(startof(this) + 0x30);
-} Mesh <bgcolor=cGreen, comment="Mapped at FUN_008e7dac">;
+} Shape <bgcolor=cGreen, comment="Mapped at FUN_008e7dac">;

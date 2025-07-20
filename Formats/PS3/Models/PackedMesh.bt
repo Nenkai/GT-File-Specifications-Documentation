@@ -57,7 +57,7 @@ typedef struct
     - once it break, you should be landing more or less in the relevant code
     
     After that you can also probably dump SPURS SPU modules from RPCS3 debug pane by hitting Alt+S.
-    NOTE: The first bitstream that will be loaded is character/mf07, FlexFormats[4]
+    NOTE: The first bitstream that will be loaded is character/mf07, PackedMesh[4]
     
     Open that in Ghidra with the SPU module, I used elad335's PR fork
     https://github.com/elad335/GhidraSPU/tree/patch-2
@@ -74,16 +74,38 @@ typedef struct
     typedef enum
     {
         SmoothMesh_End = 0,
+        SmoothMesh_Opcode1 = 1,
+        SmoothMesh_Opcode2 = 2,
+        SmoothMesh_Opcode3 = 3,
+        SmoothMesh_Opcode4 = 4,
+        SmoothMesh_UseBuffer = 5,
+        SmoothMesh_Opcode6 = 6,
         SmoothMesh_PushLayout = 7,
+        SmoothMesh_Opcode8 = 8,
+        SmoothMesh_Opcode9 = 9,
+        SmoothMesh_Opcode10 = 10,
+        SmoothMesh_Opcode11 = 11,
+        SmoothMesh_Opcode12 = 12,
+        SmoothMesh_Opcode13 = 13,
+        SmoothMesh_Opcode14 = 14,
+        SmoothMesh_Opcode15 = 15,
+        SmoothMesh_Opcode16 = 16,
+        SmoothMesh_Opcode17 = 17,
+        SmoothMesh_Opcode18 = 18,
+        SmoothMesh_Opcode19 = 19,
+        SmoothMesh_Opcode20 = 20,
+        SmoothMesh_Opcode21 = 21,
+        SmoothMesh_Opcode22 = 22,
+        SmoothMesh_Opcode23 = 23,
     } SmoothMeshOpcode;
     
-    
     local int currentLayoutIndex = 1; // Accurate to SPU code
-    local int layoutIndices[2];
-    local int lastIndex = 0;
+    local int currentLayoutIndexForOpcode7 = 0; // Accurate to SPU code
+    local int layoutIndices[2]; // Accurate to SPU code
+    local int lastIndex = -1; // To emulate opcode 7
+    local int lastElem21_bit1 = 0; // To emulate opcode 21
     
     local int stop = false;
-    local int k = 0;
     while (!stop)
     {
         struct
@@ -91,27 +113,38 @@ typedef struct
             SmoothMeshOpcode DataType : 5; // Confirmed
             switch (DataType)
             {
-                case SmoothMesh_End: // Likely parsed successfully
+                case SmoothMesh_End: // OK!
                     stop = true;
                     break;
                     
                 case 1: // OK!
-                    int type1_a : 12;
+                    int NumTrianglesMaybe : 12;
                     break;
                     
-                case 5: // OK!
+                case 2: // OK!
+                    int NumEntries : 12;
+                    break;
+                    
+                case SmoothMesh_UseBuffer: // 5 - OK!
                     int unk : 12;
+                    int VertexGroupCount : 4;
                     int FaceGroupCount : 4;
-                    int unk : 4;
                     
                     local int k = 0;
-                    for (k = 0; k < FaceGroupCount; k++)
+                    for (k = 0; k < VertexGroupCount; k++)
                     {
-                        // Bit size for these may be defined somewhere else?
-                        // TODO: Find out if the bit size for these is actually dynamic
                         struct
                         {
-                            int IndexStart : 16;
+                            int VertStart : 16;
+                            int NumVerts : 10;
+                        } VertGroup;
+                    }
+                    
+                    for (k = 0; k < FaceGroupCount; k++)
+                    {
+                        struct
+                        {
+                            int FaceIdxStart : 16;
                             int NumIndices : 10;
                         } FaceGroup;
                     }
@@ -124,33 +157,89 @@ typedef struct
                     // This opcode essentially loads a bit layout (?) from UnkData[]
                     // Which is then used by opcode 22 (at least)
                     int UnkDataIndex : 12;
-                    layoutIndices[lastIndex++] = UnkDataIndex;
                     
-                    // TODO: investigate what happens when there's already two?
-                    if (lastIndex >= 1)
-                        lastIndex = 1;
+                    // So the first two declarations actually set the layout for Opcode 22
+                    // The others are unknown
+                    
+                    // We need to emulate some behavior here.
+                    // Basically, when opcode 5 is called, it won't immediately set a value to the storage
+                    // Only the next one will be applied
+                    // Basically this opcode queues until next opcode 7?
+                    if (lastIndex != -1)
+                    {
+                        // Emulate and set previous
+                        layoutIndices[currentLayoutIndexForOpcode7 ^ 1] = lastIndex;
+                    }
+                    
+                    lastIndex = UnkDataIndex;
+                    currentLayoutIndexForOpcode7 ^= 1; // Toggle
+                    break;
+                               
+                case 8: // OK!
                     break;
                     
-                case 14: // OK!
-                    int type14_a : 12;
-                    int type14_b : 12;
+                case 9: // OK!
+                    // sp + 0x140 toggle? which might be used for opcode 10 and 11?
+                    int NumEntries : 6;
+                    if (NumEntries)
+                    {
+                        struct
+                        {
+                            int Unk1 : 12;
+                            int Unk2 : 5;
+                        } Entry[NumEntries] <optimize=false>;
+                    }
                     break;
                     
-                case 15: // OK!
-                    // 62 bits + data
-                    uint64 unk : 27;
-                    int unk : 5;
-                    int unk : 17 <format=hex>;
-            
-                    // 46 Confirmed offset, size unknown
-                    ubyte DataBitSize : 8 <format=hex>;
+                case 10: // OK!
+                    int NumEntries : 8;
+                    int unk : 12;
                     
                     struct
                     {
+                        int Unk1 : 5;
+                        int VertexIndexCount : 10;
+                    } Entry[NumEntries+1] <optimize=false>; // 1 extra
+                    
+                    break;
+                
+                case 11: // OK!
+                    int Unk : 10;
+                    int Unk2 : 12;
+                    break;
+                    
+                case 12: // OK!
+                    int Unk : 20;
+                    
+                    // Num ints for something?
+                    // [97a8] shli r116, r100 (this), 4
+                    // ...
+                    // [97d8] wrch MFC_Size, r116
+                    int Unk2 : 9;
+                    break;
+                    
+                case 14: // OK!
+                    int VertexIndexStart : 12;
+                    int VertexIndexCount : 12;
+                    break;
+                    
+                case 15: // OK!
+                    // 1 float + 13 bits + 12 bits + extra commands
+                    float Unk1 : 32;
+
+                    // This is used to skip over a set number of commands, not sure how it triggers
+                    int Unk2 : 13;
+                    int NumCmdBitsToSkip : 12 <format=hex>;
+                    struct
+                    {
                         local int k = 0;
-                        for (k = 0; k < DataBitSize; k++)
+                        for (k = 0; k < NumCmdBitsToSkip; k++)
                             int bit : 1;
-                    } UnkBits;
+                    } SubCommands;
+                    
+                    break;
+                    
+                case 16: // OK!
                     break;
                     
                 case 17: // OK!
@@ -158,28 +247,33 @@ typedef struct
                     break;
                     
                 case 21: // OK!
-                    int type21_numEntries : 6;
-                    int type21_b : 1;
-                    int type21_c : 1;
-                    AlignToNextByte(); // Intended
+                    int NumEntries : 6;
+                    int UnkBit1 : 1; // This is used for opcode 22 and 23, the latter especially determines a bit size
+                    int HasUnkExtraData : 1;
+                    lastElem21_bit1 = UnkBit1;
                     
-                    struct
+                    if (HasUnkExtraData)
                     {
-                        // This is correct, 320 bits per entry
-                        byte bits[320 / 8];
-                    } Entry[type21_numEntries + 1]; // This is correct, there's always an extra
+                        AlignToNextByte(); // Intended
+                        
+                        struct
+                        {
+                            // This is correct, 320 bits per entry
+                            byte bits[320 / 8];
+                        } Entry[NumEntries + 1]; // This is correct, there's always an extra
+                    }
                     break;
                     
-                case 22: // OK! But side note, investigate how opcode 7 works..
+                case 22: // OK!
                     int IsSwitchLayout : 1;
                     int EntryNum : 8;
                     
                     // The switch happens before the data. Accurate to SPU code
                     if (IsSwitchLayout)
-                        currentLayoutIndex = !currentLayoutIndex;
+                        currentLayoutIndex ^= 1;
 
-                    // spu debugging: mf07 - FlexFormats[4] - Opcode_[8] = 0x1e0 * 0x19?
-                    // spu debugging: mf07 - FlexFormats[4] - Opcode_[15] = 0x140 * 0x1c (0x8c0)?
+                    // spu debugging: mf07 - PackedMesh[4] - Opcode_[8] = 0x1e0 * 0x19?
+                    // spu debugging: mf07 - PackedMesh[4] - Opcode_[15] = 0x140 * 0x1c (0x8c0)?
                     
                     // (0xC * 4) * 0xA = 0x1E0 - is 0xA packed face bit size? yes it is
                     // (0x8 * 4) * 0xA = 0x140
@@ -189,8 +283,9 @@ typedef struct
                     // 0x08 is UnkData[3] byte at 0x01
                     
                     // the UnkData selected depends on opcode 7, at least the ones that are pushed for use
-                    local int countFromLayout = UnkData0x1C.Unk[layoutIndices[currentLayoutIndex]].unk2;
-                    local int mainEntryNum = Align(EntryNum, 4) / 4;
+                    local int lay = layoutIndices[currentLayoutIndex];
+                    local int countFromLayout = UnkData0x1C.Unk[lay].unk2;
+                    local int mainEntryNum = Align(EntryNum + 1, 4) / 4;
 
                     local int l = 0;
                     struct
@@ -205,14 +300,30 @@ typedef struct
                     } MainEntries[mainEntryNum] <optimize=false>;
                     break;
                     
-                case 23: // OK for mf07
+                case 23: // OK!
+                    // This probably must be preceded by opcode 21 and 22
+                    
                     int NumEntries : 6;
                     
-                    // spu debugging: mf07 - FlexFormats[4] - Opcode_[7] = 0x10 * 0x19?
-                    // todo: find out where 1e0 and 0x19 comes from
+                    // spu debugging: mf07 - PackedMesh[4] - Opcode_[7] = 0x10 * 0x19
+                    // mf07 - PackedMesh[1] - Opcode_[8] = 0x10 * 3
+                    // mf07 - PackedMesh[1] - Opcode_[12] = 0x0C * 3
+                    
+                    // address is from SPURS dumped module
+                    // [0x85f8] il r57, 0x10 (put 0x10 into r57)
+                    // ..
+                    // [0x8600] il r55, 0x0c (put 0x0c into r57)
+                    // ..
+                    // [0x8608] selb r50, r51, r51, r97
+                    // [0x860c] selb r81, r57, r55, r97
+                    //                ^ num bits
+                    
+                    // Either 0x10 or 0x0C. it checks if bit1 from previous opcode 21 is true. 
+                    // if it is, 0x10, otherwise, 0x0C
+ 
                     struct
                     {
-                        int bits : 16;
+                        int bits : lastElem21_bit1 ? 0x10 : 0x0C;
                     } Entries[NumEntries + 1] <optimize=false>;
                     break;
                     
@@ -222,7 +333,265 @@ typedef struct
                     break;
                     
             }
-        } Opcode_ <optimize=false, read=Str("Type %s", (EnumToString(DataType) == "" ? Str("%d", DataType) : EnumToString(DataType)))>;
-            
+        } Opcode_ <optimize=false, read=Str("Type %s", (EnumToString(DataType) == "" ? Str("%d", DataType) : Str("%s (%d)", EnumToString(DataType), DataType)))>;
     }
 } PackedFaceDescriptors;
+
+#include "../../Shared/ModelVM.bt"
+        
+typedef struct
+{
+    // All of this is largely handled by the SPU jobs
+    // Don't expect PPU reads on these
+    int PackedVertexDataOffset <format=hex, fgcolor=cRed>;
+    int UnkOffset0x04 <format=hex, fgcolor=cRed>;
+    int UnkOffset0x08 <format=hex, fgcolor=cRed>;
+    int NonPackedVertDataOffset <format=hex, fgcolor=cRed>;
+    int UnkOffset0x10 <format=hex, fgcolor=cRed>;
+    int PackedFacesOffset <format=hex, fgcolor=cRed>;
+    int PackedFaceDescriptorsOffset <format=hex, fgcolor=cRed>;
+    int unk;
+    short unk;
+    short FlexVertCount;
+    short unk;
+    short NonPackedFlexVertCount;
+    short StrideCountOf0x10 <comment="0x10 each">;
+    short PackedFacesQuadwordSize <comment="0x10 each">;
+    short PackedFaceDescriptorQuadwordSize <format=hex, comment="0x10 each">;
+    byte PackedFaceIndexBitSize;
+    byte Pad;
+
+    FSeek(startof(ModelSetHeader) + PackedFacesOffset);
+    union
+    {
+        byte PackedFaceBytes[0x10 * PackedFacesQuadwordSize];
+        struct
+        {
+            local int j = 0;
+            local int estimatedFaceCount = ((PackedFacesQuadwordSize * 0x10) * 8) // num quadwords * bits per byte
+                                                / PackedFaceIndexBitSize;
+            for (j = 0; j < estimatedFaceCount; j++)
+                int faceIdx : PackedFaceIndexBitSize;
+        } FaceIndices;
+    } PackedFacesUnion <comment="Face Indices", bgcolor=cYellow>;
+
+    FSeek(startof(ModelSetHeader) + PackedFaceDescriptorsOffset);
+    union
+    {
+        // GT61.00 -> mf07 -> FlexFormat[4] 
+        // - 0xC360 to 0xC381
+        // - 0xC381 to 0xC384
+        // - 0xC384 to 0xC38A
+        
+        byte PackedFaceDescriptorBytes[0x10 * PackedFaceDescriptorQuadwordSize];
+        PackedFaceDescriptors FaceDescriptors;
+    } PackedFacesDescriptorUnion <bgcolor=cDkYellow>;
+
+    FSeek(startof(this) + 0x30);
+} SmoothMeshData;
+
+typedef struct
+{
+    short FlexDeclarationIndex;
+    short ElementBitLayoutDefinitionIndex;
+    short Field_0x04;
+    byte SmoothMeshParamCount;
+    byte Count_0x07;
+    int UnkOffset <format=hex, fgcolor=cRed>;
+    float Field_0x0C;
+    int DataOffset <format=hex, fgcolor=cRed>; // combine with countofunk
+    int BBoxOffset <format=hex, fgcolor=cRed>;
+    float unk;
+    float unk;
+    short unk;
+    short unk;
+    short unk;
+    short unk;
+    short unk;
+    short unk;
+    int pad;
+    
+    FSeek(startof(ModelSetHeader) + UnkOffset);
+    struct
+    {
+        struct
+        {
+            int Field_0x00;
+            int Field_0x04;
+        } Unk_0x08[Count_0x07] <bgcolor=cLtBlue>;
+    } Unks_0x08[SmoothMeshParamCount] <optimize=false>;
+    
+    local int i = 0;
+    if (DataOffset != 0)
+    {
+        for (i = 0; i < SmoothMeshParamCount; i++)
+        {
+            FSeek(startof(ModelSetHeader) + DataOffset + (i * 0x30));
+            SmoothMeshData SmoothMeshSPUData;
+        }
+    }
+    
+    FSeek(startof(ModelSetHeader) + BBoxOffset);
+    struct
+    {
+        Vec3 BBox[8] <bgcolor=cBlue>;
+    } BBoxes[SmoothMeshParamCount];
+    
+    FSeek(startof(this) + 0x30);
+} PackedMesh;
+
+typedef struct
+{
+    int TotalBitCount;
+    ubyte XBitCount;
+    ubyte YBitCount;
+    ubyte ZBitCount;
+    ubyte WBitCount;
+    ubyte XBitEnd;
+    ubyte YBitEnd;
+    ubyte ZBitEnd;
+    ubyte WBitEnd;
+    short unk;
+    short unk;
+    float ScaleX;
+    float ScaleY;
+    float ScaleZ;
+    float ScaleW;
+    float OffsetX;
+    float OffsetY;
+    float OffsetZ;
+    float OffsetW;
+} ElementBitLayoutDefinition;
+
+typedef struct
+{
+    byte NameID;
+    byte FlexOffset;
+    byte ElementCount;
+    CELL_GCM_VERTEX_TYPE Type;
+} FlexElementDef;
+
+typedef struct
+{
+    byte ElementCount;
+    byte ElementCount2;
+    byte Unk;
+    byte Stride;
+    int unk;
+    int ElementDefsOffset;
+    int ElementNamesArrayOffset <format=hex, fgcolor=cRed>;
+
+    FSeek(startof(ModelSetHeader) + ElementDefsOffset);
+    FlexElementDef elementDefs1[ElementCount];
+    
+    if (ElementCount2)
+        FlexElementDef elementDefs2[ElementCount2];
+
+    FSeek(startof(ModelSetHeader) + ElementNamesArrayOffset);
+    struct
+    {
+        int NamesOffsets[ElementCount + ElementCount2] <format=hex, fgcolor=cRed>;
+    
+        local int j = 0;
+        for (j = 0; j < ElementCount + ElementCount2; j++)
+        {
+            FSeek(startof(ModelSetHeader) + NamesOffsets[j]);
+            String Name;
+        }
+    } ElementNames;
+
+    FSeek(FileSize());
+} FlexStructDeclaration;
+
+typedef struct
+{
+    struct
+    {
+        char Magic[4];
+        uint Version <format=hex>;
+        int RelocSize <format=hex>;
+        int RelocPtr;
+        ushort FormatCount_0x18 <fgcolor=cGreen>;
+        ushort UnkCount_0x1C <fgcolor=cGreen>;
+        ushort ElementBitLayoutDefinitionArrayCount_0x20 <fgcolor=cGreen>;
+        ushort StructDeclarationCount_0x24 <fgcolor=cGreen>;
+        int FormatsOffset_0x18 <format=hex, fgcolor=cRed>;
+        int UnkOffset_0x1C <format=hex, fgcolor=cRed>;
+        int ElementBitLayoutDefinitionArraysOffset_0x20 <format=hex, fgcolor=cRed>;
+        int StructDeclarationsOffset_0x24 <format=hex, fgcolor=cRed>;
+        int UnkOffset_0x28;
+        int Unk;
+        int UnkOffset_0x30 <format=hex, fgcolor=cRed>;
+
+    } PackedMeshHeader <bgcolor=cPurple>;
+    
+    local int i = 0;
+    
+    // We need this first. Formats require it
+    if (PackedMeshHeader.UnkCount_0x1C)
+    {
+        FSeek(startof(ModelSetHeader) + PackedMeshHeader.UnkOffset_0x1C);
+        struct
+        {
+            for (i = 0; i < PackedMeshHeader.UnkCount_0x1C; i++)
+            {
+                FSeek(startof(ModelSetHeader) + PackedMeshHeader.UnkOffset_0x1C + (i * 0x08));
+                struct
+                {
+                    ubyte unk;
+                    ubyte unk2;
+                    ushort TotalDataSize <format=hex>;
+                    uint DataOffset <fgcolor=cRed, format=hex>;
+                } Unk <bgcolor=cBlack>;
+            }
+        } UnkData0x1C;
+    }
+    
+    if (PackedMeshHeader.FormatCount_0x18)
+    {
+        FSeek(startof(ModelSetHeader) + PackedMeshHeader.FormatsOffset_0x18);
+        struct
+        {
+            for (i = 0; i < PackedMeshHeader.FormatCount_0x18; i++)
+            {
+                FSeek(startof(ModelSetHeader) + PackedMeshHeader.FormatsOffset_0x18 + (i * 0x30));
+                PackedMesh PackedMesh_;
+            }
+        } PackedMeshes;
+    }
+
+    if (PackedMeshHeader.ElementBitLayoutDefinitionArrayCount_0x20)
+    {
+        FSeek(startof(ModelSetHeader) + PackedMeshHeader.ElementBitLayoutDefinitionArraysOffset_0x20);
+        struct
+        {
+            for (i = 0; i < PackedMeshHeader.ElementBitLayoutDefinitionArrayCount_0x20; i++)
+            {
+                FSeek(startof(ModelSetHeader) + PackedMeshHeader.ElementBitLayoutDefinitionArraysOffset_0x20 + (i * 0x08));
+                struct
+                {
+                    int Length;
+                    int EntriesOffset <format=hex, fgcolor=cRed>;
+        
+                    FSeek(startof(ModelSetHeader) + EntriesOffset + (i * 0x10));
+                    ElementBitLayoutDefinition ElemBitLayoutDef[Length];
+        
+                } ElementBitLayoutDefinitionArray;
+            }
+        } ElementBitLayoutDefinitions;
+    }
+    
+    if (PackedMeshHeader.StructDeclarationCount_0x24)
+    {
+        FSeek(startof(ModelSetHeader) + PackedMeshHeader.StructDeclarationsOffset_0x24);
+        struct
+        {
+            for (i = 0; i < PackedMeshHeader.StructDeclarationCount_0x24; i++)
+            {
+                FSeek(startof(ModelSetHeader) + PackedMeshHeader.StructDeclarationsOffset_0x24 + (i * 0x10));
+                FlexStructDeclaration FlexStructDeclaration_;
+            }
+        } FlexStructDeclarations;
+    }
+    
+} PMSH <comment="Replaces FVF stuff">;

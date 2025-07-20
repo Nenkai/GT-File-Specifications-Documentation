@@ -373,7 +373,6 @@ typedef struct
         } MaterialDefinitions;
     }
 
-    local int cPos = FTell();
     if (MaterialDataCount_0x0C > 0)
     {
         struct
@@ -381,9 +380,7 @@ typedef struct
             for (j = 0; j < MaterialDataCount_0x0C; j++)
             {
                 FSeek(startof(ModelSetHeader) + MaterialDataOffset_0x0C + (j * 0x28));
-                MaterialData entry;
-            
-                FSeek(cPos);
+                MaterialData MaterialData_;
             }
         } MaterialDataEntries;
     }

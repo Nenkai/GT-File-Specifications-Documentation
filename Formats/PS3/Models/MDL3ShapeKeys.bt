@@ -11,25 +11,25 @@
 //   History: 
 //------------------------------------------------
 
-// Names for each Mesh entry.
+// Names for each Shape (mesh) entry.
 
 typedef struct
 {
     int NameOffset <format=hex, fgcolor=cRed>;
-    int MeshID <fgcolor=cYellow>;
+    int ShapeID <fgcolor=cYellow>;
     
     FSeek(NameOffset);
     string Name;
     
     FSeek(startof(this) + 0x08);
-} MeshKey <read=Str("%s (%d)", Name, MeshID)>;
+} ShapeKey <read=Str("%s (%d)", Name, MeshID)>;
 
 typedef struct
 {
     local int i = 0;
-    for (i = 0; i < ModelSetHeader.MeshKeyCount; i++)
+    for (i = 0; i < ModelSetHeader.ShapeKeyCount; i++)
     {
-        FSeek(startof(ModelSetHeader) + ModelSetHeader.MeshKeysOffset + (i * 0x08));
-        MeshKey MeshKey_;
+        FSeek(startof(ModelSetHeader) + ModelSetHeader.ShapeKeysOffset + (i * 0x08));
+        ShapeKey ShapeKey_;
     }
-} MeshKeys <bgcolor=cDkGreen>;
+} ShapeKeys <bgcolor=cDkGreen>;
