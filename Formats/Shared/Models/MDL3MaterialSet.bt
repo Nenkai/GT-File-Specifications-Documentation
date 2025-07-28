@@ -11,7 +11,7 @@
 //   History: 
 //------------------------------------------------
 
-#include "TXS3_TextureSet3.bt"
+#include "../Textures/TXS3_TextureSet3.bt"
 
 BitfieldDisablePadding();
 
@@ -186,9 +186,9 @@ typedef struct
 typedef struct
 {
     int NameOffset <fgcolor=cRed, format=hex>;
-    ushort MaterialDataID <fgcolor=cYellow, bgcolor=cDkYellow>;
+    ushort ShaderParameterID <fgcolor=cYellow, bgcolor=cDkYellow>;
     ushort CellGcmParamID <fgcolor=cYellow, bgcolor=cDkYellow>;
-    short Flags <bgcolor=cDkYellow>;
+    short Flags <bgcolor=cDkYellow, comment="fetched at GT6 EU 1.22 FUN_008f6458">;
     short KeyCount <fgcolor=cGreen, bgcolor=cDkYellow, comment="If Flag & 1 then count is > 1">;
     int KeysOffset <format=hex, fgcolor=cRed, bgcolor=cDkYellow, comment="If Flag & 1 then count exists, 0x08 Stride">;
     byte padding[0x24] <bgcolor=cDkYellow>;
@@ -208,7 +208,7 @@ typedef struct
     }
     
     FSeek(startof(this) + 0x34);
-} MaterialDefinition <read=Str("%s (Data ID: %d)", Name, MaterialDataID)>;
+} Material <read=Str("%s (ShaderParam: %d, GcmParam: %d)", Name, ShaderParameterID, CellGcmParamID)>;
 
 typedef struct
 {
@@ -218,12 +218,11 @@ typedef struct
     string Name;
     
     FSeek(startof(this) + 0x08);
-} Material2Name <read=Str("%s (%d)", Name, UnkIndex)>;
+} MaterialColorKey <read=Str("%s (%d)", Name, UnkIndex)>;
 
 typedef struct
 {
-    int ShaderEntrySearchNameOffset <comment="For Shaders offset 0x3C", fgcolor=cRed, format=hex, bgcolor=cLtGray>;
-    int ShaderEntryIndex <comment="For Shaders offset 0x3C", fgcolor=cYellow, bgcolor=cLtGray>;
+    ShaderKey ShaderKey_ <comment="For Shaders offset 0x3C", fgcolor=cYellow, bgcolor=cLtGray>;
     int _empty_ <bgcolor=cLtGray>;
     int UnkOffset <format=hex, fgcolor=cRed, bgcolor=cLtGray>;
     short CountForParent0x24 <bgcolor=cLtGray>;
@@ -232,12 +231,9 @@ typedef struct
     int KeyCount <bgcolor=cLtGray>;
     int KeyOffset <format=hex, fgcolor=cRed, bgcolor=cLtGray>;
     byte padMaybe[8] <bgcolor=cLtGray>;
-    
-    FSeek(startof(ModelSetHeader) + ShaderEntrySearchNameOffset);
-    string ShaderRefName;
-    
+
     FSeek(startof(this) + 0x28);
-} MaterialData0x14;
+} MaterialData0x14 <comment="NOTE: This structure is also pointed to directly by the model set header (offset 0x88). Refer to GT6 EU 1.22 FUN_008f7f5c">;
 
 typedef struct
 {
@@ -247,12 +243,25 @@ typedef struct
 
 typedef struct
 {
+    // Mainly used for CELL_GCM_METHOD_SET_TRANSFORM_CONSTANT_LOAD_4U
+    // Refer to GT6 EU 1.22 00c4c250 which I called CellGcm::SetTransformConstantLoad
+    ushort ColorIndexStart;
+    
+    // Refer to GT6 EU 1.22 00c4c2a4, passed to a CELL_GCM_NV4097_SET_TRANSFORM_CONSTANT_LOAD command
+    // Aswell as 00c49f24, passed to a CELL_GCM_NV308A_COLOR command
+    ushort LoadAt <comment="CellDbgRsxBundleStateTransformConstantLoad says: Constants slot number of load destination">;
+    ushort ColorCount <comment="1 = one color into array, 0x10 stride">;
+    ushort pad;
+} MaterialColorRef;
+
+typedef struct
+{
     int NameOffset <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="Own Thing">;
     int SetIndex <fgcolor=cYellow, bgcolor=cDkGray>;  
     byte Unk <bgcolor=cDkGray>;
     byte Version <bgcolor=cDkGray>;
-    short KeysCount <fgcolor=cGreen, bgcolor=cDkGray>;
-    int UnkOffset0x0C <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="Own Thing">;
+    short ColorKeyCount <fgcolor=cGreen, bgcolor=cDkGray>;
+    int ColorsOffset <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="Own Thing">;
     if (Version == 0)
     {
         int UnkOffset0x10 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 0, 0x08 Strides">;
@@ -273,23 +282,39 @@ typedef struct
     }
     else if (Version == 2)
     {
-        int KeysOffset <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, Own Thing">;
+        // NOTE: At runtime this is replaced by UnkOffset0x14->0x1C if this is 0!
+        int ColorKeysOffset <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, Own Thing">;
         int UnkOffset0x14 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, Own Thing">;
         int UnkOffset0x18 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, 0x08 Strides">;
         int UnkOffset0x1C <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="If Version == 2, Own Thing">;
-        short _empty_ <bgcolor=cDkGray>;
-        short Count0x18 <fgcolor=cGreen, bgcolor=cDkGray>;
+        ushort Count_0x20 <bgcolor=cDkGray, comment="Refer to GT6 EU 1.22 008f6c60, Count for UnkOffset0x1C">;
+        short Count0x22 <fgcolor=cGreen, bgcolor=cDkGray>;
         int ShaderReferencesOffset0x24 <format=hex, fgcolor=cRed, bgcolor=cDkGray, comment="Same as 0x14 - Stride 0x20 - If Version == 2">;
         /* if (this->field_0x10 == 0x0) {
             this->field_0x10 = *(int *)(this->field_0x14 + 0x1c); */
+    }
+    
+    if (NameOffset > 0)
+    {
+        FSeek(startof(ModelSetHeader) + NameOffset);
+        string Name <comment="Used when addressing shaders (to shaders's defs 0x1C)">;
+    }
 
-        local int n = 0;
-        for (n = 0; n < KeysCount; n++)
-        {
-            FSeek(startof(ModelSetHeader) + KeysOffset + (n * 8));
-            Material2Name ElementKey;
-        }
-
+    local int n = 0;
+    for (n = 0; n < ColorKeyCount; n++)
+    {
+        FSeek(startof(ModelSetHeader) + ColorKeysOffset + (n * 8));
+        MaterialColorKey ColorKey_;
+    }
+        
+    if (ColorKeyCount > 0 && ColorsOffset != 0)    
+    {
+        FSeek(startof(ModelSetHeader) + ColorsOffset);
+        Color4 ColorsArray[1] <fgcolor=cLtBlue, comment="Variable size. Ref'ed by ShaderRef->ProgramColorRef->ColorIndexStart, multiply by 0x10, then ColorCount * 0x10 for total size">;
+    }
+    
+    if (Version == 2)
+    {
         FSeek(startof(ModelSetHeader) + UnkOffset0x14);
         MaterialData0x14 unk0x14;
 
@@ -306,57 +331,60 @@ typedef struct
             FSeek(startof(ModelSetHeader) + ShaderReferencesOffset0x24);
             struct
             {
-                short field_0x00;
-                short field_0x02;
-                int field_0x04 <format=hex>;
-                int field_0x08 <format=hex>;
-                int ShaderProgramOffset <format=hex>;
-                int ShaderProgram2Offset <format=hex>;
+                short VertexProgramColorRefCount <fgcolor=cGreen, comment="Refer to GT6 EU 1.22 008f6d4c, related to program offset (0)">;
+                short FragmentProgramColorRefCount <fgcolor=cGreen, comment="Refer to GT6 EU 1.22 008f6e50, related to program offset (1)">;
+                int VertexProgramColorRefsOffset <fgcolor=cRed, format=hex, comment="Uses Count_0x00, related to program offset (0)">;
+                int FragmentProgramColorRefsCount <fgcolor=cRed, format=hex, comment="Uses Count_0x02, related to program offset (1)">;
+                int VertexProgramOffset <fgcolor=cRed, format=hex>;
+                int FragmentProgramOffset <fgcolor=cRed, format=hex>;
                 int field_0x14;
                 short field_0x18;
                 short field_0x1A;
                 int field_0x1C;
 
-                if (ShaderProgramOffset != 0)
+                if (VertexProgramColorRefCount)
                 {
-                    FSeek(startof(ModelSetHeader) + ShaderProgramOffset);
-                    ShaderProgram Program;   
+                    FSeek(startof(ModelSetHeader) + VertexProgramColorRefsOffset);
+                    MaterialColorRef Program0ColorRef[VertexProgramColorRefCount];
                 }
                 
-                if (ShaderProgram2Offset != 0)
+                if (FragmentProgramColorRefCount)
                 {
-                    FSeek(startof(ModelSetHeader) + ShaderProgram2Offset);
-                    ShadersProgram_0x2C Program2;   
+                    FSeek(startof(ModelSetHeader) + FragmentProgramColorRefsCount);
+                    MaterialColorRef Program1ColorRef[FragmentProgramColorRefCount];
                 }
+                
+                if (VertexProgramOffset != 0)
+                {
+                    FSeek(startof(ModelSetHeader) + VertexProgramOffset);
+                    VertexShader VertexProgram_;   
+                }
+                
+                if (FragmentProgramOffset != 0)
+                {
+                    FSeek(startof(ModelSetHeader) + FragmentProgramOffset);
+                    FragmentShader FragmentProgram_;   
+                }
+                
+                FSeek(startof(this) + 0x20);
             } ShaderReferences;
         }
     }
 
-    if (NameOffset > 0)
-    {
-        FSeek(startof(ModelSetHeader) + NameOffset);
-        string Name <comment="Used when addressing shaders (to shaders's defs 0x1C)">;
-    }
-
-    if (UnkOffset0x0C > 0)    
-    {
-        FSeek(startof(ModelSetHeader) + UnkOffset0x0C);
-        float unkFloats0x0C[8] <fgcolor=cLtBlue>;
-    }
     
     FSeek(startof(this) + 0x28);
-} MaterialData <read=Str("%s (%d)", Name, SetIndex)>;
+} MaterialShaderParameter <read=Str("%s (%d)", Name, SetIndex)>;
 
 
 typedef struct
 {
-    ushort MaterialCount <fgcolor=cGreen>;
-    ushort MaterialDataCount_0x0C <fgcolor=cGreen>;
-    byte unk;
+    ushort MaterialCount <fgcolor=cGreen, comment="Debug assert in 1668.elf: 'nMaterials_'">;
+    ushort ShaderParameterCount <fgcolor=cGreen, comment="Debug assert in 1668.elf: 'nShaderParameters_'">;
+    byte unk <comment="Unknown, used like: MaterialCount / this, refer to GT6 EU 1.22 FUN_8e5580">;
     byte CellGcmParamCount_0x10 <fgcolor=cGreen>;
     ushort TextureParameterCount <fgcolor=cGreen>;
     uint MaterialsOffset <format=hex, fgcolor=cRed, comment="0x34 Stride">;
-    uint MaterialDataOffset_0x0C <format=hex, fgcolor=cRed, comment="0x28 Stride">;
+    uint ShaderParametersOffset <format=hex, fgcolor=cRed, comment="0x28 Stride">;
     uint CellGcmParamsOffset_0x10 <format=hex, fgcolor=cRed, comment="Own Thing, If Version < 13">;
     uint TextureParameterMapOffset <format=hex, fgcolor=cRed, comment="0x44 Stride">;
 
@@ -368,21 +396,21 @@ typedef struct
             for (j = 0; j < MaterialCount; j++)
             {
                 FSeek(startof(ModelSetHeader) + MaterialsOffset + (j * 0x34));
-                MaterialDefinition Definition <comment="0x34 Stride">;
+                Material Material_ <comment="0x34 Stride">;
             }
-        } MaterialDefinitions;
+        } Materials;
     }
 
-    if (MaterialDataCount_0x0C > 0)
+    if (ShaderParameterCount > 0)
     {
         struct
         {
-            for (j = 0; j < MaterialDataCount_0x0C; j++)
+            for (j = 0; j < ShaderParameterCount; j++)
             {
-                FSeek(startof(ModelSetHeader) + MaterialDataOffset_0x0C + (j * 0x28));
-                MaterialData MaterialData_;
+                FSeek(startof(ModelSetHeader) + ShaderParametersOffset + (j * 0x28));
+                MaterialShaderParameter ShaderParameter_;
             }
-        } MaterialDataEntries;
+        } ShaderParameters;
     }
 
     if (CellGcmParamCount_0x10 > 0)
@@ -401,14 +429,14 @@ typedef struct
 
     if (TextureParameterCount > 0)
     {
-        FSeek(startof(ModelSetHeader) + TextureParameterCount);
+        FSeek(startof(ModelSetHeader) + TextureParameterMapOffset);
         struct
         {
             local int k = 0;
             for (k = 0; k < TextureParameterCount; k++)
             {
-                FSeek(startof(ModelSetHeader) + TextureParameterCount + (k * 0xA0));
-                PGLUTextureInfo TextureParameter;
+                FSeek(startof(ModelSetHeader) + TextureParameterMapOffset + (k * 0x44));
+                PGLUTextureInfoPS3 TextureParameter;
             }
         } TextureParameters  <comment="May have more entries than images, but image ids will fit the TXS count and will have different parameters such as Aniso">;
     }

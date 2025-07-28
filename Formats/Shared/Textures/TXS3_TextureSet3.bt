@@ -11,7 +11,85 @@
 //   History: 
 //------------------------------------------------
 
-#include "CellEnums.bt"
+#include "../../Sony/Graphics/CellGcmEnums.bt"
+#include "../../Sony/Graphics/GEEnums.bt"
+
+BitfieldDisablePadding();
+
+void FSeekWithRelocation(int64 offset)
+{
+    FSeek(startof(Header) + (offset - Header.RelocPtr));
+}
+
+typedef struct 
+{
+    int UnkOffset1 <fgcolor=cRed, format=hex>;
+    int field_0x04;
+    float field_0x08;
+    float field_0x0C;
+    float field_0x10;
+    float field_0x14;
+    
+    SCE_GE_TMAP SCE_GE_TMAP_;
+    SCE_GE_TSHADE SCE_GE_TSHADE_;
+    SCE_GE_TMODE SCE_GE_TMODE_;
+    SCE_GE_TPF SCE_GE_TPF_;
+    SCE_GE_CLOAD SCE_GE_CLOAD_;
+    SCE_GE_CLUT SCE_GE_CLUT_;
+    SCE_GE_TFILTER SCE_GE_TFILTER_;
+    SCE_GE_TWRAP SCE_GE_TWRAP_;
+    SCE_GE_TLEVEL SCE_GE_TLEVEL_;
+    SCE_GE_TFUNC SCE_GE_TFUNC_;
+    SCE_GE_TEC SCE_GE_TEC_;
+    int _RuntimeClutOffset;
+    
+    struct
+    {
+        int RelocPtr;
+        ushort Width;
+        byte Unk : 5; // 1 << Unk
+        byte     : 3;
+        byte Index;
+    } MipInfo[8];
+    
+    short _empty;
+    short ClutMapEntryIndex;
+    short _empty;
+    short ImageInfoIndex;
+    int _empty;
+    int FileNameOffset <format=hex, fgcolor=cRed>;
+    
+    FSeekWithRelocation(UnkOffset1);
+    struct
+    {
+        if (ClutMapEntryIndex != -1)
+        {
+            SCE_GE_CBP SCE_GE_CBP_;
+            SCE_GE_CBP SCE_GE_CBW_;
+        }
+        
+        SCE_GE_TBP0 SCE_GE_TBP0_;
+        SCE_GE_TBW0 SCE_GE_TBW0_;
+        SCE_GE_TSIZE0 SCE_GE_TSIZE0_;
+        SCE_GE_SU SCE_GE_SU_;
+        SCE_GE_SV SCE_GE_SV_;
+        SCE_GE_TU SCE_GE_TU_;
+        SCE_GE_TV SCE_GE_TV_;
+        SCE_GE_TMAP SCE_GE_TMAP_;
+        SCE_GE_TMODE SCE_GE_TMODE_;
+        SCE_GE_TPF SCE_GE_TPF_;
+        SCE_GE_TFILTER SCE_GE_TFILTER_;
+        SCE_GE_TWRAP SCE_GE_TWRAP_;
+        SCE_GE_TLEVEL SCE_GE_TLEVEL_;
+        SCE_GE_TFUNC SCE_GE_TFUNC_;
+        SCE_GE_TEC SCE_GE_TEC_;
+        SCE_GE_CLUT SCE_GE_CLUT_;
+        SCE_GE_CLOAD SCE_GE_CLOAD_;
+    } SubTextureParams <bgcolor=cRed>;
+    
+    FSeekWithRelocation(FileNameOffset);
+    string FileName;
+} PGLUTextureInfoPSP <read=FileName, bgcolor=cYellow, optimize=false>;
 
 string PrintFormat(ubyte& format)
 {
@@ -29,7 +107,6 @@ string PrintFormat(ubyte& format)
 
 typedef struct 
 {
-    BitfieldDisablePadding();
     struct
     {
         CELL_GCM_METHOD offset <comment="Normally CELL_GCM_NV4097_SET_TEXTURE_OFFSET aka 0x1A00 + (index * 0x20)">;
@@ -148,7 +225,7 @@ typedef struct
     }
     FSeek(cPos);
 
-} PGLUTextureInfo <bgcolor=cYellow, optimize=false>;
+} PGLUTextureInfoPS3 <read=ImageName, bgcolor=cYellow, optimize=false>;
 
 typedef struct 
 {
@@ -171,8 +248,9 @@ typedef struct StreamTextureMapSet
    int _pad_[2];
    
    local int cPos = FTell();
-   FSeek(StreamTextureMapOffset);
+   FSeekWithRelocation(StreamTextureMapOffset);
    StreamTextureMapInfo streamFileInfo[ImageInfoCount];
+   
    FSeek(cPos);
 } StreamMap <bgcolor=cLtBlue, bgcolor=cPurple>;
 
@@ -196,40 +274,126 @@ typedef struct
     local int cPos = FTell();
     if (StreamTextureMapSetOffset != 0)
     {
-        FSeek(StreamTextureMapSetOffset);
+        FSeekWithRelocation(StreamTextureMapSetOffset);
         StreamMap map;
     }
 
     FSeek(cPos);
-} ImageData <optimize=false>;
+} TextureBufferInfo <optimize=false>;
 
 typedef struct (int arrSize)
 {
-    ImageData images[arrSize];
+    TextureBufferInfo images[arrSize];
 } ImageDataMap <bgcolor=cDkGreen>;
 
 // Main header is 0x40
-struct TXS3 {
-    char Magic[4];
-    if (Magic[0] == '3')
-        LittleEndian();
-    else
-        BigEndian();
+typedef struct 
+{
+    struct
+    {
+        char Magic[4];
+        if (Magic[0] == '3')
+            LittleEndian();
+        else
+            BigEndian();
+    
+        uint FileSize <format=hex>;
+        uint RelocPtr <format=hex>;
+        uint StringTableOffset <format=hex>;
+        uint Unk2 <comment="Related to UnkOffset">;
+        ushort PGLUTextureInfoCount;
+        ushort TextureImageInfoCount;
+        uint PGLUTextureInfoOffset <format=hex, fgcolor=cRed>;
+        uint TextureInfoOffset <format=hex, fgcolor=cRed>;
+    
+        uint RelocSize <format=hex, fgcolor=cRed>;
+        short UnkCount_0x24 <fgcolor=cGreen>;
+        short ClutMapEntryCount <fgcolor=cGreen>;
+        uint UnkOffset_0x28 <format=hex, fgcolor=cRed, comment="Count from 024, Stride 0x08. ">;
+        uint ClutMapOffset <format=hex, fgcolor=cRed>;
+        int UnkOffset_0x30 <format=hex, fgcolor=cRed>; // TODO - Car Variations maybe?
+        ushort UnkCount_0x34 <fgcolor=cGreen>;
+        ushort _empty;
+        uint UnkOffset_0x38 <format=hex, fgcolor=cRed, comment="Count from 0x34, Stride 0x1C. ">;
+    } Header;
+    
+    /* Above: from 08af69c4 (GT PSP EU 2.00): 
+    *(ushort *)(param_1 + 0xe) = *(ushort *)(param_1 + 4) < 2 ^ 1;
+    *(undefined *)(param_1 + 0x17) = 1;
+    *(undefined2 *)(param_1 + 0xc) = 0;
+    *(undefined4 *)(param_1 + 0x10) = 0;
+    *(undefined *)(param_1 + 0x16) = 1;
+    *(ushort *)(param_1 + 0x14) = (ushort)(**(float **)(param_1 + 8) < 0.0);
+    */
 
-    uint FileSize <format=hex>;
-    uint BaseFilePos <format=hex>;
-    uint HeaderSizeMaybe;
-    uint Unk2 <comment="Related to UnkOffset">;
-    ushort PGLUTextureInfoCount;
-    ushort TexturemageInfoCount;
-    uint PGLUTextureInfoOffset <format=hex, fgcolor=cRed>;
-    uint TextureInfoOffset <format=hex, fgcolor=cRed>;
-
-    int UnkOffset <format=hex>;
-
-    FSeek(PGLUTextureInfoOffset);
-    PGLUTextureInfo textureInfos[PGLUTextureInfoCount];
-
-    FSeek(TextureInfoOffset);
-    ImageDataMap data(TexturemageInfoCount);
+    // Try heuristics to find out which platform we're on
+    local int isPS3 = IsBigEndian();
+    local int isPSP = false;
+    if (!isPS3)
+    {
+        local int pgluTextureInfoStructSize = (Header.TextureInfoOffset - Header.PGLUTextureInfoOffset) / Header.PGLUTextureInfoCount;
+        if (pgluTextureInfoStructSize >= 0x98)
+            isPSP = true;
+    }
+    
+    if (Header.PGLUTextureInfoCount)
+    {
+        FSeekWithRelocation(Header.PGLUTextureInfoOffset);
+        struct
+        {
+            local int i = 0;
+            for (i = 0; i < Header.PGLUTextureInfoCount; i++)
+            {
+                if (isPS3)
+                {
+                    FSeekWithRelocation(Header.PGLUTextureInfoOffset + (i * 0x44));
+                    PGLUTextureInfoPS3 TextureInfo;
+                }
+                else if (isPSP)
+                {
+                    FSeekWithRelocation(Header.PGLUTextureInfoOffset + (i * 0x98));
+                    PGLUTextureInfoPSP TextureInfo;
+                }
+            }
+        } TextureInfos;
+    }
+    
+    if (Header.TextureImageInfoCount)
+    {
+        FSeek(startof(this) + (Header.TextureInfoOffset - Header.RelocPtr));
+        struct
+        {
+            local int i = 0;
+            for (i = 0; i < Header.TextureImageInfoCount; i++)
+            {
+                FSeekWithRelocation(Header.TextureInfoOffset + (i * 0x20));
+                TextureBufferInfo BufferInfo;
+            }
+        } BufferInfos;
+    }
+    
+    if (Header.ClutMapEntryCount)
+    {
+        FSeekWithRelocation(Header.ClutMapOffset);
+        struct
+        {
+            local int i = 0;
+            for (i = 0; i < Header.ClutMapEntryCount; i++)
+            {
+                FSeekWithRelocation(Header.ClutMapOffset + (i * 0x0C));
+                struct
+                {
+                    int a;
+                    int ClutBufferOffset <format=hex, fgcolor=cRed>;
+                    int c;
+                } ClutEntry;
+            }
+        } ClutInfos;
+    }
 } TextureSet3;
+
+if (ReadUInt(0) == 0x54585333 || ReadUInt(0) == 0x33535854)
+{
+    FSeek(0);
+    TextureSet3 TextureSet;
+}

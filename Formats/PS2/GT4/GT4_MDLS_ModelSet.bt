@@ -124,11 +124,11 @@ typedef struct
         short MaterialCount;
         short TexSetCount <comment="Per color">;
         short ColorCount;
-        short InstanceOutRegisterDwordSize <comment="Used for creating the instance register storage">;
-        short InstanceUnkRegisterDwordSize;
-        short HostMethodInfoCount;
-        short ExternalInfoCount;
-        short OutRegisterInfoCount;
+        short VMInstanceOutRegisterDwordSize <comment="Used for creating the instance register storage">;
+        short VMInstanceUnkRegisterDwordSize;
+        short VMHostMethodInfoCount;
+        short VMExternalInfoCount;
+        short VMOutRegisterInfoCount;
     
         FSeek(BasePos + 0x2a);
         short modelSetSymbols;
@@ -143,11 +143,11 @@ typedef struct
         int MaterialsOffset <format=hex, fgcolor=cRed>;
         int TexSetTableOffset <format=hex, fgcolor=cRed>;
         int bindMatrixMapOffset <format=hex, fgcolor=cRed>;
-        int HostMethodInfoOffset <format=hex, fgcolor=cRed>; // strides of 0x08
+        int VMHostMethodInfoOffset <format=hex, fgcolor=cRed>; // strides of 0x08
     
         FSeek(BasePos + 0x50);
-        int ExternalInfoOffset <format=hex, fgcolor=cRed>;
-        int OutRegisterInfoOffset <format=hex, fgcolor=cRed>;
+        int VMExternalInfoOffset <format=hex, fgcolor=cRed>;
+        int VMOutRegisterInfoOffset <format=hex, fgcolor=cRed>;
         int modelSetSymbolsOffset <format=hex, fgcolor=cRed>; // 0x08 toc - offset then index?
         int VMBytecodeOffset <format=hex, fgcolor=cRed>;
         int VariationMaterialsOffset <format=hex, fgcolor=cRed>;
@@ -241,14 +241,14 @@ typedef struct
         }
     } TexSetColors;
 
-    if (Header.HostMethodInfoCount > 0)
+    if (Header.VMHostMethodInfoCount > 0)
     {
         struct
         {
             local int i = 0;
-            for (i = 0; i < Header.HostMethodInfoCount; i++)
+            for (i = 0; i < Header.VMHostMethodInfoCount; i++)
             {
-                FSeek(BasePos + Header.HostMethodInfoOffset + (i * 0x08));
+                FSeek(BasePos + Header.VMHostMethodInfoOffset + (i * 0x08));
                 RegisterInfo HostMethodInfo;
             }
             
@@ -256,14 +256,14 @@ typedef struct
         } HostMethodInfos;
     }
     
-    if (Header.OutRegisterInfoOffset > 0)
+    if (Header.VMOutRegisterInfoOffset > 0)
     {
         struct
         {
             local int i = 0;
-            for (i = 0; i < Header.OutRegisterInfoCount; i++)
+            for (i = 0; i < Header.VMOutRegisterInfoCount; i++)
             {
-                FSeek(BasePos + Header.OutRegisterInfoOffset + (i * 0x08));
+                FSeek(BasePos + Header.VMOutRegisterInfoOffset + (i * 0x08));
                 RegisterInfo OutRegisterInfo;
             }
             

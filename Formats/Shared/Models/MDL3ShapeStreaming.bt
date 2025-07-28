@@ -45,7 +45,7 @@ typedef struct
 {
     int ShapeStreamChunkCount <fgcolor=cGreen>;
     int ShapeStreamChunkInfoOffset <format=hex, fgcolor=cRed>;
-    int BufferSize <format=hex, fgcolor=cGreen, comment="Should be always 0x80 aligned">;
+    int BufferSize <format=hex, fgcolor=cGreen, comment="Game aligns this to 0x80. VersionMajor > 1. See: GT6 1.22 EU FUN_008d5eec">;
     int ShapeStreamChunkGroupsOffset <format=hex, fgcolor=cRed>;
     int _empty_[3];
     short ShapeStreamChunkGroupCount <fgcolor=cGreen>;

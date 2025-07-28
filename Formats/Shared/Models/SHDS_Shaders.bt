@@ -1,0 +1,309 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "RSXShaders.bt"
+
+typedef struct
+{
+    uint NameOffset <format=hex, fgcolor=cRed>;
+    uint ArrayIndex <comment="This is addressed by FVFs on top of the name search">;
+    short VertexShaderID;
+    short FragmentShaderID <comment="Points to either 0x24 or 0x2C in ShaderSet header">;
+
+    FSeek(startof(ModelSetHeader) + NameOffset);
+    string Name <bgcolor=cLtGray>;
+    
+    FSeek(startof(this) + 0x0C);
+} ShaderDefinition <read=Str("%s [%d] (VertexShader: %d, FragmentShader: %d)", Name, ArrayIndex, VertexShaderID, FragmentShaderID)>;
+
+typedef struct
+{
+    int NameOffset <format=hex, fgcolor=cRed>;
+    short unk <comment="Not seen in use">;
+    SrcReg unk2 <comment="Used for PMSH struct field entries, might be a bit offset?">;
+    int Field_0x08;
+    int Field_0x0C;
+
+    FSeek(startof(ModelSetHeader) + NameOffset);
+    string Name;
+
+    FSeek(startof(this) + 0x10);
+} ShaderSemantic <read=Name, comment="Referenced by each FVF field when searching, search happens by name">;
+
+typedef struct
+{
+    int NameOffset <format=hex, fgcolor=cRed>;
+    byte field_0x04;
+    byte field_0x05_1 : 4;
+    byte field_0x05_2 : 4;
+    short SlotId <comment="Passed to CELL_GCM_NV4097_SET_TRANSFORM_CONSTANT_LOAD - Refer to GT6 EU 1.22 0010023f0 - This is just the const register it goes to, 0-467">;
+    
+    // GTHD 1668.elf debug assert says 'shaderdriver.cxx:401 var.elements_'?
+    short SlotArrayStart <comment="SlotId + this, refer to GT6 EU 1.22 00ffeb00 for an example">;
+    short SlotArrayEnd;
+    byte UnkFlags;
+    byte TextureId <comment="Refer to GT6 EU 1.22 FUN_00ffcf2c for an example">;
+    
+    // GTHD 1668.elf Debug assert says: 'shaderdriver.cxx:117 v.semantics_ < SEMANTICS_MAX' where max is 78
+    ushort Semantic <comment="Refer to GT6 EU 1.22 FUN_008fedec - indexed to switch table if not -1. Up to 173 in GT6 1.22, more were added across games">;
+    
+    FSeek(startof(ModelSetHeader) + NameOffset);
+    string Name;
+
+    FSeek(startof(this) + 0x10);
+} ShaderConstSource <read=Name>;
+
+typedef struct
+{
+    int RSXVertexProgramOffset <format=hex, fgcolor=cRed, comment="ucode">;
+    int RSXVertexProgramSize <format=hex>;
+    short Count_0x10 <fgcolor=cGreen>;
+    short SemanticCount <fgcolor=cGreen>;
+    short VariableCount <fgcolor=cGreen>;
+    short empty;
+    int UnkOffset_0x10 <format=hex, fgcolor=cRed>;
+    int SemanticsOffset <format=hex, fgcolor=cRed>; 
+    int VariablesOffset <format=hex, fgcolor=cRed>;
+    int UnkOffset_0x1C <format=hex, fgcolor=cRed>;
+    short UnkField_0x20;
+    short Entry0x38Index <comment="Refer to GT6 EU 1.22 0010023e4 and 008fec90">;
+    int UnkField_0x24;
+
+    FSeek(startof(ModelSetHeader) + RSXVertexProgramOffset);
+    RSXVertexProgram RSXVertexProgram_;
+
+    if (Count_0x10)
+    {
+        Printf("TODO: Implement ShaderProgram Entry 0x10\n");   
+    }
+    
+    local int j = 0;
+    for (j = 0; j < SemanticCount; j++)
+    {
+        FSeek(startof(ModelSetHeader) + SemanticsOffset + (j * 0x10));
+        ShaderSemantic Semantic;
+    }
+
+    for (j = 0; j < VariableCount; j++)
+    {
+        FSeek(startof(ModelSetHeader) + VariablesOffset + (j * 0x10));
+        ShaderConstSource Variables;
+    }
+
+    if (UnkOffset_0x1C)
+    {
+        Printf("TODO: Implement VertexProgram Entry 0x1C\n");   
+    }
+    
+    FSeek(startof(this) + 0x28);
+} VertexShader;
+
+typedef struct
+{
+    int FragmentShaderCgData0ffset <format=hex, fgcolor=cRed, comment="Some offset in the main shader header already point to it">;
+    int FragmentShaderCgSize <format=hex>;
+    ushort NumConstants;
+    byte UnkCount_0x38;
+    byte UnkCount_0x14;
+    short UnkCount_0x18;
+    short UnkFlags_0x0E <comment="Refer to GT6 EU 1.22 008fd9b8">;
+    int ConstantsOffset <format=hex, fgcolor=cRed>;
+    int UnkOffset_0x14 <format=hex, fgcolor=cRed>;
+    int UnkOffset_0x18 <format=hex, fgcolor=cRed>;
+    int UnkOffset_0x1C <format=hex, fgcolor=cRed>;
+    int unk_[2];
+} FragmentShaderBase;
+
+typedef struct
+{
+    // No clue if this is correct, but refer to GT6 1.22 EU 008fc824, which I called ShaderSet::GetFragmentShaderByIndex
+    // It grabs an entry at 0x24 with stride 0x28 if 0x2C doesn't exist
+    // Otherwise returns an entry from 0x2C
+    FragmentShaderBase Base;
+    
+    int pad[4];
+    int UnkOffset_0x38 <format=hex, fgcolor=cRed>;
+    int field_0x3C;
+    int field_0x40;
+    int UnkOffset_0x44;
+
+    local int j = 0;
+    if (Base.NumConstants)
+    {
+        FSeek(startof(ModelSetHeader) + Base.ConstantsOffset);
+        struct
+        {
+            for (j = 0; j < Base.NumConstants; j++)
+            {
+                FSeek(startof(ModelSetHeader) + Base.ConstantsOffset + (j * 0x10));
+                ShaderSemantic Constant_;
+            }
+        } Constants;
+    }
+    
+    for (j = 0; j < Base.UnkCount_0x14; j++)
+    {
+        FSeek(startof(ModelSetHeader) + Base.UnkOffset_0x14 + (j * 0x10));
+        ShaderConstSource Entry_0x14;
+    }
+
+    for (j = 0; j < Base.UnkCount_0x18; j++)
+    {
+        FSeek(startof(ModelSetHeader) + Base.UnkOffset_0x18 + (j * 0x10));
+        ShaderConstSource Entry_0x18;
+    }
+
+    for (j = 0; j < Base.UnkCount_0x38; j++)
+    {
+        FSeek(startof(ModelSetHeader) + UnkOffset_0x38 + (j * 0x10));
+        ShaderConstSource Entry_0x38;
+    }
+
+    FSeek(startof(this) + 0x48);
+} FragmentShader;
+
+typedef struct
+{
+
+    int NameOffset <format=hex, fgcolor=cRed>;
+    int ShaderID <comment="Cross referenced with definitions">;
+    int Field_0x08;
+    int UnkOffset_0x0C <format=hex, fgcolor=cRed>;
+    int Field_0x10;
+    int Field_0x14;
+    int Field_0x18;
+    int Field_0x1C;
+    int Field_0x20;
+    int Field_0x24;
+
+    FSeek(startof(ModelSetHeader) + NameOffset);
+    string Name <comment="Used for searching">;
+
+    FSeek(startof(this) + 0x28);
+} Entry0x3C <read=Name, comment="Refered to by Material Data 0x14 Entry by both Name and ID">;
+
+typedef struct
+{
+
+    int UnkOffset_0x00 <format=hex, fgcolor=cRed>;
+    int ProgramOffset_0x04 <format=hex, fgcolor=cRed>;
+    int ProgramSize_0x04 <format=hex>;
+    int Field_0x0C <format=hex, fgcolor=cRed>;
+    int Field_0x10;
+    int Field_0x14;
+    int Field_0x18;
+    int Field_0x1C;
+
+    FSeek(startof(this) + 0x20);
+} Entry0x40 <comment="Referenced by 0x78's entries (entry->0x00 (short)) in model set">;
+
+typedef struct SHDS
+{
+    struct SHDSHeader
+    {
+        char Magic[4];
+        int _empty_;
+        int RelocationPtr <format=hex>;
+        int _empty;
+        int Offset0x10;
+        short Empty;
+        ushort ShaderDefinitionCount <fgcolor=cGreen>;
+        ushort VertexShaderCount <fgcolor=cGreen>;
+        ushort FragmentShaderCount <fgcolor=cGreen, comment="Count for 0x24 and 0x2C">;
+        uint ShaderDefinitionsOffset_0x1C <format=hex, fgcolor=cRed, comment="0x0C Stride, also used in MDL3 itself">;
+        uint VertexShadersOffset <format=hex, fgcolor=cRed, comment="0x28 Stride">;
+        uint UnkFragmentShadersOffset <format=hex, fgcolor=cRed, comment="0x28 Stride">;
+        int RelocationSize <format=hex>;
+        uint FragmentShadersOffset <format=hex, fgcolor=cRed, comment="0x48 Stride">;
+        short Count0x38 <fgcolor=cGreen>;
+        short Count0x3C <fgcolor=cGreen>;
+        short Count0x40 <fgcolor=cGreen>;
+        short pad;
+        uint Offset0x38 <format=hex, fgcolor=cRed, comment="0x10 Stride">;
+        uint Offset0x3C <format=hex, fgcolor=cRed, comment="0x4 Stride">;
+        uint Offset0x40 <format=hex, fgcolor=cRed, comment="0x20 Stride">;
+    } ShaderSetHeader <bgcolor=cPurple>;
+
+    local int i = 0;
+    if (ShaderSetHeader.ShaderDefinitionCount > 0)
+    {
+        FSeek(startof(ModelSetHeader) + ShaderSetHeader.ShaderDefinitionsOffset_0x1C);
+        struct
+        {
+            for (i = 0; i < ShaderSetHeader.ShaderDefinitionCount; i++) 
+            {
+                FSeek(startof(ModelSetHeader) + ShaderSetHeader.ShaderDefinitionsOffset_0x1C + (i * 0x0C));
+                ShaderDefinition ShaderDef;
+            }
+        } ShaderDefinitions;
+    }
+
+    if (ShaderSetHeader.VertexShaderCount > 0)
+    {
+        FSeek(startof(ModelSetHeader) + ShaderSetHeader.VertexShadersOffset);
+        struct
+        {
+            for (i = 0; i < ShaderSetHeader.VertexShaderCount; i++) 
+            {
+                FSeek(startof(ModelSetHeader) + ShaderSetHeader.VertexShadersOffset + (i * 0x28));
+                VertexShader VertexShader_;
+            }
+        } VertexShaders;
+    }
+
+    if (ShaderSetHeader.FragmentShaderCount > 0 && ShaderSetHeader.UnkFragmentShadersOffset)
+    {
+        Printf("TODO: ShaderSet FragmentShaders1\n");
+        // Stride 0x28
+    }
+    
+    if (ShaderSetHeader.FragmentShaderCount > 0)
+    {
+        FSeek(startof(ModelSetHeader) + ShaderSetHeader.FragmentShadersOffset);
+        struct
+        {
+            for (i = 0; i < ShaderSetHeader.FragmentShaderCount; i++) 
+            {
+                FSeek(startof(ModelSetHeader) + ShaderSetHeader.FragmentShadersOffset + (i * 0x48));
+                FragmentShader FragmentShader_;
+            }
+        } FragmentShaders;
+    }
+
+    if (ShaderSetHeader.Count0x3C > 0)
+    {
+        FSeek(startof(ModelSetHeader) + ShaderSetHeader.Offset0x3C);
+        struct
+        {
+            int Offsets[ShaderSetHeader.Count0x3C];
+            for (i = 0; i < ShaderSetHeader.Count0x3C; i++) 
+            {
+                FSeek(startof(ModelSetHeader) + Offsets[i]);
+                Entry0x3C entry;
+            }
+        } Entries0x3C;
+    }
+
+    if (ShaderSetHeader.Count0x40 > 0)
+    {
+        FSeek(startof(ModelSetHeader) + ShaderSetHeader.Offset0x40);
+        struct
+        {
+            for (i = 0; i < ShaderSetHeader.Count0x40; i++) 
+            {
+                FSeek(startof(ModelSetHeader) + ShaderSetHeader.Offset0x40 + (i * 0x20));
+                Entry0x40 Entry;
+            }
+        } Entries0x40;
+    }
+} ShaderSet;

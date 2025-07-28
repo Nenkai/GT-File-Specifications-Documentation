@@ -30,8 +30,10 @@ typedef struct
     short SizeInts;
     short StorageIndex;
 
-    FSeek(NameOffset);
+    FSeek(startof(ModelSetHeader) + NameOffset);
     string Name;
+    
+    FSeek(startof(this) + 0x08);
 } VMHostMethod <read=Name>;
 
 typedef struct
@@ -55,11 +57,10 @@ typedef struct
 
 typedef struct
 {
-    for (i = 0; i < ModelSetHeader.HostMethodCount; i++)
+    for (i = 0; i < ModelSetHeader.VMHostMethodCount; i++)
     {
-        FSeek(startof(ModelSetHeader) + ModelSetHeader.HostMethodsOffset + (i * 0x08));
+        FSeek(startof(ModelSetHeader) + ModelSetHeader.VMHostMethodsOffset + (i * 0x08));
         VMHostMethod Var;
-        FSeek(FileSize());
     }
 
 } VMHostMethods;
@@ -91,6 +92,8 @@ typedef struct
 
             FSeek(startof(ModelSetHeader) + NameOffset);
             string Name;
+            
+            FSeek(startof(this) + 0x10);
         } UnkEntry_0x08 <read=Name>;
     }
 

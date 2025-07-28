@@ -37,8 +37,7 @@ typedef struct
 {
     local int basePos = FTell();
 
-    int FVFNameOffset <format=hex, fgcolor=cRed>;
-    int ShaderRelatedIndex;
+    ShaderKey ShaderKey_;
     int FieldDefsOffset <format=hex, fgcolor=cRed>;
     short RuntimeIndex <comment="Set to -1 At runtime">;
     short Pad;
@@ -60,8 +59,5 @@ typedef struct
     FSeek(startof(ModelSetHeader) + FVFArraysOffset);
     FVFFieldArrayDefinition ArrayDefinition;
 
-    FSeek(startof(ModelSetHeader) + FVFNameOffset);
-    string FVFName <bgcolor=cLtGray, comment="Used directly to search in Shaders">;
-
     FSeek(startof(this) + 0x70);
-} FlexibleVertexDefinition <bgcolor=cBlue, read=FVFName>;
+} FlexibleVertexDefinition <bgcolor=cBlue>;

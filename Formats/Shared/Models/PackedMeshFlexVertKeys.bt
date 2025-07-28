@@ -1,0 +1,22 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    local int i = 0;
+    for (i = 0; i < ModelSetHeader.PackedMeshFlexVertShaderKeyCount; i++)
+    {
+        FSeek(startof(ModelSetHeader) + ModelSetHeader.PackedMeshFlexVertShaderKeysOffset + (i * 0x08));
+        ShaderKey ShaderKey_;
+    }
+} PacekdMeshFlexVertShaderKeys <bgcolor=cDkGreen>;

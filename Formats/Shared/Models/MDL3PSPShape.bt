@@ -1,0 +1,82 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+#include "../../Sony/Graphics/GEEnums.bt"
+
+typedef struct
+{
+    // GT6 EU 1.22 FUN_8e3910, FUN_008e37ac
+    uint GECommandsOffset <format=hex, fgcolor=cRed, comment="Should be aligned to 0x10">;
+    uint Field_0x04 <format=hex, fgcolor=cRed>;
+    uint ShapeCommandsSize <format=hex>;
+    ushort Field_0x0C;
+    ushort Field_0x0E;
+    uint Field_0x10;
+    ushort TotalPrimCount;
+    ushort Flags <format=hex>;
+    uint Field_0x18 <comment="Used if Flag & 8 or & 0xF == 0, refer to GTPSP EU 08af8598">;
+    uint Field_0x1C <comment="Used if Flag & 1 or 2 or 4 or 0x14, refer to GTPSP EU 08af8598">;
+    
+    // IMPORTANT! VADR is remapped
+    // To get the verts, start of commands + virtual address of VADR.
+    
+    FSeek(startof(ModelSetHeader) + GECommandsOffset);
+    struct
+    {
+        local int end = false;
+    
+        while (!end)
+        {
+            union
+            {
+                local SCE_GE_CMD opcode;
+                uint CommandBytes <format=hex>;
+                
+                opcode = ReadUInt(FTell()) >> 24;
+                switch (opcode)
+                {
+                    case SCE_GE_CMD_NOP: SCE_GE_NOP nop; break;
+                    case SCE_GE_CMD_VADR: SCE_GE_VADR vadr; break;
+                    case SCE_GE_CMD_BASE: SCE_GE_BASE base; break;
+                    case SCE_GE_CMD_VTYPE: SCE_GE_VTYPE vtype; break;
+                    case SCE_GE_CMD_PRIM: SCE_GE_PRIM prim; break;
+                    case SCE_GE_CMD_LTE: SCE_GE_LTE lte; break;
+                    case SCE_GE_CMD_TME: SCE_GE_TME tme; break;
+                    case SCE_GE_CMD_FGE: SCE_GE_FGE fge; break;
+                    case SCE_GE_CMD_ABE: SCE_GE_ABE abe; break;
+                    case SCE_GE_CMD_MATERIAL: SCE_GE_MATERIAL material; break;
+                    case SCE_GE_CMD_ATE: SCE_GE_ATE ate; break;
+                    case SCE_GE_CMD_TLEVEL: SCE_GE_TLEVEL tlevel; break;
+                    case SCE_GE_CMD_ATEST: SCE_GE_ATEST atest; break;
+                    case SCE_GE_CMD_ZTEST: SCE_GE_ATEST ztest; break;
+                    case SCE_GE_CMD_BLEND: SCE_GE_BLEND blend; break;
+                    case SCE_GE_CMD_RET:
+                        end = true;
+                        break;
+                        
+                    default:
+                        Printf("TODO: Implement %s\n", EnumToString(opcode));
+                        break;
+                }
+            } CommandUnion <bgcolor=cBlack, optimize=false, read=EnumToString(opcode)>;
+        }
+    } GECommands;
+    
+    FSeek(startof(ModelSetHeader) + Field_0x04);
+    struct
+    {
+        int A;
+        int B;
+    } Test2[Field_0x0C];
+    FSeek(startof(this) + 0x20);
+} PSPShape <bgcolor=cGreen>;

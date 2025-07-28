@@ -40,11 +40,12 @@ typedef struct
     * Start garage, breakpoint should hit. Search for modelset bytes using Memory Viewer in RPCS3, if not found Run, repeat till found in log
 	    NOTE: thread is ksF3, the last one with that name
     * Once log shows a result, copy address
-    * In WinDbg, run command ba r<size> <x><address> - replace <size> with byte size like 4, <x> with 3 (normally) so that you have "ba r4 342C337A0" as example
+    * In WinDbg, break, then in command, run "ba r<size> <x><address>" - replace <size> with byte size like 4, <x> with 3 (normally) so that you have "ba r4 342C337A0" as example
+    *    ^ NOTE: Type the address, do not paste it. It hands WinDbg for whatever reason.
     * In RPCS3, remove breakpoint, and run.
     
     You should get a hit in WinDbg somewhere around spu_thread::do_dma_transfer
-    Copy the address of the dst register, set a break there, then run
+    Copy the address of the dst register after stepping once in source view, set a memory break there, then run
     You should land in an instruction. Make sure you use source level view; step out until you're out of the instruction, and try to get the LS and add SPU->PC to this
     You should now have the address to the instruction that did the last instruction, try to match it in Ghidra/IDA against the Spu Job binaries
     
@@ -69,8 +70,19 @@ typedef struct
     (0xE8000000 is the local storage offset for the current spu thread. You can see it above the register list in RPCS3.)
     
     Also Ghidra likes to try and open each switch block as their own function but that's wrong, make sure you are decompiling FUN_000071E8
+    
+    sp + 0x20 = vert count
+    sp + 0x90 = bitstream pointer
+    sp + 0xa0..0xb0 = current layouts
+    sp + 0x130 = UnkOffset0x10 pointer
+    sp + 0x160 = current index for opcode 22
+    sp + 0x170 = current index for opcode 7
+    sp + 0x360 = also bitstream pointer? previous?
     */
 
+    /* For more info about tessellation, refer to https://archive.org/details/polyphony_digital_lectures/
+     * "Creating car catalog photos in a game ~The story of modeling and rendering in Gran Turismo~"
+     */
     typedef enum
     {
         SmoothMesh_End = 0,
@@ -99,7 +111,7 @@ typedef struct
         SmoothMesh_Opcode23 = 23,
     } SmoothMeshOpcode;
     
-    local int currentLayoutIndex = 1; // Accurate to SPU code
+    local int opcode22LayoutIndex = 1; // Accurate to SPU code
     local int currentLayoutIndexForOpcode7 = 0; // Accurate to SPU code
     local int layoutIndices[2]; // Accurate to SPU code
     local int lastIndex = -1; // To emulate opcode 7
@@ -204,8 +216,9 @@ typedef struct
                     break;
                 
                 case 11: // OK!
-                    int Unk : 10;
-                    int Unk2 : 12;
+                    // Does something with UnkOffset0x10, which is 5 bytes each
+                    int UnkStartIndex : 10;
+                    int UnkCount : 12;
                     break;
                     
                 case 12: // OK!
@@ -216,6 +229,13 @@ typedef struct
                     // ...
                     // [97d8] wrch MFC_Size, r116
                     int Unk2 : 9;
+                    break;
+                    
+                case 13: // OK!
+                    AlignToNextByte(); // Intended
+                    
+                    // 256 bits
+                    float Unks[8];
                     break;
                     
                 case 14: // OK!
@@ -246,6 +266,9 @@ typedef struct
                     int type17_a : 2;
                     break;
                     
+                case 19: // OK!
+                    break;
+                    
                 case 21: // OK!
                     int NumEntries : 6;
                     int UnkBit1 : 1; // This is used for opcode 22 and 23, the latter especially determines a bit size
@@ -270,7 +293,7 @@ typedef struct
                     
                     // The switch happens before the data. Accurate to SPU code
                     if (IsSwitchLayout)
-                        currentLayoutIndex ^= 1;
+                        opcode22LayoutIndex ^= 1;
 
                     // spu debugging: mf07 - PackedMesh[4] - Opcode_[8] = 0x1e0 * 0x19?
                     // spu debugging: mf07 - PackedMesh[4] - Opcode_[15] = 0x140 * 0x1c (0x8c0)?
@@ -283,7 +306,7 @@ typedef struct
                     // 0x08 is UnkData[3] byte at 0x01
                     
                     // the UnkData selected depends on opcode 7, at least the ones that are pushed for use
-                    local int lay = layoutIndices[currentLayoutIndex];
+                    local int lay = layoutIndices[opcode22LayoutIndex];
                     local int countFromLayout = UnkData0x1C.Unk[lay].unk2;
                     local int mainEntryNum = Align(EntryNum + 1, 4) / 4;
 
@@ -335,7 +358,7 @@ typedef struct
             }
         } Opcode_ <optimize=false, read=Str("Type %s", (EnumToString(DataType) == "" ? Str("%d", DataType) : Str("%s (%d)", EnumToString(DataType), DataType)))>;
     }
-} PackedFaceDescriptors;
+} PackedCommands;
 
 #include "../../Shared/ModelVM.bt"
         
@@ -348,94 +371,160 @@ typedef struct
     int UnkOffset0x08 <format=hex, fgcolor=cRed>;
     int NonPackedVertDataOffset <format=hex, fgcolor=cRed>;
     int UnkOffset0x10 <format=hex, fgcolor=cRed>;
-    int PackedFacesOffset <format=hex, fgcolor=cRed>;
-    int PackedFaceDescriptorsOffset <format=hex, fgcolor=cRed>;
+    int PackedIndexBufferOffset <format=hex, fgcolor=cRed>;
+    int PackedCommandsOffset <format=hex, fgcolor=cRed>;
     int unk;
-    short unk;
+    ushort Flags <format=hex>; // 0x20 = Data0x08? 0x40 = Data0x10?
     short FlexVertCount;
-    short unk;
+    short UnkPosCountFor0x08 <comment="0x0A each (or bit size of position attribute?)">;
     short NonPackedFlexVertCount;
-    short StrideCountOf0x10 <comment="0x10 each">;
-    short PackedFacesQuadwordSize <comment="0x10 each">;
-    short PackedFaceDescriptorQuadwordSize <format=hex, comment="0x10 each">;
+    short PackedUnkOffset0x10QuadwordSize <format=hex, comment="0x10 each">;
+    short PackedIndexBufferQuadwordSize <format=hex, comment="0x10 each">;
+    short PackedCommandsQuadwordSize <format=hex, comment="0x10 each">;
     byte PackedFaceIndexBitSize;
     byte Pad;
 
-    FSeek(startof(ModelSetHeader) + PackedFacesOffset);
+    if ((Flags & 0x20) && UnkOffset0x08 != 0)
+    {
+        // SPU PC of the LQD that loads UnkOffset0x08 : 0x11dbc
+        // Another one: 646c
+        
+        // Is this only position components? 10 bytes always seems to fit 80 bits for the position component
+        FSeek(startof(ModelSetHeader) + UnkOffset0x08);
+        struct
+        {
+            hfloat X;
+            hfloat Y;
+            hfloat Z;
+            float W;
+        } UnkPositions[UnkPosCountFor0x08];
+    }
+    
+    if (UnkOffset0x10 != 0)
+    {
+        // SPU PC of the LQD that loads UnkOffset0x10 : 0x123B4, 0x126bc
+        // Other ones (LQD): 0x11e64 (0x11e94 in ghidra), 0x11fb4 
+        // Opcode 12 of commands aligns the pointer to the nearest 0x10
+        FSeek(startof(ModelSetHeader) + UnkOffset0x10);
+        union
+        {
+            local int totalSize = (PackedUnkOffset0x10QuadwordSize * 0x10);
+            if (Flags & 0x40)
+                totalSize = Align(totalSize + (FlexVertCount * 1), 0x10);
+            
+            if (Flags & 0x80)
+                totalSize = Align(totalSize + (FlexVertCount * 4), 0x10);
+                 
+            byte Unk0x10Bytes[totalSize];
+            struct
+            {
+                if (PackedUnkOffset0x10QuadwordSize)
+                {
+                    struct
+                    {
+                        int unk : 5; // Multiplied by 0x40?
+                        int unk2 : 3;
+                        uint unk3 : 32;
+                    } UnkArray0x10[(PackedUnkOffset0x10QuadwordSize * 0x10) / 5] <optimize=false, comment="Used by command opcode 11, 5 bytes each">;
+                }
+                
+                // Intentional
+                FSeek(Align(FTell(), 0x10));
+                if (Flags & 0x40)
+                {
+                    // One per vertex
+                    byte UnkFlag0x40Array[FlexVertCount];
+                }
+                
+                // Intentional
+                FSeek(Align(FTell(), 0x10));
+                if (Flags & 0x80)
+                {
+                    // One per vertex
+                   int UnkFlag0x80Array[FlexVertCount];
+                }
+            } Unk0x10;
+        } Unk0x10Union <bgcolor=cRed>;
+    }
+    FSeek(startof(ModelSetHeader) + PackedIndexBufferOffset);
     union
     {
-        byte PackedFaceBytes[0x10 * PackedFacesQuadwordSize];
+        byte PackedFaceBytes[0x10 * PackedIndexBufferQuadwordSize];
         struct
         {
             local int j = 0;
-            local int estimatedFaceCount = ((PackedFacesQuadwordSize * 0x10) * 8) // num quadwords * bits per byte
+            local int estimatedFaceCount = ((PackedIndexBufferQuadwordSize * 0x10) * 8) // num quadwords * bits per byte
                                                 / PackedFaceIndexBitSize;
             for (j = 0; j < estimatedFaceCount; j++)
                 int faceIdx : PackedFaceIndexBitSize;
         } FaceIndices;
     } PackedFacesUnion <comment="Face Indices", bgcolor=cYellow>;
 
-    FSeek(startof(ModelSetHeader) + PackedFaceDescriptorsOffset);
+    FSeek(startof(ModelSetHeader) + PackedCommandsOffset);
     union
     {
-        // GT61.00 -> mf07 -> FlexFormat[4] 
-        // - 0xC360 to 0xC381
-        // - 0xC381 to 0xC384
-        // - 0xC384 to 0xC38A
-        
-        byte PackedFaceDescriptorBytes[0x10 * PackedFaceDescriptorQuadwordSize];
-        PackedFaceDescriptors FaceDescriptors;
-    } PackedFacesDescriptorUnion <bgcolor=cDkYellow>;
+        byte PackedCommandsBytes[0x10 * PackedCommandsQuadwordSize];
+        PackedCommands PackedCommands_;
+    } PackedCommandsUnion <bgcolor=cDkYellow>;
 
     FSeek(startof(this) + 0x30);
 } SmoothMeshData;
 
 typedef struct
 {
-    short FlexDeclarationIndex;
-    short ElementBitLayoutDefinitionIndex;
-    short Field_0x04;
+    short FlexDeclarationIndex <comment="May be -1 for not specified">;
+    short ElementBitLayoutDefinitionIndex <comment="May be -1 for not specified">;
+    short ElementBitLayoutDefinitionIndex2 <comment="May be -1 for not specified, Additional? Refer to GT6 EU 1.22 00c2ea90">;
     byte SmoothMeshParamCount;
     byte Count_0x07;
     int UnkOffset <format=hex, fgcolor=cRed>;
-    float Field_0x0C;
+    float Field_0x0C <comment="Refer to GT6 EU 1.22 00c2ea94">;
     int DataOffset <format=hex, fgcolor=cRed>; // combine with countofunk
-    int BBoxOffset <format=hex, fgcolor=cRed>;
-    float unk;
-    float unk;
-    short unk;
-    short unk;
-    short unk;
-    short unk;
-    short unk;
-    short unk;
+    int BBoxOffset <format=hex, fgcolor=cRed, comment="Refer to GT6 EU 1.22 00c2ead4">;
+    float Float_0x18;
+    float Float_0x1C;
+    short Unk_0x20 <comment="Refer to GT6 EU 1.22 00c2f798">;
+    short Unk_0x22;
+    short Unk_0x24;
+    short Unk_0x26 <comment="Refer to GT6 EU 1.22 00c2ea30">;
+    short Unk_0x28;
+    short Unk_0x2A <comment="Refer to GT6 EU 1.22 00c2ea24">;
     int pad;
     
-    FSeek(startof(ModelSetHeader) + UnkOffset);
-    struct
+    if (UnkOffset)
     {
+        FSeek(startof(ModelSetHeader) + UnkOffset);
         struct
         {
-            int Field_0x00;
-            int Field_0x04;
-        } Unk_0x08[Count_0x07] <bgcolor=cLtBlue>;
-    } Unks_0x08[SmoothMeshParamCount] <optimize=false>;
+            struct
+            {
+                int Field_0x00;
+                int Field_0x04;
+            } Unk_0x08[Count_0x07] <bgcolor=cLtBlue>;
+        } Unks_0x08[SmoothMeshParamCount] <optimize=false>;
+    }
     
-    local int i = 0;
-    if (DataOffset != 0)
+    if (DataOffset)
     {
-        for (i = 0; i < SmoothMeshParamCount; i++)
+        local int i = 0;
+        if (DataOffset != 0)
         {
-            FSeek(startof(ModelSetHeader) + DataOffset + (i * 0x30));
-            SmoothMeshData SmoothMeshSPUData;
+            for (i = 0; i < SmoothMeshParamCount; i++)
+            {
+                FSeek(startof(ModelSetHeader) + DataOffset + (i * 0x30));
+                SmoothMeshData SmoothMeshSPUData;
+            }
         }
     }
     
-    FSeek(startof(ModelSetHeader) + BBoxOffset);
-    struct
+    if (BBoxOffset)
     {
-        Vec3 BBox[8] <bgcolor=cBlue>;
-    } BBoxes[SmoothMeshParamCount];
+        FSeek(startof(ModelSetHeader) + BBoxOffset);
+        struct
+        {
+            Vec3 BBox[8] <bgcolor=cBlue>;
+        } BBoxes[SmoothMeshParamCount];
+    }
     
     FSeek(startof(this) + 0x30);
 } PackedMesh;
@@ -469,39 +558,41 @@ typedef struct
     byte FlexOffset;
     byte ElementCount;
     CELL_GCM_VERTEX_TYPE Type;
-} FlexElementDef;
+} VertexAttributeDef;
 
 typedef struct
 {
-    byte ElementCount;
-    byte ElementCount2;
-    byte Unk;
+    byte VertexAttributeCount <fgcolor=cGreen>;
+    byte VertexAttributeCount2 <fgcolor=cGreen>;
+    byte AlignMaybe;
     byte Stride;
-    int unk;
-    int ElementDefsOffset;
-    int ElementNamesArrayOffset <format=hex, fgcolor=cRed>;
-
-    FSeek(startof(ModelSetHeader) + ElementDefsOffset);
-    FlexElementDef elementDefs1[ElementCount];
     
-    if (ElementCount2)
-        FlexElementDef elementDefs2[ElementCount2];
+    // GT6 EU 1.22 00c30da0 -> void PackedMesh_PMSH::ComputeSemanticFlagForFlexVert(PackedMesh *packedMesh,ulonglong flexVertDefIndex,ulonglong semanticCount,char **semanticNames,byte *semanticTypes)
+    int SemanticFlags <format=hex, comment="A specific semantic sets a specific flag, the whole thing is then xorred by ^ 0xFFFF - Refer to GT6 EU 1.22 00c30da0">;
+    int VertexAttributesOffset <format=hex, fgcolor=cRed>;
+    int VertexAttributesNamesOffset <format=hex, fgcolor=cRed>;
 
-    FSeek(startof(ModelSetHeader) + ElementNamesArrayOffset);
+    FSeek(startof(ModelSetHeader) + VertexAttributesOffset);
+    VertexAttributeDef VertexAttribute[VertexAttributeCount];
+    
+    if (VertexAttributeCount2)
+        VertexAttributeDef elementDefs2[VertexAttributeCount2];
+
+    FSeek(startof(ModelSetHeader) + VertexAttributesNamesOffset);
     struct
     {
-        int NamesOffsets[ElementCount + ElementCount2] <format=hex, fgcolor=cRed>;
+        int NamesOffsets[VertexAttributeCount + VertexAttributeCount2] <format=hex, fgcolor=cRed>;
     
         local int j = 0;
-        for (j = 0; j < ElementCount + ElementCount2; j++)
+        for (j = 0; j < VertexAttributeCount + VertexAttributeCount2; j++)
         {
             FSeek(startof(ModelSetHeader) + NamesOffsets[j]);
             String Name;
         }
-    } ElementNames;
+    } VertexAttributeNames;
 
-    FSeek(FileSize());
-} FlexStructDeclaration;
+    FSeek(startof(this) + 0x10);
+} FlexStructDeclaration <comment="Directly connected to VertexShader's semantics">;
 
 typedef struct
 {
@@ -573,7 +664,7 @@ typedef struct
                     int Length;
                     int EntriesOffset <format=hex, fgcolor=cRed>;
         
-                    FSeek(startof(ModelSetHeader) + EntriesOffset + (i * 0x10));
+                    FSeek(startof(ModelSetHeader) + EntriesOffset);
                     ElementBitLayoutDefinition ElemBitLayoutDef[Length];
         
                 } ElementBitLayoutDefinitionArray;

@@ -175,11 +175,17 @@ typedef struct TextureSet1
         int unkOffset4 <format=hex, fgcolor=cRed>;
     } Header <size=0x30 , bgcolor=cPurple>;
 
-    FSeek(startof(Header) + Header.PGLUTextureMapOffset);
-    PGLUTexture Textures[Header.PGLUTextureCount];
+    if (Header.PGLUTextureCount)
+    {
+        FSeek(startof(Header) + Header.PGLUTextureMapOffset);
+        PGLUTexture Textures[Header.PGLUTextureCount];
+    }
     
-    FSeek(startof(Header) + Header.TransferInfosOffset);
-    TransferInfo Transfers[Header.TransferCount];
+    if (Header.TransferCount)
+    {
+        FSeek(startof(Header) + Header.TransferInfosOffset);
+        TransferInfo Transfers[Header.TransferCount];
+    }
     
     if (Header.ClutPatchesOffset)
     {
