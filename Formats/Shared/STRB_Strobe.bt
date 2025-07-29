@@ -28,7 +28,6 @@ struct STRB
 
         char Magic[4];
         int Version <comment="2 for GTS/GT7, 0 for everything else. Not backwards compatible">;
-
         if (Version >= 2)
         {
             int64 RelocPtrFileSize <format=hex>;
