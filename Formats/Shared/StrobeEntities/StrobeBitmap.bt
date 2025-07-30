@@ -23,7 +23,9 @@ typedef struct
 
     FSeek(TextureHeaderOffset);
     byte TextureHeader[TextureHeaderSize] <bgcolor=cLtBlue>;
-} Bitmap;
+    
+    FSeek(startof(this) + 0x10);
+} Bitmap <read=Str("%dx%d", Width, Height)>;
 
 typedef struct
 {
@@ -34,7 +36,7 @@ typedef struct
             short Width;
             short Height;
             int TextureSetTextureIndex;
-        } TXSBitmapEntry[Header.BitmapCount];
+        } Bitmap_[Header.BitmapCount];
     }
     else
     {
@@ -43,7 +45,7 @@ typedef struct
         for (j; j < Header.BitmapCount; j++)
         {
             FSeek(Header.BitmapOffset + (j * 0x10));
-            Bitmap shapeObject;
+            Bitmap Bitmap_;
         }
     }
 } BitmapMap;

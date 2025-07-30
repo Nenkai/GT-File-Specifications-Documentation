@@ -16,9 +16,29 @@ LittleEndian();
 typedef struct
 {
     short Type;
-    short GradiantId;
-    short Unk_0x98_Matrix_Id;
-    short BitmapId;
+    if (Type == 0)
+    {
+        short pad;
+        uint Color <format=hex>;   
+    }
+    if (Type == 1 || Type == 2)
+    {
+        short GradientId;
+        short BitmapMatrixId;
+        short pad;
+    }
+    else if (Type == 3 || Type == 4)
+    {
+        short BitmapId;
+        short BitmapMatrixId;
+        short pad;
+    }
+    else if (Type == 5)
+    {
+        short pad;
+        short pad;
+        short pad;
+    }
 
 } FillStyle;
 
@@ -28,6 +48,6 @@ typedef struct
     for (j; j < Header.FillStyleCount; j++)
     {
         FSeek(Header.FillStyleOffset + (j * 0x08));
-        FillStyle shapeObject;
+        FillStyle FillStyle_;
     }
 } FillStyleMap <bgcolor=cDkPurple>;

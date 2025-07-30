@@ -138,8 +138,8 @@ struct STRB
             int unkOffset_0x70 <format=hex, fgcolor=cRed>;
             int unkCount;
     
-            int GradiantOffset <format=hex, fgcolor=cRed>;
-            int GradiantCount <fgcolor=cGreen>;
+            int GradientOffset <format=hex, fgcolor=cRed>;
+            int GradientCount <fgcolor=cGreen>;
     
             int unkOffset_0x80 <format=hex, fgcolor=cRed>;
             int empty;
@@ -171,24 +171,24 @@ struct STRB
     
     FSeek(Header.SpritesOffset);
     if (Header.SpritesCount > 0)
-        StrobeSpriteMap sprites;
+        StrobeSpriteMap Sprites;
     
     FSeek(Header.ShapeObjectOffset);
     if (Header.ShapeObjectCount)
-        ShapeObjectMap sObjectMap;
+        ShapeObjectMap ShapeObjects;
 
     FSeek(Header.FillStyleOffset);
     if (Header.FillStyleCount);
-        FillStyleMap fillStyleMap;
+        FillStyleMap FillStyles;
     
 
     
     FSeek(Header.ActionOffset);
     if (Header.ActionCount)
-        ActionMap actions;
+        ActionMap Actions;
     
     FSeek(Header.BitmapOffset);
     if (Header.BitmapCount)
-        BitmapMap bitmap;
+        BitmapMap Bitmaps;
     
-} StrobeAnimation;
+} StrobeAnimation <open=true>;

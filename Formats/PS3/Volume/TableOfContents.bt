@@ -26,43 +26,47 @@ typedef struct (int size)
 {
     local int i = 0;
 
-    local int baseSegPos;
     for (i; i < size; i++)
     {
-        baseSegPos = FTell();
         struct 
         {
-            byte hasKey : 1;
-            int keyCount : 11 <fgcolor=0x00AA00>;
-            BTreeKeyOffsets offsets(keyCount);
-            int nextBlock : 12 <format=hex, fgcolor=0x00AAFF>;
+            byte HasKey : 1;
+            int KeyCount : 11 <fgcolor=0x00AA00>;
+            BTreeKeyOffsets KeyOffsets(KeyCount);
+            int NextPageOffset : 12 <format=hex, fgcolor=0x00AAFF>;
+        } BTreePage <read=Str("%d keys", KeyCount)>;
         
-            FSeek(baseSegPos + nextBlock);
-        } BTreeSegment;
+        FSeek(startof(BTreePage) + BTreePage.NextPageOffset);
     }
 
-} BTreeSegments;
+} BTreePages;
 
 typedef struct
 {
     local int basePos = FTell();
     
-    byte hasEntries;
-    int IndexBlockOffset : 24 <format=hex, fgcolor=cRed>;
-    short SegmentCount <fgcolor=cGreen>;
+    byte NumIndexer <fgcolor=cGreen>;
+    int IndexPagesOffset : 24 <format=hex, fgcolor=cRed>;
+    short PageCount <fgcolor=cGreen>;
 
-    BTreeSegments segments(SegmentCount);
+    BTreePages Pages(PageCount);
     
-    if (SegmentCount > 1)
+    if (NumIndexer > 0)
     {
-        FSeek(basePos + IndexBlockOffset);
+        FSeek(basePos + IndexPagesOffset);
+        local int i = 0;
         
-        struct
+        for (i; i < NumIndexer; i++)
         {
-            int cnt : 12;
-            BTreeKeyOffsets index(cnt);
-            int next : 12 <format=hex>;
-        } Indexer <bgcolor=cBlue>;
+            struct
+            {
+                int IndexCount : 12;
+                BTreeKeyOffsets Index(IndexCount);
+                int NextPageOffset : 12 <format=hex>;
+            } Indexer <bgcolor=cBlue>;
+            
+            FSeek(startof(Indexer) + Indexer.NextPageOffset);
+        }
     }
 } BTree;
 
@@ -70,29 +74,26 @@ struct TOC
 {
     char Magic[4];
     int FileNameTreeOffset <format=hex, fgcolor=cRed>;
-    int ExtTreeOffset <format=hex>;
+    int FileExtTreeOffset <format=hex, fgcolor=cRed>;
     int FileInfoTreeOffset <format=hex, fgcolor=cRed>;
-
+    int FileEntryTreeCount <fgcolor=cGreen>;
+    uint FileEntryTreeOffsets[FileEntryTreeCount] <comment="Per folder", format=hex, fgcolor=cRed>;
+    
     FSeek(FileNameTreeOffset);
-    BTree fileNames;
+    BTree FileNamesBTree;
 
-    FSeek(ExtTreeOffset);
-    BTree Extensions;
+    FSeek(FileExtTreeOffset);
+    BTree ExtensionsBTree;
 
     FSeek(FileInfoTreeOffset);
-    BTree FileInfos;
+    BTree FileInfosBTree;
 
-    FSeek(0x10);
-    int FileEntryTreeCount <fgcolor=cGreen>;
     local int i = 0;
     struct
     {
-        for (i; i < FileEntryTreeCount; i++)
+        for (i = 0; i < FileEntryTreeCount; i++)
         {
-            FSeek(0x14 + (i * 4));
-            uint fileEntryTreeOffset <format=hex, fgcolor=cRed>;
-            
-            FSeek(fileEntryTreeOffset);
+            FSeek(FileEntryTreeOffsets[i]);
             BTree FileEntries;
         }
     } FileEntryBTrees;

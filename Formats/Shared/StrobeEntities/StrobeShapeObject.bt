@@ -130,7 +130,7 @@ typedef struct (int offset, int length)
             FSeek(offset + (k * 0x10));
         else
             FSeek(offset + (k * 0x08));
-        ShapeGroup group;
+        ShapeGroup Group_;
     }
 } ShapeGroupMap;
 
@@ -166,6 +166,6 @@ typedef struct
             FSeek(Header.ShapeObjectOffset + (j * 0x20));
         else
             FSeek(Header.ShapeObjectOffset + (j * 0x18));
-        ShapeObject shapeObject;
+        ShapeObject ShapeObject_;
     }
 } ShapeObjectMap;

@@ -164,7 +164,7 @@ typedef struct
             short BranchOffset;
             break;
     }
-} ActionCommand <comment=PrintAction>;
+} ActionCommand <read=PrintAction>;
 
 string PrintAction(ActionCommand& cmd)
 {
@@ -182,7 +182,7 @@ typedef struct
     FSeek(CommandsOffset);
     while (FTell() < CommandsOffset + CommandsSize)
     {
-        ActionCommand code <bgcolor=cBlack>;
+        ActionCommand Code_ <bgcolor=cBlack>;
     }
 } Action;
 
@@ -192,6 +192,6 @@ typedef struct
     for (j; j < Header.ActionCount; j++)
     {
         FSeek(Header.ActionOffset + (j * 0x08));
-        Action action;
+        Action Action_;
     }
 } ActionMap;

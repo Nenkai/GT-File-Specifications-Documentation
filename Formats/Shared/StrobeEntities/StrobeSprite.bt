@@ -73,21 +73,24 @@ typedef struct
         int NameLength <fgcolor=cGreen>;
     }
 
-    FSeek(PlaceParamOffset);
-    struct
+    if (PlaceParamCount)
     {
-        Transform transform <comment="Matrix to scale, rotation , position of the character.">;
-        ColorTransform color <comment="Color effect applied to the character.">;
-        float unk;
-        int pad;
-    } PlaceParam[PlaceParamCount] <read=Str("R%d G%d B%d A%d", color.r, color.g, color.b, color.a), bgcolor=cGreen, size=0x24, comment="One per frame for interpolation">;
+        FSeek(PlaceParamOffset);
+        struct
+        {
+            Transform transform <comment="Matrix to scale, rotation , position of the character.">;
+            ColorTransform color <comment="Color effect applied to the character.">;
+            float unk;
+            int pad;
+        } PlaceParam[PlaceParamCount] <read=Str("R%d G%d B%d A%d", color.r, color.g, color.b, color.a), bgcolor=cGreen, size=0x24, comment="One per frame for interpolation">;
+    }
     
     if (NameLength != 0)
     {
         FSeek(NameOffset);
         string Name;
     }
-} PlaceObject <read=Str("Tag %s", EnumToString(TagType))>;
+} PlaceObject <read=Str("[%d->%d] Tag %s %d (%s)", FrameStart, FrameEnd, EnumToString(TagType), CharacterId, exists(Name) ? Name : "")>;
 
 typedef struct
 {
@@ -158,7 +161,7 @@ typedef struct
         int64 FrameLabelCount <fgcolor=cGreen>;
         int64 FrameOffset <format=hex, fgcolor=cRed>;
         int64 FrameCount <fgcolor=cGreen>;
-        int FrameCount2;
+        int FrameEnd;
         int unk2;
     }
     else
@@ -171,7 +174,7 @@ typedef struct
         int FrameLabelCount <fgcolor=cGreen>;
         int FrameOffset <format=hex, fgcolor=cRed>;
         int FrameCount <fgcolor=cGreen>;
-        int FrameCount2 <fgcolor=cGreen>;
+        int FrameEnd <fgcolor=cGreen>;
     }
 
     if (PlaceObjectCount > 0)
@@ -204,7 +207,7 @@ typedef struct
     if (FrameCount > 0)
         FrameMap FrameMap_(FrameOffset, FrameCount);
 
-} StrobeSprite <optimize=false>;
+} StrobeSprite <optimize=false, read=Str("[0->%d] %d object(s), %d Action(s)", FrameEnd, PlaceObjectCount, ActionCount)>;
 
 typedef struct
 {
@@ -215,7 +218,7 @@ typedef struct
             FSeek(Header.SpritesOffset + (i * 0x48));
         else
             FSeek(Header.SpritesOffset + (i * 0x24));
-        StrobeSprite sprite;
+        StrobeSprite Sprite_;
     }
     
 } StrobeSpriteMap;
