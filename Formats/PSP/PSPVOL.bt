@@ -43,7 +43,7 @@ const int BlockSize = 0x800;
 typedef struct
 {
     int offset : 12 <format=hex, fgcolor=cRed>;
-} EntryOffset;
+} EntryOffset <read=Str("%x", offset)>;
 
 typedef enum <byte>
 {
@@ -61,22 +61,20 @@ typedef struct (byte isIndexBlock)
 {
     if (isIndexBlock)
     {
-        byte subFolderIndexMajor;
+        uint SubFolderIndexMajor : 8;
     }
     else
     {   
         EntryType Type : 1 <fgcolor=cYellow>;
         CompressionType CompressionBit : 1;
-
-        byte subFolderIndexMajor : 6;
+        uint SubFolderIndexMajor : 6;
     }
     
-    byte strLen <fgcolor=cGreen>;
-    char Name[strLen] <bgcolor=cGray>;
-
+    byte StrLen <fgcolor=cGreen, comment="This should be a 7bit int, but for template simplifying reasons this is left as a byte">;
+    char Name[StrLen] <bgcolor=cGray>;
 
     if (isIndexBlock)
-        byte subFolderIndexMinor <comment="Ignore if last entry" ,fgcolor=cLtBlue>;
+        uint SubFolderIndexMinor : 8 <comment="Ignore if last entry" ,fgcolor=cLtBlue>;
     else
     {
         if (Type == File)
@@ -87,66 +85,61 @@ typedef struct (byte isIndexBlock)
             _7BitInt UncompressedSize;
         }
         else
-           ubyte SubDirIndexMinor;
+           uint SubFolderIndexMinor : 8;
     }
-} EntryData;
+} Entry <read=Str("%s '%s' %s", (exists(Type) && Type == File ? "FILE" : "DIR"), Name,
+     exists(SubFolderIndexMajor) && exists(SubFolderIndexMinor) ? Str("(child page: %d)", ((SubFolderIndexMajor << 8) | SubFolderIndexMinor)) : "") >;
 
 typedef struct 
 {
     local int basePos = FTell();
 
-    byte isIndexBlock : 1;
-    short entryCount : 11 <fgcolor=cGreen>;
+    byte IsIndexPage : 1;
+    short EntryCount : 11 <fgcolor=cGreen>;
     
     local int i = 0;
-    for (i; i < entryCount - 1; i++)
-        EntryOffset offset <format=hex, fgcolor=cRed>;
+    if (EntryCount - 1 > 0)
+        EntryOffset EntryOffsets[EntryCount -1] <optimize=false, format=hex, fgcolor=cRed>;
 
     FSeek(FTell()); // Align
-    EntryData firstEntry (isIndexBlock);
-    
-    for (i = 0; i < entryCount - 1; i++)
+    for (i = 0; i < EntryCount; i++)
     {
-        FSeek(basePos + offset[i].offset);
-        EntryData data (isIndexBlock);
+        if (i != 0)
+            FSeek(basePos + EntryOffsets[i - 1].offset);
+        Entry Entry_ (IsIndexPage);
     }
 
     local int newPos = Align(FTell(), 0x40);
-    byte garbage[newPos - FTell()] <hidden=true, fgcolor=cDkGray, bgcolor=cDkGray>;
+    if (newPos - FTell() > 0)
+        byte garbage[newPos - FTell()] <hidden=true, fgcolor=cDkGray, bgcolor=cDkGray>;
     
-} SegmentEntryMap;
+} BTreePage <read=Str("%s%d entries", IsIndexPage ? "[Index] " : "", EntryCount)>;
 struct PSPVol
 {
-    struct Header
+    struct
     {
         int Magic <format=hex>;
         int DEADBEEF <format=hex>;
         int64 Date;
         int ToCBlockOffset <fgcolor=cYellow>;
         int FileDataBlockOffset <fgcolor=cYellow>;
-        int ToCSegmentCount <fgcolor=cGreen>;
+        int ToCPageCount <fgcolor=cGreen>;
         int ToCLength <format=hex, fgcolor=cRed>;
         int UnkSize;
-    } header <bgcolor=cPurple>;
+    } Header <bgcolor=cPurple>;
 
     struct TOC
     {
-        local int actualToCOffset = (1 + header.ToCBlockOffset) * BlockSize;
+        local int actualToCOffset = (1 + Header.ToCBlockOffset) * BlockSize;
         FSeek(actualToCOffset);
-        ushort SegmentOffsets[header.ToCSegmentCount] <bgcolor=cRed>;
-
+        
+        ushort PageOffsets[Header.ToCPageCount] <bgcolor=cRed>;
         local int i = 0;
-        for (i; i < header.ToCSegmentCount - 1; i++)
+        for (i; i < Header.ToCPageCount - 1; i++)
         {
-            FSeek(actualToCOffset + SegmentOffsets[i] * 0x40);
-            SegmentEntryMap seg;
-            if (seg.isIndexBlock != 0)
-            {
-                Printf("index block %d \n", i);
-            }
+            FSeek(actualToCOffset + PageOffsets[i] * 0x40);
+            BTreePage Page;
         }
 
-    } toc;
-
-
-} volume;
+    } TableOfContents <open=true>;
+} Volume <open=true>;
