@@ -1,0 +1,144 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: 
+//   Authors: 
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: 
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+LittleEndian();
+typedef struct
+{
+    local int currentPageOffset = FTell();
+    
+    enum <ushort>
+    {
+        PT_RECORD,
+        PT_INDEX,
+    } PageType <comment="Whether this page is used for indexing to find files, if not, it contains file information", fgcolor=cYellow>;
+    short EntryCount <comment="Number of entries in this page (should be / 2)", fgcolor=cGreen>;
+    int NextPage <comment="If this page has a next page for searching", fgcolor=cWhite>;
+    int PreviousPage <comment="If this page has a previous page for searching", fgcolor=cWhite>;
+    
+    local int PosToPageTocEnd = (currentPageOffset + Header.PageSize);
+    local int PosToPageTocStart = PosToPageTocEnd - (((EntryCount / 2) * 0x08) + 4); // <-- +4 = terminator
+        
+    local int j = 0;
+    local short entryOffset, indexerLength, entryTypeMetaOffset;
+    for (j = 0; j < EntryCount / 2; j++)
+    {
+        entryOffset = ReadShort(PosToPageTocEnd - ((j + 1) * 0x08));
+        indexerLength = ReadShort(PosToPageTocEnd - ((j + 1) * 0x08) + 2);
+        entryTypeMetaOffset = ReadShort(PosToPageTocEnd - ((j + 1) * 0x08) + 4);
+
+        FSeek(startof(this) + entryOffset);
+
+        struct
+        {
+            if (PageType == PT_INDEX)
+                byte NextDifferenceIndexingBytes[indexerLength] <comment="Node ID and file name string concatenated until FIRST difference that seperates two pages", fgcolor=0xAAAA00>;
+            else
+            {
+                BigEndian();
+                uint ParentNode <comment="Parent folder for this entry, as an ID - 0 is filesystem root">;
+                LittleEndian();
+        
+                char Name[indexerLength - 4] <fgcolor=0xAAAA00>;
+            }
+        
+            if (PageType == PT_RECORD)
+            {
+                FSeek(currentPageOffset + entryTypeMetaOffset);
+                enum<byte> { Directory, File, CompressedFile } Type <fgcolor=cGreen>;
+        
+                if (Type == Directory)
+                {
+                    struct
+                    {
+                        int NodeId;
+                    } DirectoryInfo;
+                }
+                else if (Type == File)
+                {
+                    struct
+                    {
+                        int PageOffset <format=hex>;
+                        time_t ModifiedDate <format=hex>;
+                        int RealSize <format=hex>;
+                    } FileInfo;
+                }
+                else if (Type == CompressedFile)
+                {
+                    struct
+                    {
+                        int PageOffset <format=hex, fgcolor=cRed>;
+                        time_t ModifiedDate <fgcolor=0xFFFFFF>;
+                        int CompressedFile <format=hex>;
+                        int RealSize <format=hex>;
+                    } CompressedFile;
+                }
+            }
+        } PageEntry <read=Str("%s", exists(Name) ? Name : ""), comment="Each entry is aligned to 0x04", optimize=false>;
+    }
+
+    byte _pad_[PosToPageTocStart - FTell()] <comment="Garbage", fgcolor=cDkGray>;
+   
+    struct
+    {
+        if (PageType == PT_INDEX)
+            int PageIndexEnd <comment="Final index/delimiter">;
+        else
+        {
+            short empty;
+            short EndEntriesOffset <format=hex, fgcolor=cRed>;   
+        }
+        struct
+        {
+            short IndexerOffset <comment="From start of this page", format=hex, fgcolor=cRed>;
+            short IndexerLength <format=hex, fgcolor=cGreen>; // int + string
+    
+            if (PageType == PT_INDEX)
+                int PageIndexForEntry;
+            else
+            {
+                short InfoOffset <comment="From start of this page", format=hex, fgcolor=cRed>;
+                short InfoLength <format=hex, fgcolor=cGreen>;
+            }
+        } EntryInfo[(EntryCount / 2)] <comment="Table is in reverse order", optimize=false>;
+    } EntryInfos <comment="Main TOC for this page, always at the bottom of each page in reverse order (for seeking purposes">;
+
+} TocPage <optimize=false, read=Str("%s%d entries", PageType == PT_INDEX ? "[Index] " : "", EntryCount / 2)>;
+
+struct RoFS
+{
+    LittleEndian();
+    struct
+    {
+        char Magic[4] <comment="0xACB990AD or 'RoFS' for decrypted">;
+        short VersionHigh;
+        short VersionLow;
+        int ToCPageCount;
+        int PageLength;
+        ushort PageSize <format=hex>;
+        ushort PageCount;
+    } Header <size=0x40, bgcolor=cPurple>;
+
+    FSeek(startof(Header) + 0x40);
+    int PageOffsets[Header.PageCount + 1] <bgcolor=cRed, format=hex, comment="Offsets to COMPRESSED pages - each offset normally encrypted">;
+    local int PageStartOffset = FTell();
+
+    local int i = 0;
+    for (i; i < Header.PageCount; i++)
+    {
+        if (i == 0)
+            FSeek(startof(Header) + PageOffsets[0]);
+        else
+            FSeek(startof(Header) + PageStartOffset + (i * Header.PageSize));
+        TocPage Page;
+    }
+} ReadonlyFileSystem <read=true, optimize=false>;
