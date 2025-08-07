@@ -1,41 +1,72 @@
 //------------------------------------------------
-//--- 010 Editor v10.0.2 Binary Template
+//--- 010 Editor v15.0.2 Binary Template
 //
-//      File: Autodrive (AD)
-//   Authors: Nenkai#9075
+//      File: AutoDriveData file & EnemyLine (AD)
+//   Authors: Nenkai
 //   Version: 
 //   Purpose: Responsible for AI Autodriving Paths and other stuff
 //  Category: 
-// File Mask: 
+// File Mask: *.ad
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
 
 LittleEndian();
 
+typedef struct (int newVersion)
+{
+    enum <byte>
+    {
+        Straight = 0,
+        Corner = 1,
+        Unk2 = 2,   
+    } UnkType <comment="NOTE: If this is > 0 and distnace to corner is under 0, this is set to 2.">;
+    
+    signed byte CornerAgression <comment="Used in AIdriverOld::TracePathline if type isn't 0">;
+    signed byte Field_0x02 <comment="Mostly only checks for if it's -128? Refer to AIdriverOld::ComputeNextAttackStrategy">;
+    signed byte Field_0x03;
+    
+    float X;
+    float Z;
+    float Y;
+    short TriIndexHint <comment="Runway tri index hint, seems to be passed to RaceCourse::searchSurface's result.">;
+    byte SurfaceType <comment="passed to CarSpec::getTireSpec, fetched from CourseSurfaceSearcher::getCookedSurfaceType">;
+    byte Field_0x13;
+    float KeyV <comment="VCoordn refer to EnemyLineProcessorOld::GetPitInKeyV">;
+    float DistanceToCorner;
+    float UnkRangeMin;
+    float UnkRangeMax;
+    float DirectionAngle <comment="See EnemyLineProcessorOld::GetPitBoothDirection">;
+        
+    if (newVersion)
+    {
+        byte UnkRuntime0x28;
+        byte UnkRuntime0x29;
+        byte UnkRuntime0x2A;
+        byte UnkRuntime0x2B;
+        float UnkRuntime0x2C;
+        float UnkRuntime0x30;
+        float UnkRuntime0x34;
+        byte LearningSectionData[0x8] <comment="Memset to 0 in EnemyLineProcessor_InitializeLearningSection, grabbed in EnemyLineProcessor_GetLearningSection">;
+    }
+} AttackInfo <bgcolor=cDkYellow, optimize=false>;
+        
 typedef struct
 {
     int AttackInfoCount <fgcolor=cGreen>;
-    byte _empty_[0x3C] <fgcolor=cDkGray>;
-
-    if (AttackInfoCount > 0)
+    
+    // This should be accurate as per EnemyLine::AttackInfoAccessor::AttackInfoAccessor
+    if (parentof(this).EnemyLineHeader.Magic == 0x4E4C4441)
     {
-        struct
+        byte _empty_[0x3C] <fgcolor=cDkGray>;
+        if (AttackInfoCount > 0)
         {
-            int unkBool;
-            float X;
-            float Z;
-            float Y;
-            short UnkIndex1;
-            short UnkIndex2;
-            float PitInKeyV;
-            float DistanceToCorner;
-
-            float X2;
-            float Y2;
-            float Angle;
-            byte _pad_[0x18];
-        } AttackInfo[AttackInfoCount] <bgcolor=cDkYellow, optimize=false>;
+            AttackInfo AttackInfos(true)[AttackInfoCount];
+        }
+    }
+    else
+    {
+        AttackInfo AttackInfo_(false)[AttackInfoCount];
     }
 
 } AutoDriveInfo;
@@ -47,7 +78,7 @@ typedef struct
 
     struct
     {
-        char magic[4] <fgcolor=cPurple>;
+        uint Magic <fgcolor=cPurple>;
         int RelocPtr <format=hex, fgcolor=cGray>;
         int _empty_;
         uint ADLNDataSize <format=hex, fgcolor=cYellow>; // Does not include padding
@@ -65,18 +96,32 @@ typedef struct
     {
         FSeek(baseADLNPos + EntriesOffset[i]);
 
+    /* List of other lanes available per lane? (not grouped originally, but i grouped them. it does 6 * index.)
+    EnemyLineProcessorOld::SelectAvailableLane(int)::laneSelectionTable:
+        LaneGroup <0xFF, 0xFF, 0xFF, 0xFF, 0, 0>
+        LaneGroup <1, 6, 2, 0xFF, 0, 0>
+        LaneGroup <2, 6, 1, 0xFF, 0, 0>
+        LaneGroup <3, 0xFF, 0xFF, 0xFF, 0, 0>
+        LaneGroup <4, 0xFF, 0xFF, 0xFF, 0, 0>
+        LaneGroup <0xFF, 0xFF, 0xFF, 0xFF, 0, 0>
+        LaneGroup <6, 1, 2, 0xFF, 0, 0>
+        LaneGroup <7, 6, 0xFF, 0xFF, 0, 0>
+    */
+    
         if (i == 1)
-            AutoDriveInfo info <comment="Left Lane">;
+            AutoDriveInfo LeftLane <read="Left Lane">;
         else if (i == 2)
-            AutoDriveInfo info <comment="Right Lane">;
+            AutoDriveInfo RightLane <read="Right Lane">;
+        else if (i == 3)
+            AutoDriveInfo PitInOut <read="Pit In/Out Lane. Must be present as per EnemyLineProcessorOld::Initialize. (see Automobile::ChangeDriveModeTemp_PitIn/Automobile::ChangeDriveModeTemp_PitOut)">;
         else if (i == 4)
-            AutoDriveInfo info <comment="Restricted Area/Pit?">;
+            AutoDriveInfo PitStop <read="Pitstop Line/Restricted Area. Must be present as per EnemyLineProcessorOld::Initialize.">;
         else if (i == 5)
-            AutoDriveInfo info <comment="Learning Section">;
+            AutoDriveInfo LearningSectionsLane <read="Learning Sections?">;
         else if (i == 6)
-            AutoDriveInfo info <comment="Default Lane?">;
-        else
-            AutoDriveInfo info;
+            AutoDriveInfo MainLane <read="Normal Lane">;
+        else if (i == 7)
+            AutoDriveInfo SuggestionLane <read="Suggestion Lane (see Automobile_IsCurrentLaneIsSuggestion), may swap to MainLane">;
     }
 } EnemyLine;
 
