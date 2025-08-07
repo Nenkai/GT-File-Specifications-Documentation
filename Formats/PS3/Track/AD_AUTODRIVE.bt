@@ -32,7 +32,7 @@ typedef struct (int newVersion)
     short TriIndexHint <comment="Runway tri index hint, seems to be passed to RaceCourse::searchSurface's result.">;
     byte SurfaceType <comment="passed to CarSpec::getTireSpec, fetched from CourseSurfaceSearcher::getCookedSurfaceType">;
     byte Field_0x13;
-    float KeyV <comment="VCoordn refer to EnemyLineProcessorOld::GetPitInKeyV">;
+    float KeyV <comment="VCoord refer to EnemyLineProcessorOld::GetPitInKeyV">;
     float DistanceToCorner;
     float UnkRangeMin;
     float UnkRangeMax;
