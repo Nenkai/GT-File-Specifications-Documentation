@@ -178,8 +178,7 @@ struct
     
     struct
     {
-        byte Unks[3];
-        byte ShadowDisplay <comment="flag?">;
+        uint EndModelPtr <format=hex, comment="Runtime pointer to the end of this model">;
         byte WheelDishColor[3];
         byte Unks2[0x0D];
         short WheelRadiusMenuF;
@@ -337,8 +336,11 @@ struct
 } CarObject <open=true>;
 
 // Useful signatures (SCUS_944.88)
+// 8006101C - Model::remap
 // 8007AE38 - ModelLODs::CalcCurrentLOD
 // 8007AEF4 - ModelLODs::FindLod
+// 80027010 - ModelLODs::CalcAndRemapPointers
+// 8007ADC8 - ModelLODs::CalcUnk
 // 80061798 - SetupModelLOD
 // 800670F0 - SetupModelWheelData
 // 80068004 - CopyDataToScratchpadMaybe
