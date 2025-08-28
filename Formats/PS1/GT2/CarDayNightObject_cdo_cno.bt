@@ -86,7 +86,7 @@ typedef struct
 {
     Polygon Poly;
     UV UV0;
-    ushort RawPaletterIndex;
+    ushort RawPaletteIndex <comment="PaletteIndex = (ushort)((rawPaletteIndex >> 4) + (rawPaletteIndex & 0x3F));">;
     UV UV1;
     byte Unk;
     byte Unk;
