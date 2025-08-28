@@ -1,0 +1,344 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: Gran Turismo 2 Car Day/Night (cdo/cno) Object
+//   Authors: SUBMANIAC (research), commongear (research), pez2k (research), Nenkai (template & little research)
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.cdo|*.cno
+//  ID Bytes: 47 54 02 00
+//   History: 
+//------------------------------------------------
+BitfieldDisablePadding();
+
+local double UnitsToMetres = 1.0 / 4096.0;
+
+typedef int OffsetT <format=hex, fgcolor=cRed>;
+typedef struct
+{
+    short X;
+    short Y;
+    short Z;
+} VertexXYZ16 <read=Str("%d, %d, %d", X, Y, Z)>;
+
+typedef struct
+{
+    ubyte V0Idx;
+    ubyte V1Idx;
+    ubyte V2Idx;
+    ubyte V3Idx;
+    
+    ubyte RenderOrder : 5;
+    ushort N0Ref : 9;
+    ushort pad : 2;
+    
+    ushort RenderFlagsData;
+    int pad : 1;
+    ushort N1Ref : 9;
+    ushort N2Ref : 9;
+    ushort N3Ref : 9;
+    int unk : 4;
+    
+    // P_TAG r0, g0, b0, code from SDK - LIBGPU.H
+    byte R0;
+    byte G0;
+    byte B0;
+    enum <byte>
+    {
+        POLY_F3 = 0x20,
+        POLY_FT3 = 0x24,
+        POLY_G3 = 0x30,
+        POLY_GT3 = 0x34,
+        POLY_F4 = 0x28,
+        POLY_FT4 = 0x2C,
+        POLY_G4 = 0x38,
+        POLY_GT4 = 0x3C,
+        
+        SPRT_8 = 0x74,
+        SPRT_16 = 0x7C,
+        SPRT = 0x64,
+        
+        TILE_1 = 0x68,
+        TILE_8 = 0x70,
+        TILE_16 = 0x78,
+        TILE = 0x60,
+        
+        LINE_F2 = 0x40,
+        LINE_G2 = 0x50,
+        LINE_F3 = 0x48,
+        LINE_G3 = 0x58,
+        LINE_F4 = 0x4C,
+        LINE_G4 = 0x5C
+        
+        // Set bit 1 for shade texture (tge)
+        // Set bit 2 for semi transparent (abe)
+    } Prim <format=hex, comment="Refer to template for values">; 
+} Polygon;
+
+typedef struct
+{
+    byte X;
+    byte Y;
+} UV <read=Str("%d, %d", X, Y)>;
+
+typedef struct
+{
+    Polygon Poly;
+    UV UV0;
+    ushort RawPaletterIndex;
+    UV UV1;
+    byte Unk;
+    byte Unk;
+    UV UV2;
+    UV UV3;
+} UVPoly;
+
+typedef struct
+{
+    short X;
+    short Y;
+    short Z;
+    short W;
+} VertexXYZW16 <read=Str("%d, %d, %d, %d", X, Y, Z, W)>;
+
+typedef struct
+{
+    short Field_0x00;
+    short Field_0x02;
+    short Field_0x04;
+    short Field_0x06;
+    short Field_0x08;
+    short Field_0x0A;
+} Unk_0x24;
+
+typedef struct
+{
+    short Field_0x00;
+    short Field_0x02;
+    short Field_0x04;
+    short Field_0x06;
+    short Field_0x08;
+    short Field_0x0A;
+    short Field_0x0C;
+} Unk_0x28;
+
+typedef struct
+{
+    short LeftWheelWAxis <comment="Physical front offset from the center of the car, affects both front wheels, negative value">;
+    short LeftWheelYAxis <comment="Vertical offset">;
+    short LeftWheelXAxis <comment="logitudinal offset, negative is front">;
+    short LeftWheelZAxis <comment="Menu lateral offset, individual, negative is left; equals to W * 0.875">;
+    short RightWheelWAxis <comment="unused? negative of the opposite side's W">;
+    short RightWheelYAxis <comment="Vertical offset">;
+    short RightWheelXAxis <comment="logitudinal offset, negative is front">;
+    short RightWheelZAxis <comment="Menu lateral offset, individual, negative is left; equals to W * 0.875">;
+} WheelOffsets;
+        
+typedef struct
+{
+    VertexXYZ16 SidewallModel[34];
+    VertexXYZ16 TreadModel[34];
+    VertexXYZ16 BackModel[16];
+    byte padMaybe[0x10];
+} LOD0WheelModel;
+      
+typedef struct
+{
+    VertexXYZ16 SidewallModel[18];
+    VertexXYZ16 TreadModel[18];
+    VertexXYZ16 BackModel[8];
+    byte padMaybe[0x10];
+} LOD1WheelModel;
+
+typedef struct
+{
+    VertexXYZ16 SidewallModel[14];
+    VertexXYZ16 TreadModel[14];
+    VertexXYZ16 BackModel[6];
+    byte padMaybe[0x10];
+} LOD2WheelModel;
+
+typedef struct
+{
+    short FrontWheelRimPolygonTopLeftVertexX;
+    short FrontWheelRimPolygonTopLeftVertexY;
+    short FrontWheelRimPolygonTopRightVertexX;
+    short FrontWheelRimPolygonTopRightVertexY;
+    short FrontWheelRimPolygonBottomLeftVertexX;
+    short FrontWheelRimPolygonBottomLeftVertexY;
+    short FrontWheelRimPolygonBottomRightVertexX;
+    short FrontWheelRimPolygonBottomRightVertexY;
+    byte padMaybe[4];
+} WheelRimPolygonData;
+struct
+{
+    char Magic[2] <comment="Not checked.">;
+    short Version <comment="Not checked (seemingly), but always 2 even in known demos/old builds">;
+    
+    struct
+    {
+        byte Unks[3];
+        byte ShadowDisplay <comment="flag?">;
+        byte WheelDishColor[3];
+        byte Unks2[0x0D];
+        short WheelRadiusMenuF;
+        short WheelWidthMenuF;
+        short WheelRadiusMenuR;
+        short WheelWidthMenuR;
+        
+        // Game declares this as WheelOffsets[2];
+        WheelOffsets FrontWheelOffsets;
+        WheelOffsets RearWheelOffsets;
+        
+        struct
+        {
+            short VRamPaletteCoordX;
+            short VRamPaletteCoordY;
+            short FrontWheelRimPolygonOffset;
+            short RearWheelRimPolygonOffset;
+            WheelRimPolygonData FrontRimData;
+            WheelRimPolygonData RearRimData;
+            
+            struct
+            {
+                // game declares this as LOD0WheelModel[2]
+                LOD0WheelModel Front;
+                LOD0WheelModel Rear;
+            } LOD0WheelData <bgcolor=cLtBlue>;
+            
+            struct
+            {
+                // game declares this as LOD1WheelModel[2]
+                LOD1WheelModel Front;
+                LOD1WheelModel Rear;
+            } LOD1WheelData <bgcolor=cBlue>;
+            
+            struct
+            {
+                // game declares this as LOD2WheelModel[2]
+                LOD2WheelModel Front;
+                LOD2WheelModel Rear;
+            } LOD2WheelData <bgcolor=cDkBlue>;
+        } RuntimeData <comment="As the file buffer is used as the model buffer in runtime, this will be all zeros until loaded.">;
+    } Model <open=true>;
+    
+    struct
+    {
+        int NumLODs <comment="3 max. Any more will overflow.">;
+        struct
+        {
+            int Distance;
+            int LODPtr <format=hex>;
+        } LODInfo[3];
+    } LODInfos <open=true, bgcolor=cYellow>;
+    
+    struct
+    {
+        ushort VertCount;
+        ushort NormalCount;
+        ushort TriCount;
+        ushort QuadCount;
+        ushort UnkCount0x08 <comment="Count for offset 0x24">;
+        ushort UnkCount0x0A <comment="Count for offset 0x28">;
+        ushort UVTriCount;
+        ushort UVQuadCount;
+        ushort UnkCount0x10 <comment="Count for offset 0x34">;
+        ushort UnkCount0x12 <comment="Count for offset 0x38">;
+        OffsetT VerticesOffset;
+        OffsetT NormalStartDataOffset <comment="Relative to this LOD structure. Unknown. Used at SCUS_944.88 - 0x800675E8">;
+        OffsetT TrisOffset <comment="Relative to this LOD structure. Stride: 4 int">;
+        OffsetT QuadsOffset <comment="Relative to this LOD structure. Stride: 4 int">;
+        OffsetT UnkOffset0x24 <comment="Relative to this LOD structure. Stride: 6 int, Uses count 0x8">;
+        OffsetT UnkOffset0x28 <comment="Relative to this LOD structure. Stride: 7 int, Uses count 0xA">;
+        OffsetT UVTrisOffset <comment="Relative to this LOD structure. Stride: 7 int">;
+        OffsetT UVQuadsOffset <comment="Relative to this LOD structure. Stride: 7 int">;
+        OffsetT UnkOffset0x34 <comment="Relative to this LOD structure. Stride: 9 int, Uses count 0x10">;
+        OffsetT UnkOffset0x38 <comment="Relative to this LOD structure. Stride: 10 int, Uses count 0x12">;
+        struct
+        {
+            short MinX;
+            short MinY;
+            short MinZ;
+            short MinW;
+            short MaxW;
+            short MaxY;
+            short MaxZ;
+            short MaxW;
+        } BBox;
+        short Scale <comment="Used at SCUS_944.88 - 0x800675D4">;
+        short UnkRelatedToScale0x4E <comment="Unknown. Used at SCUS_944.88 - 0x800675D4">;
+        
+        FSeek(startof(this) + VerticesOffset);
+        VertexXYZW16 Vertices[VertCount] <bgcolor=cBlack>;
+
+        local int normalsOffset = FTell();
+        if (NormalStartDataOffset != NormalStartDataOffset + NormalCount)
+        {
+            // NormalsOffset would have been remapped. But in reality it's right after the vertices.
+            struct
+            {
+               byte unk : 2;
+               short Z : 10;
+               short Y : 10;
+               short X : 10;   
+            } Normal[NormalCount] <optimize=false, bgcolor=cLtGray>;
+        }
+        
+        if (TriCount != 0)
+        {
+            FSeek(startof(this) + TrisOffset);
+            VertexXYZW16 Tris[TriCount] <bgcolor=cBlack>;
+        }
+        
+        if (QuadCount != 0)
+        {
+            FSeek(startof(this) + QuadsOffset);
+            Polygon Quads[QuadCount] <bgcolor=cRed>;
+        }
+        
+        if (UnkCount0x08 != 0)
+        {
+            FSeek(startof(this) + UnkOffset0x24);
+            Unk_0x24 UnkData_0x24[UnkCount0x08] <bgcolor=cBlack>;
+        }
+        
+        if (UnkCount0x0A != 0)
+        {
+            FSeek(startof(this) + UnkOffset0x28);
+            Unk_0x28 UnkData_0x28[UnkCount0x0A] <bgcolor=cBlack>;
+        }
+        
+        if (UVTriCount != 0)
+        {
+            FSeek(startof(this) + UVTrisOffset);
+            UVPoly UVTris[UVTriCount] <bgcolor=cBlack>;
+        }
+        
+        if (UVQuadCount != 0)
+        {
+            FSeek(startof(this) + UVQuadsOffset);
+            UVPoly UVQuads[UVQuadCount] <bgcolor=cBlack>;
+        }
+        
+        if (UnkCount0x10 != 0)
+        {
+            FSeek(startof(this) + UnkOffset0x34);
+            Printf("TODO UnkOffset0x34, Stride 9 int!");
+        }
+        
+        if (UnkCount0x12 != 0)
+        {
+            FSeek(startof(this) + UnkOffset0x38);
+            Printf("TODO UnkOffset0x38, Stride 10 int!");
+        }
+        
+    } LODData <bgcolor=cGreen>;
+} CarObject <open=true>;
+
+// Useful signatures (SCUS_944.88)
+// 8007AE38 - ModelLODs::CalcCurrentLOD
+// 8007AEF4 - ModelLODs::FindLod
+// 80061798 - SetupModelLOD
+// 800670F0 - SetupModelWheelData
+// 80068004 - CopyDataToScratchpadMaybe
