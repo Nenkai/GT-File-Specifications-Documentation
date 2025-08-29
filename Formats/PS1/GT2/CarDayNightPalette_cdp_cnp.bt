@@ -48,5 +48,5 @@ struct
     Paint Paints[16];
     
     FSeek(0x43A0);
-    byte PixelData[0x7000];
+    byte PixelData[(256 * 224) / 2] <comment="256x224, 4 bit.">;
 } CarPalette;
