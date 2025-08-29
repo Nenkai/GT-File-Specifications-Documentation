@@ -1,0 +1,52 @@
+//------------------------------------------------
+//--- 010 Editor v15.0.2 Binary Template
+//
+//      File: Gran Turismo 2 Car Daytime/Nighttime Palette
+//   Authors: SUBMANIAC (research), NEnkai (template)
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.cdp|*.cnp
+//  ID Bytes: 
+//   History: 
+//------------------------------------------------
+
+BitfieldDisablePadding();
+
+typedef struct
+{
+    byte B : 5;
+    byte G : 5;
+    byte R : 5;
+    byte _ : 1;
+} BGR555 <optimize=false, read=Str("B%dG%dR%d", B, G, R)>;
+
+typedef struct
+{
+    BGR555 Colors[16];
+} Clut <optimize=false>;
+
+typedef struct
+{
+    BGR555 Colors[256];
+} PaintClut <optimize=false>;
+
+typedef struct
+{
+    Clut Cluts[16] <comment="0 reserved for rim texture, 14 for unlit brakes, 15 for lit brakes.">;
+    Clut IlluminationMasks;
+    Clut PaintMasks <comment="Unused, PD tooling leftover, presumed to be used as masking 
+for quickly repainting car models using the in-house tooling">;
+} Paint <optimize=false>;
+
+struct
+{
+    short PaintCount <comment="Up to 15">;
+    short PaintIds[15];
+    
+    FSeek(0x20);
+    Paint Paints[16];
+    
+    FSeek(0x43A0);
+    byte PixelData[0x7000];
+} CarPalette;
