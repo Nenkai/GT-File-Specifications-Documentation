@@ -18,8 +18,8 @@ typedef struct
     byte B : 5;
     byte G : 5;
     byte R : 5;
-    byte _ : 1;
-} BGR555 <optimize=false, read=Str("B%dG%dR%d", B, G, R)>;
+    byte A : 1;
+} BGR555 <optimize=false, read=Str("B%dG%dR%dA%d", B, G, R, A), comment="Full black = transparent unless Alpha bit is toggled.">;
 
 typedef struct
 {
