@@ -46,7 +46,12 @@ struct
     
     FSeek(0x20);
     Paint Paints[16];
-    
-    FSeek(0x43A0);
+    // Runtime data after this, or just pre-allocated buffer
+
+    FSeek(0x43A0); // Always at 0x43A0, this is where the game explicitly fetches the data.
     byte PixelData[(256 * 224) / 2] <comment="256x224, 4 bit.">;
 } CarPalette;
+
+// Useful signatures (SCUS-94488):
+// 80067960 - SubmitCluts
+// 8007BA70 - SubmitPixelData
