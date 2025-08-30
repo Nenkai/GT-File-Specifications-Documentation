@@ -1,0 +1,417 @@
+//------------------------------------------------
+//--- 010 Editor v12.0.1 Binary Template
+//
+//      File: GT2 Course Pack
+//   Authors: Nenkai (template & research), SUBMANIAC (research)
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: .tro
+//  ID Bytes: 40 28 23 29 47 54 2D 50 53 00 00 00 00 00 1F 00
+//   History: 
+//------------------------------------------------
+
+typedef struct
+{
+    short X;
+    short Y;
+    short Z;
+} Vec3_16 <read=Str("<%d, %d, %d>", X, Y, Z)>;
+
+typedef struct
+{
+    int X;
+    int Y;
+    int Z;
+} Vec3 <read=Str("<%d, %d, %d>", X, Y, Z)>;
+
+typedef struct
+{
+    int X;
+    int Y;
+    int Z;
+    int W;
+} Vec4 <read=Str("<%d, %d, %d, %d>", X, Y, Z, W)>;
+
+typedef int OffsetT <format=hex, fgcolor=cRed>;
+
+// PsyQ LIBGPU.H
+typedef enum <byte>
+{
+    POLY_F3 = 0x20,
+    POLY_FT3 = 0x24,
+    POLY_G3 = 0x30,
+    POLY_GT3 = 0x34,
+    POLY_F4 = 0x28,
+    POLY_FT4 = 0x2C,
+    POLY_G4 = 0x38,
+    POLY_GT4 = 0x3C,
+    
+    SPRT_8 = 0x74,
+    SPRT_16 = 0x7C,
+    SPRT = 0x64,
+    
+    TILE_1 = 0x68,
+    TILE_8 = 0x70,
+    TILE_16 = 0x78,
+    TILE = 0x60,
+    
+    LINE_F2 = 0x40,
+    LINE_G2 = 0x50,
+    LINE_F3 = 0x48,
+    LINE_G3 = 0x58,
+    LINE_F4 = 0x4C,
+    LINE_G4 = 0x5C
+    
+    // Set bit 1 for shade texture (tge)
+    // Set bit 2 for semi transparent (abe)
+} Prim <format=hex, comment="Refer to template for values">; 
+                    
+typedef struct
+{
+    OffsetT UnkOffset_0x00;
+    OffsetT RoadTrisListOffsets[8];
+    OffsetT UnkOffset_0x24;
+    OffsetT UnkOffset_0x28;
+
+    int CountForOffset_0x00;
+    short RoadTrisListCounts[8] <fgcolor=cGreen>;
+    int CountForOffset_0x24;
+
+    FSeek(UnkOffset_0x00);
+    struct
+    {
+        int a;
+        int b;
+    } Unk_0x00[CountForOffset_0x00] <bgcolor=cGreen>;
+
+    local int i = 0;
+    local int j = 0;
+    for (i = 0; i < 8; i++)
+    {
+        FSeek(RoadTrisListOffsets[i]);
+        
+        // List 4 = tris?
+        // List 5 = quads?
+        // Sounds similar to cdo...
+        
+        struct
+        {
+            local int idx = i;
+            for (j = 0; j < RoadTrisListCounts[i]; j++)
+            {
+                struct
+                {
+                    ubyte Vertices[3];
+                    byte Unk;
+                    byte Unk;
+                    byte Unk;
+                    byte TextureID;
+                    byte SurfaceType;
+                    
+                    // PsyQ LIBGPU.H
+                    byte R0;
+                    byte G0;
+                    byte B0;
+                    Prim Prim_ <format=hex, comment="Refer to template for values">; 
+                } RoadVertex <size=0x0C>;
+            }
+        } RoadTriList <bgcolor=cLtGreen, read=Str("%d tris", parentof(this).RoadTrisListCounts[idx])>;
+    }
+
+    if (CountForOffset_0x24 > 0)
+    {
+        FSeek(UnkOffset_0x24);
+        struct
+        {
+            int a;
+            int b;
+            int c;
+            int d;
+        } Unk_0x24[CountForOffset_0x24] <bgcolor=cDkGreen>;
+    }
+} ShapeData;
+
+typedef struct
+{
+    ushort PreviousTrackChunkIndex <comment="For searching">;
+    ushort NextTrackChunkIndex <comment="For searching">;
+    int PreviousTrackChunkPtr <comment="Remapped at runtime">;
+    int NextTrackChunkPtr <comment="Remapped at runtime">;
+    int Unk_0x0C;
+    short Unk_0x10 <comment="Really a int alongside Unk_0x12. Used for calculations with the main Value/Vcoord in the parent structure. Refer to 80028588">;
+    short VCoord <comment="Really a int alongside Unk_0x10. Used for calculations with the main Value/Vcoord in parent structure. Refer to 80028588">;
+    short Unk_0x14 <comment="Refer to 80028588">;
+    short Unk_0x16 <comment="Refer to 80028588">;
+    Vec3 UnkVec_0x18 <comment="Refer to 80027BBC">;
+    Vec3_16 UnkVec0x24 <comment="Used alongside UnkVec_0x18. Refer to 80027BBC">;
+    short pad;
+    int UnkField0x2C;
+    Vec3 Center <comment="Used for search calculations (closest chunk to point)">;
+    int UnkPositionalData[22];
+    OffsetT UnkOffset_0x94;
+    OffsetT UnkOffset_0x98;
+    OffsetT UnkOffset_0x9C;
+    OffsetT UnkOffset_0xA0;
+    ShapeData ShapeData_0xA4;
+
+    FSeek(UnkOffset_0x94);
+    ShapeData ShapeData_0x94;
+
+    FSeek(UnkOffset_0x98);
+    struct
+    {
+        int EntryCount;
+        struct
+        {
+            short unk;
+            short unk2;
+            int b;
+        } Data[EntryCount];
+    } UnkStruct_0x98 <bgcolor=cBlack, comment="Refer to 80027FC4, Refers to ShapeData 0xA4 somehow?">;
+
+    FSeek(UnkOffset_0x9C);
+    struct
+    {
+        short Unk_0x00;
+        short Unk_0x02;
+        short Unk_0x04;
+        short Unk_0x06;
+        short PolyReferenceListCount[16];
+        OffsetT PolyReferenceListOffsets[16];
+
+        local int i = 0;
+        local int j = 0;
+        for (i = 0; i < 16; i++)
+        {
+            FSeek(PolyReferenceListOffsets[i]);
+            
+            struct
+            {
+                local int idx = i;
+                OffsetT PolyReferenceOffset[PolyReferenceListCount[i]];
+            } PolyReferenceList <bgcolor=cLtGray, read=Str("Count: %d", parentof(this).PolyReferenceListCount[idx])>;
+        }
+    } UnkStruct_0x9C <bgcolor=cLtBlue>;
+
+    FSeek(UnkOffset_0xA0);
+    struct
+    {
+        short ShortCount;
+        short UnkFlag <format=hex>;
+        short Indices[ShortCount];
+    } UnkStruct_0xA0 <bgcolor=cDkYellow>;
+
+} TrackChunk <read=Str("Prev: %d, Next: %d", PreviousTrackChunkIndex, NextTrackChunkIndex)>;
+
+typedef struct
+{
+    short UnkValue <comment="Really a int alongside VCoordFinish.">;
+    short VCoordFinish <comment="Really a int alongside UnkValue. Finish line vcoord/meters. Used for calculating car vcoords. Critical value.">;
+    short NumChunks;
+    short UnkCount;
+    OffsetT UnkOffset;
+    OffsetT ChunkOffsets[NumChunks];
+
+    struct
+    {
+        local int i = 0;
+        for (i = 0; i < NumChunks; i++)
+        {
+            FSeek(ChunkOffsets[i]);
+            TrackChunk Chunk <bgcolor=cDkAqua>;
+        }
+    } ChunkList;
+    
+    FSeek(UnkOffset);
+    struct
+    {
+       Vec3 UnkVec1;
+       int Unk;
+       Vec3 UnkVec2;
+       int Pad;
+    } UnkDataVCoordLookupMaybe[UnkCount] <comment="Refer to 80028470">;
+} TrackChunkTable <bgcolor=0x1490D0>;
+
+typedef struct
+{
+    int LODCount;
+    struct
+    {
+        short Unk;
+        short Distance;
+        int LODDataPtr <format=hex, fgcolor=cRed, comment="Also pointer to data from 0x18">;
+    } LODInfo[LODCount] <bgcolor=cSilver>;
+} LODLookupList <comment="Same structure as in CDO/CNO, same calculation">; // Same structure as CDO/CNO!
+
+typedef struct
+{
+    int EntryCount;
+    int EntryOffsets[EntryCount] <format=hex, fgcolor=cRed>;
+
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(EntryOffsets[i]);
+        LODLookupList LodLookupList;
+    }
+} LODLookupTable <bgcolor=cLtPurple>;
+
+typedef struct
+{
+    OffsetT UnkOffset_0x00;
+    OffsetT PolyListOffsets[8];
+    OffsetT UnkOffset_0x24;
+    OffsetT UnkOffset_0x28;
+
+    int CountForOffset_0x00;
+    short PolyListCounts[8];
+    int UnkData_0x40[6];
+
+    struct
+    {
+        int a;
+        int b;
+    } Unk_0x00[CountForOffset_0x00] <bgcolor=cAqua>;
+
+    local int j = 0;
+    local int x = 0;
+    for (j = 0; j < 8; j++)
+    {
+        FSeek(PolyListOffsets[j]);
+        
+        struct
+        {
+            local int idx = j;
+            for (x = 0; x < PolyListCounts[j]; x++)
+            {
+                struct
+                {
+                    byte Unk_0x00[4];
+                    byte Unk_0x04[4];
+                    byte R0;
+                    byte G0;
+                    byte B0;
+                    Prim Prim_ <format=hex, comment="Refer to template for values">; 
+                    byte Unk_0x0C[4];
+                    byte Unk_0x10[4];
+                    byte Unk_0x14[4];
+                } Poly <bgcolor=cDkRed>;
+            }
+        } PolyList <read=Str("%d polys", parentof(this).PolyListCounts[idx])>; 
+    }
+
+} LODData;
+
+typedef struct
+{
+    int EntryCount;
+    OffsetT EntryOffsets[EntryCount];
+
+    FSeek(EntryOffsets[0]);
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(EntryOffsets[i]);
+        LODData data;
+    }
+} LODDataTable <bgcolor=cBlue>;
+
+
+typedef struct
+{
+    short unkIndex;
+    short unkIndex2;
+    short unk3;
+    short unk4;
+    int unk5;
+    int offsetToParent0x10 <format=hex>;
+
+    /*
+    struct
+    {
+        byte data[0x18];
+    } Unk[unkIndex];
+    */
+} Entry_0x1C_Data;
+
+typedef struct
+{
+    short EntryCount;
+    short UnkSize; // param_2 = (param_2 + -1) % (int)UnkSize + 1;
+
+    OffsetT EntryOffsets[EntryCount];
+
+    local int i = 0;
+    for (i = 0; i < EntryCount; i++)
+    {
+        FSeek(EntryOffsets[i]);
+        Entry_0x1C_Data data <bgcolor=cLtRed>;
+    }
+} Entry_0x1C <bgcolor=cDkRed>;
+
+struct
+{
+    struct
+    {
+    
+        char Magic[12] <comment="Can be anything else, not checked">;
+        int VersionMaybe;
+        OffsetT TrackChunksOffset;
+        OffsetT LODLookupTableOffset;
+        OffsetT LODDataOffset;
+        OffsetT UnkPtr_0x1C;
+        OffsetT UnkPtr_0x20;
+
+        // Past that, no offsets
+        int SectorCount;
+        struct
+        {
+            short Unk;
+            short VCoord;
+        } Sectors[8] <read=Str("%d: %dm", Unk, VCoord)>;
+        Vec3 OriginOrStartLinePosMaybe;
+
+        short StartPositionDirection <comment="Is this 12 bits?">; // 80012E30
+        short UnkLikelyUnused;
+        
+        // 0x58, 0x5c and 0x60 are used for some computation in 0x10's entries
+        // Reserved
+        Vec3 StartPositions[16];
+        int InstancedObjectOffsets[33] <comment="Always fixed 33", format=hex, fgcolor=cRed>;
+
+    } Header <bgcolor=cPurple>;
+
+    
+    struct
+    {
+        local int i = 0;
+        for (i = 0; i < 33; i++)
+        {
+            
+        }    
+    } InstancedObjects;
+    FSeek(Header.TrackChunksOffset);
+    TrackChunkTable TrackChunkTable_;
+
+    FSeek(Header.LODLookupTableOffset);
+    LODLookupTable LODLookupTable_;
+    
+    FSeek(Header.LODDataOffset);
+    LODDataTable LODData_;
+    
+    FSeek(Header.UnkPtr_0x1C);
+    Entry_0x1C _0x1C;
+    
+    FSeek(Header.UnkPtr_0x20);
+    struct
+    {
+        int aaa;
+    } Entry_0x20;
+} TrackObject <open=true>;
+
+// Useful signatures:
+// 800272C8 - TrackPalette::Load
+// 800271C0 - TrackObject::remap
+// 80028288 - TrackObject::0x10::FindPos(TrackObject_0x10 *a1, Vec3 *carPos)
+// 80028378 - TrackObject::0x10::SearchChunkIndexFromPosUnk(TrackObject_0x10 **a1, int a2, Vec3 *carPos)
