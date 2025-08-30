@@ -447,8 +447,9 @@ struct
     } Entry_0x20;
 } TrackObject <open=true>;
 
-// Useful signatures:
+// Useful signatures (US version):
 // 800272C8 - TrackPalette::Load
-// 800271C0 - TrackObject::remap
+// 800271C0 - TrackObject::remap (useful to put a break on it as that's where the offsets are remapped to pointers)
 // 80028288 - TrackObject::0x10::FindPos(TrackObject_0x10 *a1, Vec3 *carPos)
 // 80028378 - TrackObject::0x10::SearchChunkIndexFromPosUnk(TrackObject_0x10 **a1, int a2, Vec3 *carPos)
+
