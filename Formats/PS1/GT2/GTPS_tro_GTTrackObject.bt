@@ -292,6 +292,7 @@ typedef struct
                     byte R0;
                     byte G0;
                     byte B0;
+
                     Prim Prim_ <format=hex, comment="Refer to template for values">; 
                     byte Unk_0x0C[4];
                     byte Unk_0x10[4];
@@ -410,7 +411,7 @@ struct
     } Entry_0x20;
 } TrackObject <open=true>;
 
-// Useful signatures:
+// Useful signatures (SCUS_944.88):
 // 800272C8 - TrackPalette::Load
 // 800271C0 - TrackObject::remap
 // 80028288 - TrackObject::0x10::FindPos(TrackObject_0x10 *a1, Vec3 *carPos)
