@@ -78,7 +78,7 @@ typedef struct
     short RoadTrisListCounts[8] <fgcolor=cGreen>;
     int CountForOffset_0x24 <fgcolor=cGreen>;
 
-    FSeek(UnkOffset_0x00);
+    FSeekPtr(UnkOffset_0x00);
     struct
     {
         int a;
@@ -89,7 +89,7 @@ typedef struct
     local int j = 0;
     for (i = 0; i < 8; i++)
     {
-        FSeek(RoadTrisListOffsets[i]);
+        FSeekPtr(RoadTrisListOffsets[i]);
         
         // List 4 = tris?
         // List 5 = quads?
@@ -121,7 +121,7 @@ typedef struct
 
     if (CountForOffset_0x24 > 0)
     {
-        FSeek(UnkOffset_0x24);
+        FSeekPtr(UnkOffset_0x24);
         struct
         {
             int a;
@@ -136,8 +136,8 @@ typedef struct
 {
     ushort PreviousTrackChunkIndex <comment="For searching">;
     ushort NextTrackChunkIndex <comment="For searching">;
-    int PreviousTrackChunkPtr <comment="Remapped at runtime">;
-    int NextTrackChunkPtr <comment="Remapped at runtime">;
+    uint PreviousTrackChunkPtr <format=hex, comment="Remapped at runtime">;
+    uint NextTrackChunkPtr <format=hex, comment="Remapped at runtime">;
     int Unk_0x0C;
     short Unk_0x10 <comment="Really a int alongside Unk_0x12. Used for calculations with the main Value/Vcoord in the parent structure. Refer to 80028588">;
     short VCoord <comment="Really a int alongside Unk_0x10. Used for calculations with the main Value/Vcoord in parent structure. Refer to 80028588">;
@@ -155,10 +155,10 @@ typedef struct
     OffsetT UnkOffset_0xA0;
     ShapeData ChunkShape;
 
-    FSeek(UnkOffset_0x94);
+    FSeekPtr(UnkOffset_0x94);
     ShapeData ShapeData_0x94;
 
-    FSeek(BoundaryCollisionOffset);
+    FSeekPtr(BoundaryCollisionOffset);
     struct
     {
         int EntryCount <fgcolor=cGreen>;
@@ -170,7 +170,7 @@ typedef struct
         } BoundaryCollision[EntryCount];
     } Boundaries <bgcolor=cBlack, comment="Refer to 80027FC4, Refers to ChunkShape">;
 
-    FSeek(UnkOffset_0x9C);
+    FSeekPtr(UnkOffset_0x9C);
     struct
     {
         short Unk_0x00;
@@ -184,7 +184,7 @@ typedef struct
         local int j = 0;
         for (i = 0; i < 16; i++)
         {
-            FSeek(PolyReferenceListOffsets[i]);
+            FSeekPtr(PolyReferenceListOffsets[i]);
             
             struct
             {
@@ -194,7 +194,7 @@ typedef struct
         }
     } UnkStruct_0x9C <bgcolor=cLtBlue, comment="Changing this messes with the ai? ai path or just collision?">;
 
-    FSeek(UnkOffset_0xA0);
+    FSeekPtr(UnkOffset_0xA0);
     struct
     {
         short ChunkCount <fgcolor=cGreen>;
@@ -222,12 +222,12 @@ typedef struct
         local int i = 0;
         for (i = 0; i < NumChunks; i++)
         {
-            FSeek(ChunkOffsets[i]);
+            FSeekPtr(ChunkOffsets[i]);
             TrackChunk Chunk <bgcolor=cDkAqua>;
         }
     } ChunkList;
     
-    FSeek(UnkOffset);
+    FSeekPtr(UnkOffset);
     struct
     {
        Vec3 UnkVec1;
@@ -256,7 +256,7 @@ typedef struct
     local int i = 0;
     for (i = 0; i < EntryCount; i++)
     {
-        FSeek(EntryOffsets[i]);
+        FSeekPtr(EntryOffsets[i]);
         LODLookupList LodLookupList;
     }
 } LODLookupTable <bgcolor=cLtPurple>;
@@ -282,7 +282,7 @@ typedef struct
     local int x = 0;
     for (j = 0; j < 8; j++)
     {
-        FSeek(PolyListOffsets[j]);
+        FSeekPtr(PolyListOffsets[j]);
         
         struct
         {
@@ -312,11 +312,11 @@ typedef struct
     int EntryCount <fgcolor=cGreen>;
     OffsetT EntryOffsets[EntryCount];
 
-    FSeek(EntryOffsets[0]);
+    FSeekPtr(EntryOffsets[0]);
     local int i = 0;
     for (i = 0; i < EntryCount; i++)
     {
-        FSeek(EntryOffsets[i]);
+        FSeekPtr(EntryOffsets[i]);
         LODData data;
     }
 } LODDataTable <bgcolor=cBlue>;
@@ -349,16 +349,23 @@ typedef struct
     local int i = 0;
     for (i = 0; i < EntryCount; i++)
     {
-        FSeek(EntryOffsets[i]);
+        FSeekPtr(EntryOffsets[i]);
         Entry_0x1C_Data data <bgcolor=cLtRed>;
     }
 } Entry_0x1C <bgcolor=cDkRed>;
+
+local uint64 startPos;
+void FSeekPtr(uint ptr)
+{
+    local uint64 rel = (ptr - startPos);
+    FSeek(rel);
+}
 
 struct
 {
     struct
     {
-    
+        
         char Magic[12] <comment="Can be anything else, not checked">;
         int VersionMaybe;
         OffsetT TrackChunksOffset;
@@ -383,7 +390,11 @@ struct
         // Reserved
         Vec3 StartPositions[16];
         int InstancedObjectOffsets[33] <comment="Always fixed 33", format=hex, fgcolor=cRed>;
-
+        
+        // We assume InstancedObjectOffsets[0] is always 0x19C
+        // But we would want to make the template work while attached to a process to :)
+        // So we need a way to find out the base pointer of the file. This is a good way to do so.
+        startPos = InstancedObjectOffsets[0] - 0x19C;
     } Header <bgcolor=cPurple>;
 
     
@@ -395,19 +406,21 @@ struct
             
         }    
     } InstancedObjects;
-    FSeek(Header.TrackChunksOffset);
+    
+    
+    FSeekPtr(Header.TrackChunksOffset);
     TrackChunkTable TrackChunkTable_;
 
-    FSeek(Header.LODLookupTableOffset);
+    FSeekPtr(Header.LODLookupTableOffset);
     LODLookupTable LODLookupTable_;
     
-    FSeek(Header.LODDataOffset);
+    FSeekPtr(Header.LODDataOffset);
     LODDataTable LODData_;
     
-    FSeek(Header.UnkPtr_0x1C);
+    FSeekPtr(Header.UnkPtr_0x1C);
     Entry_0x1C _0x1C;
     
-    FSeek(Header.UnkPtr_0x20);
+    FSeekPtr(Header.UnkPtr_0x20);
     struct
     {
         OffsetT ThisHeaderSize;
@@ -418,7 +431,7 @@ struct
         local int i = 0;
         for (i = 0; i < Count; i++)
         {
-            FSeek(startof(this) + UnkRelativeOffsets[i]);
+            FSeekPtr(startof(this) + UnkRelativeOffsets[i]);
             struct
             {
                 local int idx = i;
@@ -452,4 +465,3 @@ struct
 // 800271C0 - TrackObject::remap (useful to put a break on it as that's where the offsets are remapped to pointers)
 // 80028288 - TrackObject::0x10::FindPos(TrackObject_0x10 *a1, Vec3 *carPos)
 // 80028378 - TrackObject::0x10::SearchChunkIndexFromPosUnk(TrackObject_0x10 **a1, int a2, Vec3 *carPos)
-
