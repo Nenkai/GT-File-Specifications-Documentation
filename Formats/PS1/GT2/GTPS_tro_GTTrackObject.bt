@@ -2,7 +2,7 @@
 //--- 010 Editor v12.0.1 Binary Template
 //
 //      File: GT2 Course Pack
-//   Authors: Nenkai (template & research), SUBMANIAC (research)
+//   Authors: Nenkai#9075
 //   Version: 
 //   Purpose: 
 //  Category: 
@@ -74,9 +74,9 @@ typedef struct
     OffsetT UnkOffset_0x24;
     OffsetT UnkOffset_0x28;
 
-    int CountForOffset_0x00;
+    int CountForOffset_0x00 <fgcolor=cGreen>;
     short RoadTrisListCounts[8] <fgcolor=cGreen>;
-    int CountForOffset_0x24;
+    int CountForOffset_0x24 <fgcolor=cGreen>;
 
     FSeek(UnkOffset_0x00);
     struct
@@ -150,25 +150,25 @@ typedef struct
     Vec3 Center <comment="Used for search calculations (closest chunk to point)">;
     int UnkPositionalData[22];
     OffsetT UnkOffset_0x94;
-    OffsetT UnkOffset_0x98;
+    OffsetT BoundaryCollisionOffset;
     OffsetT UnkOffset_0x9C;
     OffsetT UnkOffset_0xA0;
-    ShapeData ShapeData_0xA4;
+    ShapeData ChunkShape;
 
     FSeek(UnkOffset_0x94);
     ShapeData ShapeData_0x94;
 
-    FSeek(UnkOffset_0x98);
+    FSeek(BoundaryCollisionOffset);
     struct
     {
-        int EntryCount;
+        int EntryCount <fgcolor=cGreen>;
         struct
         {
             short unk;
             short unk2;
             int b;
-        } Data[EntryCount];
-    } UnkStruct_0x98 <bgcolor=cBlack, comment="Refer to 80027FC4, Refers to ShapeData 0xA4 somehow?">;
+        } BoundaryCollision[EntryCount];
+    } Boundaries <bgcolor=cBlack, comment="Refer to 80027FC4, Refers to ChunkShape">;
 
     FSeek(UnkOffset_0x9C);
     struct
@@ -177,7 +177,7 @@ typedef struct
         short Unk_0x02;
         short Unk_0x04;
         short Unk_0x06;
-        short PolyReferenceListCount[16];
+        short PolyReferenceListCount[16] <fgcolor=cGreen>;
         OffsetT PolyReferenceListOffsets[16];
 
         local int i = 0;
@@ -192,15 +192,19 @@ typedef struct
                 OffsetT PolyReferenceOffset[PolyReferenceListCount[i]];
             } PolyReferenceList <bgcolor=cLtGray, read=Str("Count: %d", parentof(this).PolyReferenceListCount[idx])>;
         }
-    } UnkStruct_0x9C <bgcolor=cLtBlue>;
+    } UnkStruct_0x9C <bgcolor=cLtBlue, comment="Changing this messes with the ai? ai path or just collision?">;
 
     FSeek(UnkOffset_0xA0);
     struct
     {
-        short ShortCount;
+        short ChunkCount <fgcolor=cGreen>;
         short UnkFlag <format=hex>;
-        short Indices[ShortCount];
-    } UnkStruct_0xA0 <bgcolor=cDkYellow>;
+        struct
+        {
+            byte ChunkIndex;
+            byte Unk2;   
+        } RenderedChunk[ChunkCount] <read=Str("%d (Unk2: %d)", ChunkIndex, Unk2)>;
+    } RenderedChunkList <bgcolor=cDkYellow, read=Str("%d chunk(s)", ChunkCount)>;
 
 } TrackChunk <read=Str("Prev: %d, Next: %d", PreviousTrackChunkIndex, NextTrackChunkIndex)>;
 
@@ -208,8 +212,8 @@ typedef struct
 {
     short UnkValue <comment="Really a int alongside VCoordFinish.">;
     short VCoordFinish <comment="Really a int alongside UnkValue. Finish line vcoord/meters. Used for calculating car vcoords. Critical value.">;
-    short NumChunks;
-    short UnkCount;
+    short NumChunks <fgcolor=cGreen>;
+    short UnkCount <fgcolor=cGreen>;
     OffsetT UnkOffset;
     OffsetT ChunkOffsets[NumChunks];
 
@@ -231,11 +235,11 @@ typedef struct
        Vec3 UnkVec2;
        int Pad;
     } UnkDataVCoordLookupMaybe[UnkCount] <comment="Refer to 80028470">;
-} TrackChunkTable <bgcolor=0x1490D0>;
+} TrackChunkTable <bgcolor=0x1490D0, comment="Hint: highspeedring (testline.tro) starting line = chunk 85!">;
 
 typedef struct
 {
-    int LODCount;
+    int LODCount <fgcolor=cGreen>;
     struct
     {
         short Unk;
@@ -246,7 +250,7 @@ typedef struct
 
 typedef struct
 {
-    int EntryCount;
+    int EntryCount <fgcolor=cGreen>;
     int EntryOffsets[EntryCount] <format=hex, fgcolor=cRed>;
 
     local int i = 0;
@@ -264,8 +268,8 @@ typedef struct
     OffsetT UnkOffset_0x24;
     OffsetT UnkOffset_0x28;
 
-    int CountForOffset_0x00;
-    short PolyListCounts[8];
+    int CountForOffset_0x00 <fgcolor=cGreen>;
+    short PolyListCounts[8] <fgcolor=cGreen>;
     int UnkData_0x40[6];
 
     struct
@@ -292,7 +296,6 @@ typedef struct
                     byte R0;
                     byte G0;
                     byte B0;
-
                     Prim Prim_ <format=hex, comment="Refer to template for values">; 
                     byte Unk_0x0C[4];
                     byte Unk_0x10[4];
@@ -306,7 +309,7 @@ typedef struct
 
 typedef struct
 {
-    int EntryCount;
+    int EntryCount <fgcolor=cGreen>;
     OffsetT EntryOffsets[EntryCount];
 
     FSeek(EntryOffsets[0]);
@@ -338,7 +341,7 @@ typedef struct
 
 typedef struct
 {
-    short EntryCount;
+    short EntryCount <fgcolor=cGreen>;
     short UnkSize; // param_2 = (param_2 + -1) % (int)UnkSize + 1;
 
     OffsetT EntryOffsets[EntryCount];
@@ -365,7 +368,7 @@ struct
         OffsetT UnkPtr_0x20;
 
         // Past that, no offsets
-        int SectorCount;
+        int SectorCount <fgcolor=cGreen>;
         struct
         {
             short Unk;
@@ -407,11 +410,44 @@ struct
     FSeek(Header.UnkPtr_0x20);
     struct
     {
-        int aaa;
+        OffsetT ThisHeaderSize;
+        int Count <comment="Max 7", fgcolor=cGreen>;
+        OffsetT UnkRelativeOffsets[Count];
+        
+        local int EntriesStartPos = FTell();
+        local int i = 0;
+        for (i = 0; i < Count; i++)
+        {
+            FSeek(startof(this) + UnkRelativeOffsets[i]);
+            struct
+            {
+                local int idx = i;
+                
+                if (UnkRelativeOffsets[i] != 0)
+                {
+                    int SubEntryCount <fgcolor=cGreen>;
+                    struct
+                    {
+                        int Type;
+                        int UnkX <comment="Multiplied by 16?">;
+                        int UnkZ <comment="Multiplied by 16?">;
+                        int Field_0x0C;
+                        short Field_0x10;
+                        byte Field_0x12;
+                        byte Field_0x13;
+                        int Field_0x14;
+                        int Field_0x18;
+                        int Field_0x1C;
+                        int Field_0x20;
+                        int Field_0x24 <comment="12 bits?">;
+                    } SubEntry[SubEntryCount] <optimize=false, bgcolor=0x336344>;
+                }
+            } Unk <read=Str("%d entries", parentof(this).UnkRelativeOffsets[idx] == 0 ? 0 : SubEntryCount)>;
+        }
     } Entry_0x20;
 } TrackObject <open=true>;
 
-// Useful signatures (SCUS_944.88):
+// Useful signatures:
 // 800272C8 - TrackPalette::Load
 // 800271C0 - TrackObject::remap
 // 80028288 - TrackObject::0x10::FindPos(TrackObject_0x10 *a1, Vec3 *carPos)
