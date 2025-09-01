@@ -1,0 +1,184 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Track Camera Settings
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: Responsible for Pre-Race, Replay & More Camera Positions & Curves
+//  Category: 
+// File Mask:
+//  ID Bytes: 52 45 50 34
+//   History: 
+//------------------------------------------------
+
+typedef int OffsetT <format=hex, fgcolor=cRed>;
+typedef int CountT <fgcolor=cGreen>;
+
+typedef struct
+{
+    float Time <comment="Must be ordered for binary search">;
+    float Value[3]; 
+} Keyframe <read=Str("%f (%f, %f, %f)", Time, Value[0], Value[1], Value[2])>;
+
+typedef struct
+{
+    int NumKeyFramesTimes2 <comment="Always double">;
+    Keyframe KeyFrames[NumKeyFramesTimes2 / 2];
+} CurveGT4 <optimize=false, comment="Linear interpolation", read=Str("%d keyframes", NumKeyFramesTimes2 / 2)>;
+
+local int basePos;
+
+typedef struct
+{
+    local int wasBigEndian = IsBigEndian();
+    LittleEndian();
+    
+    int CameraFlags <format=hex>;
+    float TimeMsStart <comment="Must be ordered for binary search">;
+    float TimeMsEnd;
+    int UnkField_0x0C;
+    float UnkField_0x10;
+    int UnkField_0x14;
+    int UnkField_0x18;
+    float UnkField_0x1C <comment="No effect changing it">;
+    float GammaBrightness;
+    float UnkField_0x24[4]; // unused? changing any of them had no effect
+    OffsetT PositionCurveOffset <comment="SrcX/SrcZ/x/DestX/DestZ/x">;
+    OffsetT HeightCurveOffset <comment="SrcY/x/x/DestY/x/x">;
+    OffsetT CurveOffset_0x3C <comment="SrcPosAngle/x/x/DestPosAngle/x/x">;
+    OffsetT CurveOffset_0x40 <comment="SrcPitch/x/x/DestPitch/x/x">;
+    OffsetT CurveOffset_0x44 <comment="SrcPitch2/x/x/DestPitch2/x/x">;
+    OffsetT CurveOffset_0x48 <comment="SrcYaw/x/x/DestYaw/x/x">;
+    OffsetT FOVCurveOffset <comment="SrcFOV/x/x/DestFOV/x/x">;
+    OffsetT CurvePermRotationMaybe_Left_Right_No_Offset_0x50 <comment="SrcPermanentYaw/x/x/DestPermanentYaw/x/x">;
+    OffsetT CurveOffset_0x54 <comment="No effect?">;
+    OffsetT CurveOffset_0x58;
+    float UnkField_0x5C;
+    float UnkField_0x60;
+    OffsetT CurveOffset_0x64 <comment="No effect?">;
+    OffsetT CurveYCameraRot_0x68 <comment="Can be random too?">;
+    OffsetT UnkOffset_0x6C <format=hex, fgcolor=cRed>;
+    OffsetT UnkOffset_0x70 <format=hex, fgcolor=cRed>;
+    int Empty_0x74;
+    int Empty_0x78;
+    
+    if (Rep4Header.Version >= 3)
+    {
+        int Unk_0x7C;
+        OffsetT Unk_0x80;
+        byte Reserved[0x50] <bgcolor=cBlack>;
+    }
+    FSeek(startof(Rep4Header) + PositionCurveOffset);
+    CurveGT4 PositionCurve;
+    
+    FSeek(startof(Rep4Header) + HeightCurveOffset);
+    CurveGT4 HeightCurve;
+    
+    FSeek(startof(Rep4Header) + CurveOffset_0x3C);
+    CurveGT4 Curve_0x3C;
+    
+    FSeek(startof(Rep4Header) + CurveOffset_0x40);
+    CurveGT4 Curve_0x40;
+    
+    FSeek(startof(Rep4Header) + CurveOffset_0x44);
+    CurveGT4 Curve_0x44;
+    
+    FSeek(startof(Rep4Header) + CurveOffset_0x48);
+    CurveGT4 Curve_0x48;
+    
+    FSeek(startof(Rep4Header) + FOVCurveOffset);
+    CurveGT4 FOVCurve;
+    
+    FSeek(startof(Rep4Header) + CurvePermRotationMaybe_Left_Right_No_Offset_0x50);
+    CurveGT4 PermRotationMaybe_Left_Right_No;
+    
+    FSeek(startof(Rep4Header) + CurveOffset_0x54);
+    CurveGT4 Curve_0x54;
+    
+    if (CurveOffset_0x58)
+    {
+        FSeek(startof(Rep4Header) + CurveOffset_0x58);
+        CurveGT4 Curve_0x58;
+    }
+    
+    if (CurveOffset_0x64)
+    {
+        FSeek(startof(Rep4Header) + CurveOffset_0x64);
+        CurveGT4 Curve_0x64;
+    }
+    
+    if (CurveYCameraRot_0x68)
+    {
+        FSeek(startof(Rep4Header) + CurveYCameraRot_0x68);
+        CurveGT4 Curve_0x68;
+    }
+    
+    if (UnkOffset_0x6C)
+    {
+        FSeek(startof(Rep4Header) + UnkOffset_0x6C);
+        CurveGT4 Curve_0x6C;
+    }
+    
+    if (UnkOffset_0x70)
+    {
+        FSeek(startof(Rep4Header) + UnkOffset_0x70);
+        CurveGT4 Curve_0x70;
+    }
+
+    if (Rep4Header.Version >= 3) // GT5 (not prologue)
+    {
+        FSeek(startof(Rep4Header) + Unk_0x80);
+        CurveGT4 Curve_0x80;
+        
+        FSeek(startof(this) + 0xD4);
+    }
+    else
+        FSeek(startof(this) + 0x7C);
+        
+    if (wasBigEndian)
+        BigEndian();
+} CameraGT4 <read=Str("%f->%f", TimeMsStart, TimeMsEnd), optimize=false, comment="Aligned to 0x08">;
+
+typedef struct
+{   
+    LittleEndian();
+    struct
+    {
+        char Magic[4];
+        int RelocPtr <format=hex>;
+        int Version <comment="GT4/GTPSP = 0, GT5 = 3/4">;
+        int RelocSize <format=hex>;
+        int Empty;
+        
+        /* tested on GT5 Autumn Mini (c129.cam)
+        the first general floats determine the total duration of the cameras, why these start values, i don't know
+        then the actual cameras's values determine the "part of time" within the total time
+        so if i set 1340 to 1600, at the beginning the camera will bug out because theres no camera set between 1340 and 1600
+        then at 1600 to 2035 the camera starts, but it'll be much faster than normal
+        */
+        float VStart; // General time start?
+        float VEnd; // General time end?
+        int UnkField_0x1C;
+        CountT CamerasCount;
+        OffsetT CamerasOffset;
+        int UnkField_0x28;
+        CountT DistributeCameraCount;
+        OffsetT DistributeCameraOffsets; // 0x30 strides
+        CountT UnkVCoordsCount;
+        OffsetT UnkVCoordsOffset; // Floats
+        CountT SectionLapCount;
+        OffsetT SectionLapOffset; // int strides
+        byte pad[0x0C];
+    } Rep4Header <bgcolor=cDkPurple>;
+
+    FSeek(startof(this) + Rep4Header.CamerasOffset);
+    CameraGT4 Cameras[Rep4Header.CamerasCount] <bgcolor=cBlue>;
+
+    BigEndian();
+} ReplayGT4 <optimize=false>;
+
+if (ReadByte(FTell()) == 0x52 && 
+    ReadByte(FTell() + 1) == 0x45 && 
+    ReadByte(FTell() + 2) == 0x50 &&
+    ReadByte(FTell() + 3) == 0x34)
+    ReplayGT4 ReplayGT4_;

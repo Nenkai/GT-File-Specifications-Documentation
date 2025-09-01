@@ -95,8 +95,11 @@ typedef struct
     int VMUpdate_BytecodeOffset;
     int VMCallback_BytecodeOffset;
 
-    FSeek(BasePos + BoundsOffset);
-    Vector3 Bounds[BoundCount];
+    if (BoundCount)
+    {
+        FSeek(BasePos + BoundsOffset);
+        Vector3 Bounds[BoundCount];
+    }
     
     FSeek(BasePos + RenderCommandsOffset);
     PGLCommands RenderCommands;
@@ -256,7 +259,7 @@ typedef struct
         } HostMethodInfos;
     }
     
-    if (Header.VMOutRegisterInfoOffset > 0)
+    if (Header.VMOutRegisterInfoCount > 0)
     {
         struct
         {

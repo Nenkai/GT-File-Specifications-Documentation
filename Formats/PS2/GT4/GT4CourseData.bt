@@ -16,6 +16,7 @@ LittleEndian();
 #include "GT4_MDLS_ModelSet.bt";
 #include "GT4_BLBd_BillboardSet.bt";
 #include "GT4_GTCM_MiniMapSet.bt";
+#include "../../Shared/Course/GT4ReplayData_Rep4.bt";
 
 struct 
 {
@@ -68,12 +69,12 @@ struct
    int PlayStartCameraOffset <format=hex, fgcolor=cRed>;
    int ReplayStartCameraOffset <format=hex, fgcolor=cRed>;
    int GadgetsOffset <format=hex, fgcolor=cRed>;
-   int CoursePreviewCameraOffset <format=hex, fgcolor=cRed>;
+   int CoursePreviewCameraOffset <format=hex, fgcolor=cRed, comment="Pre-Race Cameras">;
    int UnkTexSetOffset_0xC4 <format=hex, fgcolor=cRed>;
    int skyReflectionModelSet <format=hex, fgcolor=cRed>;
    int dPhotoMode <format=hex, fgcolor=cRed>;
    int StartCameraMotionSet <format=hex, fgcolor=cRed>;
-   int ReplayStartCameraOffset <format=hex, fgcolor=cRed>;
+   int UnkMotionOffset <format=hex, fgcolor=cRed>;
    int FgSkyModelSetOffset <format=hex, fgcolor=cRed>;
    int RunwayOffset <format=hex, fgcolor=cRed>;   
 } CourseDataGT4;
@@ -124,4 +125,28 @@ if (CourseDataGT4.FlareShapeOffset)
 {
     FSeek(CourseDataGT4.FlareShapeOffset);
     pgluShape FlareShape;
+}
+
+if (CourseDataGT4.ReplayGT4Offset)
+{
+    FSeek(CourseDataGT4.ReplayGT4Offset);
+    ReplayGT4 ReplayGT4_;
+}
+
+if (CourseDataGT4.PlayStartCameraOffset)
+{
+    FSeek(CourseDataGT4.PlayStartCameraOffset);
+    ReplayGT4 PlayStartCamera;
+}
+
+if (CourseDataGT4.ReplayStartCameraOffset)
+{
+    FSeek(CourseDataGT4.ReplayStartCameraOffset);
+    ReplayGT4 ReplayStartCamera;
+}
+
+if (CourseDataGT4.CoursePreviewCameraOffset)
+{
+    FSeek(CourseDataGT4.CoursePreviewCameraOffset);
+    ReplayGT4 CoursePreviewCamera;
 }

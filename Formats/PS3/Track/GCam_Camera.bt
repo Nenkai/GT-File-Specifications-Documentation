@@ -1,0 +1,76 @@
+//------------------------------------------------
+//--- 010 Editor v10.0.2 Binary Template
+//
+//      File: Track Camera Settings
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: Responsible for Pre-Race, Replay & More Camera Positions & Curves
+//  Category: 
+// File Mask:
+//  ID Bytes: 47 43 61 6D
+//   History: 
+//------------------------------------------------
+
+#include "../../Shared/Course/GT4ReplayData_Rep4.bt";
+
+typedef struct
+{
+    enum <int>
+    {
+        Unk1 = 1,
+        Unk2 = 2,
+        CoursePreview_PreRace = 4,   
+    } CamType <bgcolor=cGray>;
+    OffsetT Rep4Offset <format=hex, bgcolor=cGray, fgcolor=cRed>;
+    int _pad_[6] <bgcolor=cGray, hidden=true>;
+
+    FSeek(startof(CameraFile) + Rep4Offset);
+    ReplayGT4 ReplayGT4_;
+} Rep4Meta <read=Str("%s", EnumToString(CamType)), optimize=false>;
+
+typedef struct GCam
+{
+    struct
+    {
+        char Magic[4];
+        int RelocPtr <format=hex>;
+        int Empty;
+        int RelocSize <format=hex>;
+        CountT Map1Count;
+        OffsetT Map1Offset;
+        CountT Map2Count;
+        OffsetT Map2Offset;
+    
+        int _pad_[8];
+    } Header <bgcolor=cPurple>;
+    
+    struct
+    {
+        local int i = 0;
+        for (i; i < Header.Map1Count; i++)
+        {
+            FSeek(Header.Map1Offset + (i * 0x20));
+            Rep4Meta Rep1_; // Second is pre-race cam
+        }
+    } Entries1 <open=true>;
+    
+    if (Header.Map2Count)
+    {
+        struct
+        {
+            local int i = 0;
+            for (i; i < Header.Map2Count; i++)
+            {
+                FSeek(Header.Map2Offset + (i * 0x20));
+                Rep4Meta Rep2_;
+            }
+        } Entries2 <open=true>;
+    }
+};
+
+BigEndian();
+if (ReadByte(FTell()) == 0x47 && 
+    ReadByte(FTell() + 1) == 0x43 && 
+    ReadByte(FTell() + 2) == 0x61 &&
+    ReadByte(FTell() + 3) == 0x6D)
+    GCam CameraFile;
