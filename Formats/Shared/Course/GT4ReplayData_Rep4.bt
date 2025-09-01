@@ -17,14 +17,23 @@ typedef int CountT <fgcolor=cGreen>;
 typedef struct
 {
     float Time <comment="Must be ordered for binary search">;
-    float Value[3]; 
-} Keyframe <read=Str("%f (%f, %f, %f)", Time, Value[0], Value[1], Value[2])>;
+    float Value; 
+} CurvePoint <read=Str("%f (%f)", Time, Value)>;
 
 typedef struct
 {
-    int NumKeyFramesTimes2 <comment="Always double">;
-    Keyframe KeyFrames[NumKeyFramesTimes2 / 2];
-} CurveGT4 <optimize=false, comment="Linear interpolation", read=Str("%d keyframes", NumKeyFramesTimes2 / 2)>;
+    float Time <comment="Must be ordered for binary search">;
+    float Value[3];
+} CurvePointNew <read=Str("%f (%f, %f, %f)", Time, Value[0], Value[1], Value[2])>;
+
+typedef struct
+{
+    int NumKeyFrames;
+    if (Rep4Header.Version >= 3)
+        CurvePointNew CurvePoints[NumKeyFrames / 2];
+    else
+        CurvePoint CurvePoints[NumKeyFrames];
+} CurveGT4 <optimize=false, comment="Linear interpolation", read=Str("%d keyframes", NumKeyFrames)>;
 
 local int basePos;
 
@@ -34,8 +43,8 @@ typedef struct
     LittleEndian();
     
     int CameraFlags <format=hex>;
-    float TimeMsStart <comment="Must be ordered for binary search">;
-    float TimeMsEnd;
+    float TimeSecondStart <comment="Must be ordered for binary search, GT4 = seconds? GT5 = VCoords?">;
+    float TimeSecondEnd;
     int UnkField_0x0C;
     float UnkField_0x10;
     int UnkField_0x14;
@@ -65,79 +74,106 @@ typedef struct
     if (Rep4Header.Version >= 3)
     {
         int Unk_0x7C;
-        OffsetT Unk_0x80;
-        byte Reserved[0x50] <bgcolor=cBlack>;
+        OffsetT UnkOffset_0x80;
     }
-    FSeek(startof(Rep4Header) + PositionCurveOffset);
-    CurveGT4 PositionCurve;
     
-    FSeek(startof(Rep4Header) + HeightCurveOffset);
-    CurveGT4 HeightCurve;
+    if (Rep4Header.Version >= 4)
+    {
+        OffsetT UnkOffset_0x84;
+        OffsetT UnkOffset_0x88;
+    }
+        
+    struct
+    {
+        FSeek(PositionCurveOffset - Rep4Header.RelocPtr);
+        CurveGT4 XCurve;
+        
+        FSeek(HeightCurveOffset - Rep4Header.RelocPtr);
+        CurveGT4 YCurve;
+        
+        FSeek(CurveOffset_0x3C - Rep4Header.RelocPtr);
+        CurveGT4 ZCurve;
+    } SrcPosCurves;
     
-    FSeek(startof(Rep4Header) + CurveOffset_0x3C);
-    CurveGT4 Curve_0x3C;
+    struct
+    {
+        FSeek(CurveOffset_0x40 - Rep4Header.RelocPtr);
+        CurveGT4 XCurve;
+        
+        FSeek(CurveOffset_0x44 - Rep4Header.RelocPtr);
+        CurveGT4 YCurve;
+        
+        FSeek(CurveOffset_0x48 - Rep4Header.RelocPtr);
+        CurveGT4 ZCurve;
+    } LookAtPosCurves;
     
-    FSeek(startof(Rep4Header) + CurveOffset_0x40);
-    CurveGT4 Curve_0x40;
-    
-    FSeek(startof(Rep4Header) + CurveOffset_0x44);
-    CurveGT4 Curve_0x44;
-    
-    FSeek(startof(Rep4Header) + CurveOffset_0x48);
-    CurveGT4 Curve_0x48;
-    
-    FSeek(startof(Rep4Header) + FOVCurveOffset);
+    FSeek(FOVCurveOffset - Rep4Header.RelocPtr);
     CurveGT4 FOVCurve;
     
-    FSeek(startof(Rep4Header) + CurvePermRotationMaybe_Left_Right_No_Offset_0x50);
-    CurveGT4 PermRotationMaybe_Left_Right_No;
+    FSeek(CurvePermRotationMaybe_Left_Right_No_Offset_0x50 - Rep4Header.RelocPtr);
+    CurveGT4 YawCurve;
     
-    FSeek(startof(Rep4Header) + CurveOffset_0x54);
-    CurveGT4 Curve_0x54;
+    FSeek(CurveOffset_0x54 - Rep4Header.RelocPtr);
+    CurveGT4 PitchCurve;
     
-    if (CurveOffset_0x58)
+    if (CurveOffset_0x58 != Rep4Header.RelocPtr)
     {
-        FSeek(startof(Rep4Header) + CurveOffset_0x58);
+        FSeek(CurveOffset_0x58 - Rep4Header.RelocPtr);
         CurveGT4 Curve_0x58;
     }
     
-    if (CurveOffset_0x64)
+    if (CurveOffset_0x64 != Rep4Header.RelocPtr)
     {
-        FSeek(startof(Rep4Header) + CurveOffset_0x64);
+        FSeek(CurveOffset_0x64 - Rep4Header.RelocPtr);
         CurveGT4 Curve_0x64;
     }
     
     if (CurveYCameraRot_0x68)
     {
-        FSeek(startof(Rep4Header) + CurveYCameraRot_0x68);
+        FSeek(CurveYCameraRot_0x68 - Rep4Header.RelocPtr);
         CurveGT4 Curve_0x68;
     }
     
-    if (UnkOffset_0x6C)
+    if (UnkOffset_0x6C != Rep4Header.RelocPtr)
     {
-        FSeek(startof(Rep4Header) + UnkOffset_0x6C);
-        CurveGT4 Curve_0x6C;
+        FSeek(UnkOffset_0x6C - Rep4Header.RelocPtr);
+        CurveGT4 RollCurve;
     }
     
-    if (UnkOffset_0x70)
+    if (UnkOffset_0x70 != Rep4Header.RelocPtr)
     {
-        FSeek(startof(Rep4Header) + UnkOffset_0x70);
-        CurveGT4 Curve_0x70;
+        FSeek(UnkOffset_0x70 - Rep4Header.RelocPtr);
+        CurveGT4 RollCurve2;
     }
 
     if (Rep4Header.Version >= 3) // GT5 (not prologue)
     {
-        FSeek(startof(Rep4Header) + Unk_0x80);
+        FSeek(UnkOffset_0x80 - Rep4Header.RelocPtr);
         CurveGT4 Curve_0x80;
-        
+
+        if (Rep4Header.Version >= 4)
+        {
+            if (UnkOffset_0x84 != Rep4Header.RelocPtr)
+            {
+                FSeek(UnkOffset_0x84 - Rep4Header.RelocPtr);
+                CurveGT4 Curve_0x84;
+            }
+            
+            if (UnkOffset_0x88 != Rep4Header.RelocPtr)
+            {
+                FSeek(UnkOffset_0x88 - Rep4Header.RelocPtr);
+                CurveGT4 Curve_0x88;
+            }
+        }
         FSeek(startof(this) + 0xD4);
     }
+    
     else
         FSeek(startof(this) + 0x7C);
         
     if (wasBigEndian)
         BigEndian();
-} CameraGT4 <read=Str("%f->%f", TimeMsStart, TimeMsEnd), optimize=false, comment="Aligned to 0x08">;
+} CameraGT4 <read=Str("%f->%f", TimeSecondStart, TimeSecondEnd), optimize=false, comment="Aligned to 0x08">;
 
 typedef struct
 {   
@@ -156,8 +192,8 @@ typedef struct
         so if i set 1340 to 1600, at the beginning the camera will bug out because theres no camera set between 1340 and 1600
         then at 1600 to 2035 the camera starts, but it'll be much faster than normal
         */
-        float VStart; // General time start?
-        float VEnd; // General time end?
+        float VCoordStart; // General time start?
+        float VCoordEnd; // General time end?
         int UnkField_0x1C;
         CountT CamerasCount;
         OffsetT CamerasOffset;
@@ -171,7 +207,7 @@ typedef struct
         byte pad[0x0C];
     } Rep4Header <bgcolor=cDkPurple>;
 
-    FSeek(startof(this) + Rep4Header.CamerasOffset);
+    FSeek(Rep4Header.CamerasOffset - Rep4Header.RelocPtr);
     CameraGT4 Cameras[Rep4Header.CamerasCount] <bgcolor=cBlue>;
 
     BigEndian();
@@ -182,3 +218,7 @@ if (ReadByte(FTell()) == 0x52 &&
     ReadByte(FTell() + 2) == 0x50 &&
     ReadByte(FTell() + 3) == 0x34)
     ReplayGT4 ReplayGT4_;
+    
+// Useful sigs (GT6 EU 1.22): 
+// 0x527ba0 - GT4ReplayData::HeaderGT4::map
+// 0x527b84 - GT4ReplayData::CurveGT4::getValue (?)

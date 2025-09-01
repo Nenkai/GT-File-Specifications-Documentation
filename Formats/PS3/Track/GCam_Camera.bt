@@ -74,3 +74,6 @@ if (ReadByte(FTell()) == 0x47 &&
     ReadByte(FTell() + 2) == 0x61 &&
     ReadByte(FTell() + 3) == 0x6D)
     GCam CameraFile;
+    
+// Useful sigs (GT6 EU 1.22):
+// - 0x528218 - GCamCameraFile::map
