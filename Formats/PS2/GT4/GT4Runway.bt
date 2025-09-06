@@ -63,23 +63,23 @@ struct GT4Runway
     float goalVCoord;
     float boundsSet1[3];
     float boundsSet2[3]; 
-    short checkpointCount;
-    short unkCount;
-    short unkCount2;
+    ushort checkpointCount;
+    ushort unkCount;
+    ushort unkCount2;
 
-    short lightingCount; // Can be 0 - "ConcourseLighting::compute"
+    ushort lightingCount; // Can be 0 - "ConcourseLighting::compute"
 
     FSeek(0x44);
-    short gadgetsCount;
-    short roadVerticesCount;
-    short roadFacesCount;
-    short clusterCount;
-    short unkCount;
+    ushort gadgetsCount;
+    ushort roadVerticesCount;
+    ushort roadFacesCount;
+    ushort clusterCount;
+    ushort unkCount;
 
     FSeek(0x50);
-    short unkCount; // Max 9?
-    short gridCount;
-    short sectionCount;
+    ushort unkCount; // Max 9?
+    ushort gridCount;
+    ushort sectionCount;
 
     FSeek(0x58);
     int checkpointsOffset <format=hex, fgcolor=cRed>;
