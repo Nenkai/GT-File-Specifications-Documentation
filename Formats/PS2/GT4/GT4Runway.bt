@@ -40,10 +40,10 @@ typedef struct
 {
     float startVCoord;
     float goalVCoord;
-    short checkpointCount;
-    short unk;
-    short gadgetsCount;
-    short sectionStopCount;
+    ushort checkpointCount;
+    ushort unk;
+    ushort gadgetsCount;
+    ushort sectionStopCount;
     int stopPointsOffset <format=hex, fgcolor=cRed>; // X Y Z Pos
     int checkpointsOffset <format=hex, fgcolor=cRed>; // stride of 0x08 - count, idk
     int gridOffsets <format=hex, fgcolor=cRed>;
