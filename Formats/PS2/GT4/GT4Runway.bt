@@ -1,40 +1,52 @@
 //------------------------------------------------
 //--- 010 Editor v10.0.2 Binary Template
 //
-//      File: 
-//   Authors: 
+//      File: GT4 Runway (RNW4) File
+//   Authors: Nenkai
 //   Version: 
-//   Purpose: 
+//   Purpose: Track collision kdtree, checkpoint validation, boundaries, grid start positions, sectors & more
 //  Category: 
 // File Mask: 
-//  ID Bytes: 
+//  ID Bytes: 52 4E 57 34
 //   History: 
 //------------------------------------------------
 
 LittleEndian();
 
-typedef struct
-{
-    int a;
-    int b;
-    int offset <format=hex>;
-    int padding;
-} Cluster;
+typedef int OffsetT <format=hex, fgcolor=cRed>;
+typedef int Count32 <fgcolor=cGreen>;
+typedef ushort Count16 <fgcolor=cGreen>;
+
 typedef struct
 {
     float X;
     float Y;
     float Z;
-    float direction;
-} Grid;
+} Vector3 <optimize=false, read=Str("<%f, %f, %f>", this.X, this.Y, this.Z)>;
+
 
 typedef struct
 {
-    int checkpointCount;
-    int checkpointsOffset <format=hex>;
-    float checkpointVCoords[checkpointCount];
+    Vector3 Position;
+    float Direction;
+} Grid <read=Str("<%f, %f, %f, Angle Rad: %f>", Position.X, Position.Y, Position.Z, Direction)>;
 
-} Checkpoint;
+typedef struct
+{
+    Vector3 Left;
+    Vector3 Middle;
+    Vector3 Right;
+    float TrackV;
+} Checkpoint <read=Str("V: %f", TrackV)>;
+
+typedef struct
+{
+    int CheckpointCount <fgcolor=cGreen>;
+    OffsetT CheckpointsOffset;
+    
+    FSeek(CheckpointsOffset);
+    float CheckpointVCoords[CheckpointCount];
+} CheckPointList; // GT4Course::RunwayData::CheckPointList
 
 typedef struct 
 {
@@ -50,85 +62,204 @@ typedef struct
     int gadgetsOffset <format=hex, fgcolor=cRed>;
 } Section;
 
-struct GT4Runway
+typedef struct
 {
-    char magic[4];
-    int relocatePtr;
-    int relocateFileSize <format=hex>;
-    int flags; // 0x80 = Has Light Set Data?
+    ushort TriIndexCount;
+    ushort CheckpointLookupLength;
+    ushort CheckpointLookupIndexStart;
+    ushort _pad_;
+    uint TriIndicesOffset <fgcolor=cRed, format=hex>;
+    int _pad2_;
+    
+    FSeek(TriIndicesOffset);
+    ushort Tris[TriIndexCount] <bgcolor=cLtGray>;
+} Cluster <bgcolor=cGray, read=Str("TriCount: %d, Checkpoints: %d->%d", TriIndexCount, CheckpointLookupIndexStart,
+    CheckpointLookupIndexStart + CheckpointLookupLength)>; // GT4Course::RunwayData::Cluster
+    
+struct KDTreeNode;
 
-    FSeek(0x14);
-    float courseLength;
-    float startVCoord;
-    float goalVCoord;
-    float boundsSet1[3];
-    float boundsSet2[3]; 
-    ushort checkpointCount;
-    ushort unkCount;
-    ushort unkCount2;
+string PrintKDTreeNode(KDTreeNode& node)
+{
+    
+    local float normalizedValue = ((float)node.ValueBits + 0.5) * (1.0f / 64.0f); // Normalize 0<->64 to 0.0<->1.0
+    /* This will only work for the first depth. Bounds are updated as we go deeper
+    local float min = node.Axis == 0 ? RunwayFile4.Header.BoundsSetMin.X :
+                      node.Axis == 1 ? RunwayFile4.Header.BoundsSetMin.Y :
+                      node.Axis == 2 ? RunwayFile4.Header.BoundsSetMin.Z : 0;
+    local float max = node.Axis == 0 ? RunwayFile4.Header.BoundsSetMax.X :
+                      node.Axis == 1 ? RunwayFile4.Header.BoundsSetMxY :
+                      node.Axis == 2 ? RunwayFile4.Header.BoundsSetMax.Z : 0;
+    local float pos = (min * (1.0f - normalizedValue)) + (max * normalizedValue); // Lerp
+    */
+    return Str("[%s] %f", EnumToString(node.Axis), normalizedValue);
+}
 
-    ushort lightingCount; // Can be 0 - "ConcourseLighting::compute"
+typedef struct (int depth)
+{
+    if (depth < 0)
+        return;
+        
+    byte ValueBits : 6;
+    enum <byte>
+    {
+        X = 0,
+        Y = 1,
+        Z = 2,   
+    } Axis : 2;
+    
+    if (depth - 1 > 0)
+    {
+        KDTreeNode Left(depth - 1);
+        KDTreeNode Right(depth - 1);
+    }
+} KDTreeNode <read=PrintKDTreeNode>;
 
-    FSeek(0x44);
-    ushort gadgetsCount;
-    ushort roadVerticesCount;
-    ushort roadFacesCount;
-    ushort clusterCount;
-    ushort unkCount;
+struct RunwayData // GT4Course::RunwayData
+{
+    struct
+    {
+        char magic[4] <comment="Not checked.">;
+        int RelocatePtr;
+        int RelocateFileSize <format=hex>;
+        int Flags; // 0x80 = Has Light Set Data?
+        uint Version <comment="Not checked. GT4 should be 4.">;
+        float CourseLength;
+        float StartVCoord;
+        float GoalVCoord;
+        Vector3 BoundsSetMin; // GT4Course::RunwayData::Bound
+        Vector3 BoundsSetMax; 
+        Count16 CheckpointListCount;
+        Count16 GridCount;
+        Count16 CheckpointCount;
+        Count16 CheckpointLookupIndicesCount; // Can be 0 - "ConcourseLighting::compute"
+        uint UnkEmpty_0x40;
+        Count16 GadgetsCount;
+        Count16 RoadVerticesCount;
+        Count16 RoadTriCount;
+        Count16 ClusterCount;
+        ushort KdTreeMaxDepth <fgcolor=cYellow, comment="Should match the amount of clusters, 2^this, max 9?">;
+        ushort BoundVerticesCount;
+        Count16 UnkCount; 
+        Count16 PitstopCount;
+        Count16 SectionCount;
+        ushort UnkEmpty_0x56;
+        OffsetT CheckpointListOffset;
+        OffsetT GridsOffset;
+        OffsetT CheckpointsOffset; // Strides of 0x28, determined by the count at 0x3c - elf code suggests quads
+        OffsetT CheckpointLookupIndicesOffset;
+        OffsetT LightSetsOffset;
+        OffsetT unkOffset;
+        OffsetT GadgetsOffsets; // Strides of 0x20
+        OffsetT RoadVerticesOffset; // Strides of 0x10. 0xc & d of it is an index for 0x6c offset, when multiplied by two
+        OffsetT RoadTrisOffset; // Strides of 0x0c. int at 0x8-0x0c is used to index data at 0x8c
+        OffsetT ClusterListOffset;
+        OffsetT CollisionKDTreeOffset;
+        OffsetT BoundVerticesOffset; 
+        Count32 BoundIndicesCount;
+        OffsetT BoundIndicesOffset; 
+        OffsetT PitStopsOffset;
+    
+        //if ( ((1 << v3) & (unsigned int)result) != 0 )
+        //    break;
+        int TireSoundRelatedFlagsMaybe;
+        int Unk_0x98;
+        int SectionsOffset <format=hex, fgcolor=cRed>;
+    } Header <bgcolor=cPurple, read=Str("Version %d, TrackV: %fm", Version, CourseLength)>;
+    
+    if (Header.CheckpointListCount)
+    {
+        FSeek(Header.CheckpointListOffset);
+        CheckPointList CheckPointList_[Header.CheckpointListCount] <bgcolor=cLtBlue, optimize=false>;
+    }
+    
+    if (Header.GridCount)
+    {
+        FSeek(Header.GridsOffset);
+        Grid Grids[Header.GridCount] <bgcolor=cYellow>; // Note: GT4 doesn't even use the count. be aware.
+    }
+    
+    if (Header.CheckpointCount)
+    {
+        FSeek(Header.CheckpointsOffset);
+        Checkpoint Checkpoints[Header.CheckpointCount] <bgcolor=cBlue, optimize=false>;
+    }
+    
+    if (Header.CheckpointLookupIndicesCount)
+    {
+        FSeek(Header.CheckpointLookupIndicesOffset);
+        ushort CheckpointLookupIndices[Header.CheckpointLookupIndicesCount] <bgcolor=cDkBlue, optimize=false>;
+    }
+    
+    if (Header.RoadVerticesCount)
+    {
+        FSeek(Header.RoadVerticesOffset);
+        struct
+        {
+            Vector3 Vertex;
+            short Unk_0x0C;
+            byte Unk_0x0E;
+            byte Unk_0x0F;
+        } RoadVertices[Header.RoadVerticesCount] <bgcolor=cGreen>;
+    }
+    
+    if (Header.RoadTriCount)
+    {
+        FSeek(Header.RoadTrisOffset);
+        struct
+        {
+            ushort Vert1;
+            ushort Vert2;
+            ushort Vert3;
+            byte UnkBits;
+            byte Unk;
+            uint Flags;
+        } RoadTri[Header.RoadTriCount] <read=Str("Verts: %d, %d, %d", Vert1, Vert2, Vert3), bgcolor=cRed>;
+    }
+    
+    FSeek(Header.CollisionKDTreeOffset);
+    KDTreeNode KDTreeRootNode(Header.KdTreeMaxDepth) <bgcolor=cBlack>;
+    
+    if (Header.ClusterCount)
+    {
+        local int i = 0;
+        struct
+        {
+            for (i = 0; i < Header.ClusterCount; i++)
+            {
+                FSeek(Header.ClusterListOffset + (i * 0x10));
+                Cluster Cluster_;
+            }
+        } Clusters;
+    }
+    
+    
+    if (Header.BoundVerticesCount)
+    {
+        FSeek(Header.BoundVerticesOffset);
+        struct
+        {
+            Vector3 Vertex;
+            int Unk;
+        } BoundVertex[Header.BoundVerticesCount] <bgcolor=cDkRed>;
+    }
+    
+    if (Header.BoundIndicesCount)
+    {
+        FSeek(Header.BoundIndicesOffset);
+        short BoundFaces[Header.BoundIndicesCount] <bgcolor=cLtRed>;
+    }
+    
+    if (Header.SectionCount)
+    {
+        FSeek(Header.SectionsOffset);
+        Section Sections[Header.SectionCount];
+    }
+    
+    if (Header.PitstopCount)
+    {
+        FSeek(Header.PitStopsOffset);
+        Grid PitStops[Header.PitstopCount] <bgcolor=cYellow>; // Note: GT4 doesn't even use the count. be aware.
+    }
+    
 
-    FSeek(0x50);
-    ushort unkCount; // Max 9?
-    ushort gridCount;
-    ushort sectionCount;
-
-    FSeek(0x58);
-    int checkpointsOffset <format=hex, fgcolor=cRed>;
-    int gridsOffset <format=hex, fgcolor=cRed>;
-    int unk <format=hex, fgcolor=cRed>; // Strides of 0x28, determined by the count at 0x3c - elf code suggests quads
-    int unk2; // Faces, strides of 0x02
-
-    // Entering light zone?
-    FSeek(0x68);
-    int lightSetsOffset <format=hex, fgcolor=cRed>;
-    int unkOffset <format=hex, fgcolor=cRed>;
-    int gadgetsOffsets <format=hex, fgcolor=cRed>; // Strides of 0x20
-
-    // Strides of 0x10. 0xc & d of it is an index for 0x6c offset, when multiplied by two
-    int roadVerticesOffset <format=hex, fgcolor=cRed>;
-
-    // Strides of 0x0c. int at 0x8-0x0c is used to index data at 0x8c
-    int roadFacesOffset <format=hex, fgcolor=cRed>;
-    int clusterListOffset <format=hex, fgcolor=cRed>;
-
-    int traversalDataOffset <format=hex, fgcolor=cRed>; // encoded in 6 bit chunks
-    int boundVerticesOffset <format=hex, fgcolor=cRed>; 
-
-    int unkoffset <format=hex, fgcolor=cRed>;
-    int unkOffset2 <format=hex, fgcolor=cRed>; // Indexes which points to verticles
-
-    FSeek(0x90);
-    int pitStopsOffset <format=hex, fgcolor=cRed>; // Depends on grid count
-
-    //if ( ((1 << v3) & (unsigned int)result) != 0 )
-    //    break;
-    int tireSoundRelatedFlagsMaybe;
-
-    FSeek(0x9c);
-    int sectionsOffset <format=hex, fgcolor=cRed>;
-
-    FSeek(gridsOffset);
-    Grid grids[gridCount]; // Note: GT4 doesn't even use the count. be aware.
-
-    FSeek(checkpointsOffset);
-    Checkpoint checkpoints[checkpointCount];
-
-    FSeek(clusterListOffset);
-    Cluster clusters[clusterCount];
-
-    FSeek(sectionsOffset);
-    Section sections[sectionCount];
-
-    FSeek(traversalDataOffset);
-    byte unk : 6;
-    enum <byte> { X, Y, Z} Axis : 2;
-} RWY4;
+} RunwayFile4 <open=true>;
