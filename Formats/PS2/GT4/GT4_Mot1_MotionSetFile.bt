@@ -1,0 +1,352 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.2 Binary Template
+//
+//      File: Gran Turismo 4 MotionSet file 
+//   Authors: Nenkai
+//   Version: 
+//   Purpose: 
+//  Category: 
+// File Mask: *.mot
+//  ID Bytes: 4D 6F 74 31
+//   History: 
+//------------------------------------------------
+
+typedef uint OffsetT <format=hex, fgcolor=cRed>;
+
+typedef struct
+{
+    int FloatCount;
+    int Unk;
+    float Time;
+    float Data[FloatCount-1] <bgcolor=cDkBlue>;
+} Curve;
+
+typedef struct // GT4_Motion::CurveSet
+{
+    uint CurveCount;
+    uint Unused;
+    uint Unused;
+    
+    if (CurveCount > 0)
+    {
+        struct
+        {
+            OffsetT CurveOffsets[CurveCount];
+            for (local int i = 0; i < CurveCount; i++)
+            {
+                FSeek(startof(MotionSetFile) + CurveOffsets[i]);
+                Curve Curve_ <bgcolor=cBlue>;
+            }
+            
+            FSeek(startof(this) + (CurveCount * 4));
+        } Curves;
+    }
+    
+    FSeek(startof(this) + 0x0C);
+} CurveSet;
+
+typedef struct // GT4_Motion::Scatter
+{
+    OffsetT Offset_0x00;
+    uint Empty_0x04;
+    OffsetT Offset_0x08;
+    uint Empty_0x0C;
+} Scatter;
+
+typedef struct // GT4_Motion::Motion
+{
+    float field_0;
+    float field_4;
+    uint field_8;
+    uint field_C;
+    OffsetT NameOffset;
+    ushort CurveSetCount;
+    ushort ScatterCount;
+    OffsetT CurveSetsOffset;
+    OffsetT ScattersOffset;
+    
+    if (CurveSetCount > 0)
+    {
+        struct
+        {
+            FSeek(startof(MotionSetFile) + CurveSetsOffset);
+            OffsetT CurveSetOffsets[CurveSetCount];
+            
+            for (local int i = 0; i < CurveSetCount; i++)
+            {
+                FSeek(startof(MotionSetFile) + CurveSetOffsets[i]);
+                CurveSet CurveSet_;
+            }
+            
+            FSeek(startof(this) + (CurveSetCount * 4));
+        } CurveSets;
+    }
+    
+    if (ScatterCount > 0)
+    {
+        struct
+        {
+            for (local int i = 0; i < ScatterCount; i++)
+            {
+                FSeek(startof(MotionSetFile) + (i * 0x10));
+                Scatter Scatter_;
+            }
+        } Scatters;
+    }
+    
+    FSeek(startof(MotionSetFile) + NameOffset);
+    string Name;
+    
+    FSeek(startof(this) + 0x20);
+} Motion <read=Name>;
+        
+typedef struct // GT4_Motion::PlayList
+{
+    ushort ElementCount;
+    OffsetT ElementsOffset;
+    int field_8;
+    int field_C;
+    OffsetT NameOffset;
+    FSkip(0x0C);
+    
+    FSeek(startof(MotionSetFile) + NameOffset);
+    string Name;
+    
+    FSeek(startof(this) + 0x20);
+} Playlist <read=Name>;
+
+typedef struct (int isCompressed)
+{
+    if (isCompressed)
+        short Index;
+    else
+        int Index;
+} CurveSetIndex <read=Index>;
+
+typedef struct // GT4_Motion::MotionSetFactor
+{
+    short MotionCount <fgcolor=cGreen>;
+    short PlaylistCount <fgcolor=cGreen>;
+    OffsetT MotionsOffset;
+    OffsetT PlaylistsOffset;
+    OffsetT CommandsOffset;
+    
+    for (local int j = 0; j < MotionCount; j++)
+    {
+        FSeek(startof(MotionSetFile) + MotionsOffset + (j * 0x20));
+        Motion Motion_;
+    }
+    
+    for (local int j = 0; j < PlaylistCount; j++)
+    {
+        FSeek(startof(MotionSetFile) + PlaylistsOffset + (j * 0x20));
+        Playlist Playlist_;
+    }
+    
+    FSeek(startof(MotionSetFile) + CommandsOffset);
+    struct
+    {
+        local int exit = false;
+        while (!exit)
+        {
+            struct
+            {
+                enum <byte>
+                {
+                    MotionCommand_Finish = 1,
+                    MotionCommand_PushMatrix = 2,
+                    MotionCommand_PopMatrix = 3,
+                    MotionCommand_Exe = 4,
+                    MotionCommand_Translate = 5,
+                    MotionCommand_RotateX = 6,
+                    MotionCommand_RotateY = 7,
+                    MotionCommand_RotateZ = 8,
+                    MotionCommand_Scale = 9,
+                    MotionCommand_FoV = 10,
+                    MotionCommand_LookAt = 11,
+                    MotionCommand_LightDiffuse = 12,
+                    MotionCommand_LightAmbient = 13,
+                    MotionCommand_LightSpecular = 14,
+                    MotionCommand_LightPosition = 15,
+                    MotionCommand_Vector1 = 16,
+                    MotionCommand_Vector2 = 17,
+                    MotionCommand_Vector3 = 18,
+                    MotionCommand_RotateQuat = 19,
+                } MotionCommandType;
+                
+                if (MotionCommandType == 0)
+                {
+                    exit = true;
+                    break;   
+                }
+                
+                switch (MotionCommandType)
+                {
+                    case MotionCommand_Finish:
+                    case MotionCommand_PushMatrix:
+                    case MotionCommand_PopMatrix:
+                        break;
+                        
+                    case MotionCommand_Exe:
+                        {
+                            string Name;
+                        }
+                        break;
+                        
+                    case MotionCommand_Translate:
+                        {
+                            byte Bitmask <format=binary>;
+                            CurveSetIndex XCurve((Bitmask >> 0) & 1);
+                            CurveSetIndex YCurve((Bitmask >> 1) & 1);
+                            CurveSetIndex ZCurve((Bitmask >> 2) & 1);
+                        }
+                        break;
+                        
+                    case MotionCommand_RotateX:
+                    case MotionCommand_RotateY:
+                    case MotionCommand_RotateZ:
+                        {
+                            byte Bitmask <format=binary>;
+                            CurveSetIndex Value_((Bitmask >> 0) & 1);
+                        }
+                        break;
+                        
+                    case MotionCommand_Scale:
+                        {
+                            byte Bitmask <format=binary>;
+                            CurveSetIndex XCurveSet((Bitmask >> 0) & 1);
+                            CurveSetIndex YCurveSet((Bitmask >> 1) & 1);
+                            CurveSetIndex ZCurveSet((Bitmask >> 2) & 1);
+                        }
+                        break;
+                    
+                    case MotionCommand_FoV:
+                        {
+                            byte Bitmask <format=binary>;
+                            CurveSetIndex CurveSet_((Bitmask >> 0) & 1);
+                        }
+                        break;
+                        
+                     case MotionCommand_LookAt:
+                        {
+                            byte Bitmask <format=binary>;
+                            CurveSetIndex XCurveSet((Bitmask >> 0) & 1);
+                            CurveSetIndex YCurveSet((Bitmask >> 1) & 1);
+                            CurveSetIndex ZCurveSet((Bitmask >> 2) & 1);
+                            
+                            CurveSetIndex X2CurveSet((Bitmask >> 3) & 1);
+                            CurveSetIndex Y2CurveSet((Bitmask >> 4) & 1);
+                            CurveSetIndex Z2CurveSet((Bitmask >> 5) & 1);
+                            
+                            CurveSetIndex X3CurveSet((Bitmask >> 6) & 1);
+                            CurveSetIndex Y3CurveSet((Bitmask >> 7) & 1);
+                            CurveSetIndex Z3CurveSet((Bitmask >> 8) & 1);
+                        }
+                        break;
+                        
+                    case MotionCommand_LightDiffuse:
+                    case MotionCommand_LightAmbient:
+                    case MotionCommand_LightSpecular:
+                        {
+                            byte Bitmask <format=binary>;
+                            CurveSetIndex RCurveSet((Bitmask >> 0) & 1);
+                            CurveSetIndex GCurveSet((Bitmask >> 1) & 1);
+                            CurveSetIndex BCurveSet((Bitmask >> 2) & 1);
+                            CurveSetIndex ACurveSet((Bitmask >> 3) & 1);
+                        }
+                        break;
+                        
+                    case MotionCommand_LightPosition:
+                        {
+                            byte Bitmask <format=binary>;
+                            CurveSetIndex XCurveSet((Bitmask >> 0) & 1);
+                            CurveSetIndex YCurveSet((Bitmask >> 1) & 1);
+                            CurveSetIndex ZCurveSet((Bitmask >> 2) & 1);
+                        }
+                        break;
+                        
+                    case MotionCommand_Vector1:
+                        {
+                            byte Bitmask <format=binary>;
+                            string Name;
+                            CurveSetIndex Vec1CurveSet((Bitmask >> 0) & 1);
+                        }
+                        break;
+                        
+                    case MotionCommand_Vector2:
+                        {
+                            byte Bitmask <format=binary>;
+                            string Name;
+                            CurveSetIndex Vec1CurveSet((Bitmask >> 0) & 1);
+                            CurveSetIndex Vec2CurveSet((Bitmask >> 1) & 1);
+                        }
+                        break;
+                    case MotionCommand_Vector3:
+                        {
+                            byte Bitmask <format=binary>;
+                            string Name;
+                            CurveSetIndex Vec1CurveSet((Bitmask >> 0) & 1);
+                            CurveSetIndex Vec2CurveSet((Bitmask >> 1) & 1);
+                            CurveSetIndex Vec3CurveSet((Bitmask >> 2) & 1);
+                        }
+                        break;
+                        
+                    case MotionCommand_RotateQuat:
+                        {
+                            byte Bitmask <format=binary>;
+                            CurveSetIndex XCurveSet((Bitmask >> 0) & 1);
+                            CurveSetIndex YCurveSet((Bitmask >> 1) & 1);
+                            CurveSetIndex ZCurveSet((Bitmask >> 2) & 1);
+                        }
+                        break;
+                    default:
+                        break;
+                }
+            } Command <read=Str("%s", EnumToString(MotionCommandType) + (exists(Name) ? " ("+Name+")" : ""))>;
+        }
+    } Commands;
+    
+    FSeek(startof(this) + 0x10);
+} Factor;
+        
+typedef struct // GT4_Motion::MotionSetFile::UniqueName
+{
+    OffsetT NameOffset;
+    short FactorIndex;
+    short MotionIndex;
+    short PlaylistIndex;
+    FSkip(6);
+    
+    FSeek(startof(MotionSetFile) + NameOffset);
+    string Name;
+    
+    FSeek(startof(this) + 0x10);
+} UniqueName <read=Name>;
+
+struct
+{
+    struct
+    {
+        uint Magic <format=hex, comment="Not checked">;
+        uint RelocPtr <comment="Remapped at runtime. Pointer to this file">;
+        uint Empty_0x08;
+        uint Empty_0x0C;
+        OffsetT FactorsOffset;
+        ushort FactorCount <fgcolor=cGreen>;
+        ushort UniqueNameCount <fgcolor=cGreen>;
+        OffsetT Offset_0x18;
+        OffsetT UniqueNamesOffset;
+    } Header <bgcolor=cPurple, size=0x20>;
+    
+    for (local int i = 0; i < Header.FactorCount; i++)
+    {
+        FSeek(startof(this) + Header.FactorsOffset + (i * 0x10));
+        Factor Factor_; // GT4_Motion::MotionSetFactor
+    }
+    
+    for (local int i = 0; i < Header.UniqueNameCount; i++)
+    {
+        FSeek(startof(this) + Header.UniqueNamesOffset + (i * 0x10));
+        UniqueName UniqueName_; // GT4_Motion::MotionSetFactor
+    }
+} MotionSetFile <open=true>; // GT4_Motion::MotionSetFile
