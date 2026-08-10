@@ -1,0 +1,44 @@
+//------------------------------------------------
+//--- 010 Editor v16.0.4 Binary Template
+//
+//      File: RT03_RText03.bt
+//   Authors: therealtunge, Nenkai
+//   Version: 1.0
+//   Purpose: RText03 template
+//  Category: GT4
+// File Mask: 
+//  ID Bytes: RT03
+//   History: 
+//------------------------------------------------
+
+typedef struct {
+    byte Magic[4];
+    uint RelocPtr;
+    char Empty[4];
+    uint PageCount;
+} Header;
+
+typedef struct {
+    uint PageNamePointer <format=hex>;
+    uint PairCount;
+    uint PairOffset <format=hex>;
+    uint Pad <format=hex>;
+    local int BasePos = FTell();
+    FSeek(PageNamePointer);
+    string Name;
+        
+    FSeek(PairOffset);
+    struct {
+        uint LabelOffset <format=hex>;
+        uint ValueOffset <format=hex>;
+            
+        string Label <pos=LabelOffset>;
+        string Value <pos=ValueOffset>;
+    } Pair[PairCount] <optimize=false>;
+
+	FSeek(BasePos);
+} Page<optimize=false>;
+
+if (ReadInt(0) == 0x33305452)
+    Header Header_;
+	Page Pages[Header_.PageCount];
