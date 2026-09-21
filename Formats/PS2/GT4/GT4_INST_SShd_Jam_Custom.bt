@@ -1,12 +1,12 @@
 //------------------------------------------------
 //--- 010 Editor v11.0.1 Binary Template
 //
-//      File: 
-//   Authors: 
+//      File: Gran Turismo 4 EsHeader/Engine/Instrument (INST) File
+//   Authors: Nenkai
 //   Version: 
 //   Purpose: 
 //  Category: 
-// File Mask: 
+// File Mask: *.ins
 //  ID Bytes: 
 //   History: 
 //------------------------------------------------
@@ -58,9 +58,8 @@ typedef struct
     byte NoteMin;
     byte NoteMax;
     byte BaseNote;
-    byte UnkPitch;
+    byte Pitch;
     
-    Printf("%d\n", unk);
     enum <ubyte> 
     {
       SetNoiseShiftFrequency = 0x02, // SE only
@@ -76,7 +75,7 @@ typedef struct
     byte Volume;
     byte Pan;
     byte UnkPitchRelated_0x0E;
-    byte LfoTableIndex <comment="None if 0x7F?", format=hex>;
+    ubyte LfoTableIndex <comment="None if 0x7F?", format=hex>;
 } JamSplitChunk;
                         
 struct GTSOUNDINSTRUMENT
@@ -98,7 +97,6 @@ struct GTSOUNDINSTRUMENT
        
     } EsHeader <bgcolor=cPurple>;
 
-    local int jamHeaderPos = FTell();
     struct
     {
         int JamHeaderSize <format=hex, fgcolor=cRed>;
@@ -129,7 +127,7 @@ struct GTSOUNDINSTRUMENT
 
     if (JamHeader.ProgramChunkPhysicalOffset != -1)
     {
-        FSeek(jamHeaderPos + JamHeader.ProgramChunkPhysicalOffset);
+        FSeek(startof(JamHeader) + JamHeader.ProgramChunkPhysicalOffset);
         struct
         {
             short EntryCount;
@@ -142,7 +140,7 @@ struct GTSOUNDINSTRUMENT
                 if (Offsets[i] == -1)
                     continue;
     
-                FSeek(jamHeaderPos + JamHeader.ProgramChunkPhysicalOffset + Offsets[i]);
+                FSeek(startof(JamHeader) + JamHeader.ProgramChunkPhysicalOffset + Offsets[i]);
                 struct
                 {
                     ubyte CountOrFlag <format=hex>;
@@ -156,11 +154,11 @@ struct GTSOUNDINSTRUMENT
                     
                     if (CountOrFlag == 0xFF)
                     {
-                        JamSplitChunk chunks[(EndNoteRange - StartNoteRange) + 1];
+                        JamSplitChunk chunks[(EndNoteRange - StartNoteRange) + 1] <optimize=false>;
                     }
                     else
                     {
-                        JamSplitChunk chunks[(CountOrFlag & 0x0f) + 1];
+                        JamSplitChunk chunks[(CountOrFlag & 0x0f) + 1] <optimize=false>;
                     }
                     
                     
@@ -171,7 +169,7 @@ struct GTSOUNDINSTRUMENT
 
     if (JamHeader.VelocityChunkPhysicalOffset != -1)
     {
-        FSeek(jamHeaderPos + JamHeader.VelocityChunkPhysicalOffset);
+        FSeek(startof(JamHeader) + JamHeader.VelocityChunkPhysicalOffset);
         struct
         {
             short Empty;
@@ -181,9 +179,22 @@ struct GTSOUNDINSTRUMENT
         FSeek(0xF0);
     }
 
+    if (JamHeader.LfoTableChunkPhysicalOffset != -1)
+    {
+        FSeek(startof(JamHeader) + JamHeader.LfoTableChunkPhysicalOffset);
+        struct
+        {
+            short Count;
+            if (Count)
+                short Offsets[Count]; // Pointed by LfoIndex
+        } LfoChunk <bgcolor=cDkYellow>;
+
+        FSeek(0xF0);
+    }
+    
     if (JamHeader.SeSeqChunkPhysicalOffset != -1)
     {
-        FSeek(jamHeaderPos + JamHeader.SeSeqChunkPhysicalOffset);
+        FSeek(startof(JamHeader) + JamHeader.SeSeqChunkPhysicalOffset);
         struct
         {
             local int baseChunkOffset = FTell();
@@ -280,7 +291,7 @@ struct GTSOUNDINSTRUMENT
 
         if (JamHeader.UnkChunkPhysicalOffset != -1)
         {
-            FSeek(jamHeaderPos + JamHeader.UnkChunkPhysicalOffset);
+            FSeek(startof(JamHeader) + JamHeader.UnkChunkPhysicalOffset);
             struct
             {
                 byte _;
@@ -289,7 +300,7 @@ struct GTSOUNDINSTRUMENT
 
         if (JamHeader.SeProgChunkPhysicalOffset != -1)
         {
-            FSeek(jamHeaderPos + JamHeader.SeProgChunkPhysicalOffset);
+            FSeek(startof(JamHeader) + JamHeader.SeProgChunkPhysicalOffset);
             struct
             {
                 short MaxIndex;
